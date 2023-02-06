@@ -23,3 +23,7 @@ func (buffer *Buffer) AddCandle(candle Candle) {
 func (buffer *Buffer) GetCandles() []Candle {
 	return buffer.candles
 }
+
+func (buffer *Buffer) GetLastCandle() Candle {
+	return buffer.candles[len(buffer.candles)-1]
+}

@@ -73,20 +73,20 @@ func MaxInt(values []int) int {
 	return max
 }
 
-//func BuySliceIntersect(buys1, buys2 []Buy) []Buy {
-//	var result []Buy
-//
-//	for _, buy1 := range buys1 {
-//		for _, buy2 := range buys2 {
-//			if buy1.Id == buy2.Id {
-//				result = append(result, buy1)
-//				break
-//			}
-//		}
-//	}
-//
-//	return result
-//}
+func BuySliceIntersect(buys1, buys2 []Buy) []Buy {
+	var result []Buy
+
+	for _, buy1 := range buys1 {
+		for _, buy2 := range buys2 {
+			if buy1.Id == buy2.Id {
+				result = append(result, buy1)
+				break
+			}
+		}
+	}
+
+	return result
+}
 
 func CalcGrowth(startPrice, endPrice float64) float64 {
 	if startPrice == 0 || endPrice == 0 {

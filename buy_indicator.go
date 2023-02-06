@@ -6,6 +6,7 @@ type BuyIndicator interface {
 
 type BackTrailingBuyIndicator struct {
 	config *Config
+	buffer *Buffer
 	db     *Database
 }
 

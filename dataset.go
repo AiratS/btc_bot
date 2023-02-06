@@ -6,10 +6,6 @@ import (
 	"os"
 )
 
-const DATASETS_DIRECTORY = "datasets"
-const CANDLE_SYMBOL = "BTCUSDT"
-const CANDLE_INTERVAL = "1m"
-
 var importedCandles *[]Candle
 
 func GetDatasetDates() []string {

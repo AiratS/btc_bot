@@ -6,6 +6,7 @@ type SellIndicator interface {
 
 type HighPercentageSellIndicator struct {
 	config *Config
+	buffer *Buffer
 	db     *Database
 }
 
