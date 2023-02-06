@@ -27,3 +27,8 @@ func (buffer *Buffer) GetCandles() []Candle {
 func (buffer *Buffer) GetLastCandle() Candle {
 	return buffer.candles[len(buffer.candles)-1]
 }
+
+func (buffer *Buffer) GetLastCandleClosePrice() float64 {
+	candle := buffer.GetLastCandle()
+	return candle.GetPrice()
+}

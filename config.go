@@ -11,4 +11,7 @@ type Config struct {
 
 	PriceFallCandles    int
 	PriceFallPercentage float64
+
+	TrailingTopPercentage float64
+	TrailingLowPercentage float64
 }

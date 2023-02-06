@@ -1,5 +1,7 @@
 package main
 
+import "log"
+
 type Bot struct {
 	Config         *Config
 	BuyIndicators  []BuyIndicator
@@ -22,6 +24,7 @@ func NewBot(config *Config) Bot {
 }
 
 func (bot *Bot) DoStuff(candle Candle) {
+	log.Println("starting bot")
 	bot.buffer.AddCandle(candle)
 	bot.runBuyIndicators()
 	bot.runSellIndicators()
