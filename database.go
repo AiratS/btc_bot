@@ -92,3 +92,26 @@ func (db *Database) AddSell(
 	result, _ := db.connect.Exec(query, symbol, exchangeRate, coinsCount, revenue, buyId, createdAt)
 	return result
 }
+
+func (db *Database) FetchUnsoldBuysByUpperPercentage(exchangeRate, upperPercentage float64) []Buy {
+	unsoldBuys := []Buy{}
+	query := `
+		SELECT b.*
+		FROM buys AS b 
+        LEFT JOIN sells AS s 
+        	ON s.buy_id = b.id 
+        WHERE s.id IS NULL 
+            AND (b.exchange_rate + ((b.exchange_rate * $2) / 100)) <= $3   
+	`
+
+	rows, _ := db.connect.Query(query, upperPercentage, exchangeRate)
+	defer rows.Close()
+
+	for rows.Next() {
+		buy := Buy{}
+		rows.Scan(&buy.Id, &buy.Symbol, &buy.Coins, &buy.ExchangeRate, &buy.CreatedAt)
+		unsoldBuys = append(unsoldBuys, buy)
+	}
+
+	return unsoldBuys
+}

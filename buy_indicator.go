@@ -14,8 +14,16 @@ type BackTrailingBuyIndicator struct {
 	hasSignal      bool
 }
 
-func NewBackTrailingBuyIndicator() BackTrailingBuyIndicator {
-	return BackTrailingBuyIndicator{}
+func NewBackTrailingBuyIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) BackTrailingBuyIndicator {
+	return BackTrailingBuyIndicator{
+		config: config,
+		buffer: buffer,
+		db:     db,
+	}
 }
 
 func (indicator *BackTrailingBuyIndicator) Start() {

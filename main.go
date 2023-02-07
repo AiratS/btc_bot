@@ -23,5 +23,8 @@ func main() {
 }
 
 func initConfig() Config {
-	return Config{}
+	return Config{
+		HighSellPercentage:    5,
+		TrailingTopPercentage: 5,
+	}
 }

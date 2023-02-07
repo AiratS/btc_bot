@@ -1,19 +1,19 @@
 package main
 
-import "log"
-
 type Bot struct {
 	Config         *Config
 	BuyIndicators  []BuyIndicator
 	SellIndicators []SellIndicator
-	buffer         Buffer
+	buffer         *Buffer
 	db             Database
 }
 
 func NewBot(config *Config) Bot {
+	buffer := NewBuffer(resolveBufferSize(config))
+
 	bot := Bot{
 		Config: config,
-		buffer: NewBuffer(resolveBufferSize(config)),
+		buffer: &buffer,
 		db:     NewDatabase(),
 	}
 
@@ -24,7 +24,6 @@ func NewBot(config *Config) Bot {
 }
 
 func (bot *Bot) DoStuff(candle Candle) {
-	log.Println("starting bot")
 	bot.buffer.AddCandle(candle)
 	bot.runBuyIndicators()
 	bot.runSellIndicators()
@@ -91,11 +90,8 @@ func calcRevenue(coinsCounts, exchangeRate float64) float64 {
 
 func getIntersectedBuys(eachIndicatorBuys [][]Buy) []Buy {
 	count := len(eachIndicatorBuys)
-	if 1 == count {
-		return eachIndicatorBuys[0]
-	}
-
 	firstBuys := eachIndicatorBuys[0]
+
 	for index, _ := range eachIndicatorBuys {
 		if index == (count - 1) {
 			break
@@ -111,12 +107,16 @@ func getIntersectedBuys(eachIndicatorBuys [][]Buy) []Buy {
 func resolveBufferSize(config *Config) int {
 	return MaxInt([]int{
 		// add your candles
-		config.PriceFallCandles,
+		100,
 	})
 }
 
 func setupBuyIndicators(bot *Bot) {
-	backTrailingBuyIndicator := NewBackTrailingBuyIndicator()
+	backTrailingBuyIndicator := NewBackTrailingBuyIndicator(
+		bot.Config,
+		bot.buffer,
+		&bot.db,
+	)
 
 	bot.BuyIndicators = []BuyIndicator{
 		&backTrailingBuyIndicator,
@@ -124,7 +124,11 @@ func setupBuyIndicators(bot *Bot) {
 }
 
 func setupSellIndicators(bot *Bot) {
-	highPercentageSellIndicator := NewHighPercentageSellIndicator()
+	highPercentageSellIndicator := NewHighPercentageSellIndicator(
+		bot.Config,
+		bot.buffer,
+		&bot.db,
+	)
 
 	bot.SellIndicators = []SellIndicator{
 		&highPercentageSellIndicator,
