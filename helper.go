@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"os"
 	"time"
 )
@@ -120,4 +122,9 @@ func getKlineCandleListFirstIdx(candles *[]Candle, candlesCount int) int {
 	}
 
 	return firstIdx
+}
+
+func LogAndPrint(msg string) {
+	fmt.Println(msg)
+	log.Println(msg)
 }

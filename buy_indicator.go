@@ -1,7 +1,13 @@
 package main
 
+import "fmt"
+
 type BuyIndicator interface {
 	HasSignal() bool
+	IsStarted() bool
+	Start()
+	Update()
+	Finish()
 }
 
 type BackTrailingBuyIndicator struct {
@@ -9,9 +15,12 @@ type BackTrailingBuyIndicator struct {
 	buffer *Buffer
 	db     *Database
 
-	lastPrice      float64
-	upperStopPrice float64
-	hasSignal      bool
+	isStarted                bool
+	hasSignal                bool
+	lastPrice                float64
+	upperStopPrice           float64
+	updatesCount             int
+	updatedTimesBeforeFinish int
 }
 
 func NewBackTrailingBuyIndicator(
@@ -23,28 +32,48 @@ func NewBackTrailingBuyIndicator(
 		config: config,
 		buffer: buffer,
 		db:     db,
+
+		isStarted:                false,
+		hasSignal:                false,
+		updatesCount:             0,
+		updatedTimesBeforeFinish: 0,
 	}
 }
 
+func (indicator *BackTrailingBuyIndicator) IsStarted() bool {
+	return indicator.isStarted
+}
+
 func (indicator *BackTrailingBuyIndicator) Start() {
+	LogAndPrint("Trailing Started")
 	price := indicator.buffer.GetLastCandleClosePrice()
 	indicator.upperStopPrice = indicator.calculateStopPrice(
 		price,
 		indicator.config.TrailingTopPercentage,
 	)
+
+	indicator.isStarted = true
 	indicator.lastPrice = price
+	indicator.hasSignal = false
+	indicator.updatesCount = 0
+	indicator.updatedTimesBeforeFinish = 0
+	indicator.updatesCount = 0
 }
 
 func (indicator *BackTrailingBuyIndicator) Update() {
-	currentPrice := indicator.buffer.GetLastCandleClosePrice()
-	isGrowing := indicator.isGrowing()
-	indicator.lastPrice = currentPrice
+	if !indicator.IsStarted() {
+		indicator.Start()
+	}
 
-	if isGrowing {
-		if indicator.upperStopPrice <= currentPrice {
-			indicator.hasSignal = true
-		}
+	LogAndPrint("Trailing Updated")
+	indicator.updatesCount++
+	currentPrice := indicator.buffer.GetLastCandleClosePrice()
+	if indicator.updatesCount <= 1 {
 		return
+	}
+
+	if indicator.isGrowing() {
+		indicator.hasSignal = indicator.upperStopPrice <= currentPrice
 	}
 
 	newUpperStopPrice := indicator.calculateStopPrice(
@@ -53,12 +82,19 @@ func (indicator *BackTrailingBuyIndicator) Update() {
 	)
 
 	if newUpperStopPrice < indicator.upperStopPrice {
+		LogAndPrint(fmt.Sprintf("Trailing UpperStopPrice has moved to Price: %f", newUpperStopPrice))
 		indicator.upperStopPrice = newUpperStopPrice
 	}
+
+	indicator.resolveSignal(currentPrice)
+	indicator.lastPrice = currentPrice
 }
 
 func (indicator *BackTrailingBuyIndicator) Finish() {
-	indicator.hasSignal = false
+	LogAndPrint("Trailing Finished")
+	indicator.isStarted = false
+	indicator.updatesCount = 0
+	indicator.updatedTimesBeforeFinish = 0
 }
 
 func (indicator *BackTrailingBuyIndicator) HasSignal() bool {
@@ -69,6 +105,18 @@ func (indicator *BackTrailingBuyIndicator) isGrowing() bool {
 	currentPrice := indicator.buffer.GetLastCandleClosePrice()
 
 	return currentPrice > indicator.lastPrice
+}
+
+func (indicator *BackTrailingBuyIndicator) resolveSignal(currentPrice float64) {
+	indicator.hasSignal = currentPrice >= indicator.upperStopPrice
+	if indicator.hasSignal || indicator.updatedTimesBeforeFinish > 0 {
+		indicator.hasSignal = true
+		if indicator.updatedTimesBeforeFinish == indicator.config.TrailingUpdateTimesBeforeFinish {
+			indicator.Finish()
+			return
+		}
+		indicator.updatedTimesBeforeFinish++
+	}
 }
 
 func (indicator *BackTrailingBuyIndicator) calculateStopPrice(closePrice, percentage float64) float64 {

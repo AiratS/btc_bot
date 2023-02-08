@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type Bot struct {
 	Config         *Config
 	BuyIndicators  []BuyIndicator
@@ -30,13 +32,19 @@ func (bot *Bot) DoStuff(candle Candle) {
 }
 
 func (bot *Bot) runBuyIndicators() {
+	signalsCount := 0
+
 	for _, indicator := range bot.BuyIndicators {
-		if !indicator.HasSignal() {
-			return
+		indicator.Update()
+		if indicator.HasSignal() {
+			signalsCount++
 		}
 	}
 
-	bot.buy()
+	if len(bot.BuyIndicators) == signalsCount {
+		LogAndPrint(fmt.Sprintf("Buy signal, ExchangeRate: %f", bot.buffer.GetLastCandleClosePrice()))
+		bot.buy()
+	}
 }
 
 func (bot *Bot) runSellIndicators() {
@@ -53,6 +61,7 @@ func (bot *Bot) runSellIndicators() {
 
 	// Sell
 	for _, buy := range getIntersectedBuys(eachIndicatorBuys) {
+		LogAndPrint(fmt.Sprintf("Sell signal, ExchangeRate: %f", bot.buffer.GetLastCandleClosePrice()))
 		bot.sell(buy)
 	}
 }

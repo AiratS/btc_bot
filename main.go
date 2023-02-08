@@ -15,6 +15,7 @@ func main() {
 	log.SetOutput(f)
 
 	// Main
+	LogAndPrint("Bot has started!")
 	config := initConfig()
 	bot := NewBot(&config)
 	for _, candle := range *ImportDatasets() {
