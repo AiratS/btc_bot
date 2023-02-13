@@ -3,7 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
+	"math/rand"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -127,4 +130,59 @@ func getKlineCandleListFirstIdx(candles *[]Candle, candlesCount int) int {
 func LogAndPrint(msg string) {
 	fmt.Println(msg)
 	log.Println(msg)
+}
+
+func GetRandIntConfig(minMax MinMaxInt) int {
+	return GetRandInt(minMax.min, minMax.max)
+}
+
+func GetRandFloat64Config(minMax MinMaxFloat64) float64 {
+	return GetRandFloat64(minMax.min, minMax.max)
+}
+
+func GetRandInt(lower int, upper int) int {
+	rand.Seed(time.Now().UnixNano())
+	return lower + rand.Intn(upper-lower+1)
+}
+
+func GetRandFloat64(lower float64, upper float64) float64 {
+	rand.Seed(time.Now().UnixNano())
+	return lower + rand.Float64()*(upper-lower)
+}
+
+func convertStringToFloat64(typeValue string) float64 {
+	value, _ := strconv.ParseFloat(typeValue, 64)
+	return value
+}
+
+func convertStringToInt(typeValue string) int {
+	value, _ := strconv.ParseInt(typeValue, 10, 64)
+	return int(value)
+}
+
+func convertToInt(value interface{}) int {
+	switch typeValue := value.(type) {
+	case int64:
+		return int(typeValue)
+	}
+	return 0
+}
+
+func convertToFloat64(value interface{}) float64 {
+	switch typeValue := value.(type) {
+	case float64:
+		return float64(typeValue)
+	}
+	return math.NaN()
+}
+
+func CountInArray(needle float64, array *[]float64) int {
+	count := 0
+	searchArray := *array
+	for _, element := range searchArray {
+		if needle == element {
+			count++
+		}
+	}
+	return count
 }

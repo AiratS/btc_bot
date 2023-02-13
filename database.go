@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
-	"time"
 )
 
 type Database struct {
@@ -19,8 +18,8 @@ type Buy struct {
 }
 
 func NewDatabase() Database {
-	name := time.Now().Format("db/db_2006_01_02__15_04_05.db")
-	//name := ":memory:"
+	//name := time.Now().Format("db/db_2006_01_02__15_04_05.db")
+	name := ":memory:"
 	connect, _ := sql.Open("sqlite3", name)
 
 	createBuysTable(connect)
@@ -114,4 +113,37 @@ func (db *Database) FetchUnsoldBuysByUpperPercentage(exchangeRate, upperPercenta
 	}
 
 	return unsoldBuys
+}
+
+type revenue struct {
+	value float64
+}
+
+func (db *Database) GetTotalRevenue() float64 {
+	rev := revenue{}
+	query := `
+		SELECT (SUM(revenue) - COUNT(id) * 100) AS rev 
+		FROM sells 
+		GROUP BY symbol
+	`
+	row := (*db).connect.QueryRow(query)
+	row.Scan(&rev.value)
+
+	return rev.value
+}
+
+type buysCount struct {
+	value int
+}
+
+func (db *Database) GetBuysCount() int {
+	count := buysCount{}
+	query := `
+		SELECT COUNT(id) AS c 
+		FROM buys 
+	`
+	row := (*db).connect.QueryRow(query)
+	row.Scan(&count.value)
+
+	return count.value
 }

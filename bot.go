@@ -25,6 +25,10 @@ func NewBot(config *Config) Bot {
 	return bot
 }
 
+func (bot *Bot) Kill() {
+	bot.db.connect.Close()
+}
+
 func (bot *Bot) DoStuff(candle Candle) {
 	bot.buffer.AddCandle(candle)
 	bot.runBuyIndicators()
