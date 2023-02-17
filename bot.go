@@ -131,8 +131,15 @@ func setupBuyIndicators(bot *Bot) {
 		&bot.db,
 	)
 
+	buysCountIndicator := NewBuysCountIndicator(
+		bot.Config,
+		bot.buffer,
+		&bot.db,
+	)
+
 	bot.BuyIndicators = []BuyIndicator{
 		&backTrailingBuyIndicator,
+		&buysCountIndicator,
 	}
 }
 

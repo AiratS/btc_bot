@@ -147,3 +147,17 @@ func (db *Database) GetBuysCount() int {
 
 	return count.value
 }
+
+func (db *Database) CountUnsoldBuys() int {
+	var count int
+	query := `
+		SELECT COUNT(b.id)
+		FROM buys AS b 
+        LEFT JOIN sells AS s 
+        	ON s.buy_id = b.id 
+        WHERE s.id IS NULL
+	`
+	(*db).connect.QueryRow(query).Scan(&count)
+
+	return count
+}

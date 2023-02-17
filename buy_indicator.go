@@ -122,3 +122,38 @@ func (indicator *BackTrailingBuyIndicator) resolveSignal(currentPrice float64) {
 func (indicator *BackTrailingBuyIndicator) calculateStopPrice(closePrice, percentage float64) float64 {
 	return closePrice - ((closePrice * percentage) / 100)
 }
+
+type BuysCountIndicator struct {
+	config *Config
+	buffer *Buffer
+	db     *Database
+}
+
+func NewBuysCountIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) BuysCountIndicator {
+	return BuysCountIndicator{
+		config: config,
+		buffer: buffer,
+		db:     db,
+	}
+}
+
+func (indicator *BuysCountIndicator) HasSignal() bool {
+	return UNSOLD_BUYS_COUNT > indicator.db.CountUnsoldBuys()
+}
+
+func (indicator *BuysCountIndicator) IsStarted() bool {
+	return true
+}
+
+func (indicator *BuysCountIndicator) Start() {
+}
+
+func (indicator *BuysCountIndicator) Update() {
+}
+
+func (indicator *BuysCountIndicator) Finish() {
+}

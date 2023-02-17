@@ -8,9 +8,9 @@ import (
 	"os"
 )
 
-const BOTS_COUNT = 5
-const BEST_BOTS_COUNT = 2
-const BEST_BOTS_FROM_PREV_GEN = 1
+const BOTS_COUNT = 25
+const BEST_BOTS_COUNT = 7
+const BEST_BOTS_FROM_PREV_GEN = 3
 const GENERATION_COUNT = 20
 const DEFAULT_REVENUE = -1000000
 
@@ -94,12 +94,12 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 
 		TrailingTopPercentage: MinMaxFloat64{
-			min: .5,
-			max: 7,
+			min: 6,
+			max: 1,
 		},
 		TrailingUpdateTimesBeforeFinish: MinMaxInt{
-			min: 5,
-			max: 7,
+			min: 1,
+			max: 2,
 		},
 	}
 }
