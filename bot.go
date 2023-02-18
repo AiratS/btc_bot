@@ -46,7 +46,8 @@ func (bot *Bot) runBuyIndicators() {
 	}
 
 	if len(bot.BuyIndicators) == signalsCount {
-		LogAndPrint(fmt.Sprintf("Buy signal, ExchangeRate: %f", bot.buffer.GetLastCandleClosePrice()))
+		candle := bot.buffer.GetLastCandle()
+		LogAndPrint(fmt.Sprintf("Buy signal, Created at: %s, ExchangeRate: %f", candle.CloseTime, bot.buffer.GetLastCandleClosePrice()))
 		bot.buy()
 	}
 }
@@ -65,7 +66,8 @@ func (bot *Bot) runSellIndicators() {
 
 	// Sell
 	for _, buy := range getIntersectedBuys(eachIndicatorBuys) {
-		LogAndPrint(fmt.Sprintf("Sell signal, ExchangeRate: %f", bot.buffer.GetLastCandleClosePrice()))
+		candle := bot.buffer.GetLastCandle()
+		LogAndPrint(fmt.Sprintf("Sell signal, Created At: %s, ExchangeRate: %f", candle.CloseTime, bot.buffer.GetLastCandleClosePrice()))
 		bot.sell(buy)
 	}
 }
