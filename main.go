@@ -11,6 +11,14 @@ import (
 
 func main() {
 	// Logger
+	_, e := os.OpenFile("bot_log.txt", os.O_RDONLY, 0666)
+	if !os.IsNotExist(e) {
+		e := os.Remove("bot_log.txt")
+		if e != nil {
+			log.Fatal(e)
+		}
+	}
+
 	f, err := os.OpenFile("bot_log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
