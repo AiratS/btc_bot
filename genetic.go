@@ -86,24 +86,6 @@ func InitBotConfig() Config {
 	}
 }
 
-func GetBotConfigRestrictions() ConfigRestriction {
-	return ConfigRestriction{
-		HighSellPercentage: MinMaxFloat64{
-			min: .5,
-			max: 7,
-		},
-
-		TrailingTopPercentage: MinMaxFloat64{
-			min: 6,
-			max: 1,
-		},
-		TrailingUpdateTimesBeforeFinish: MinMaxInt{
-			min: 1,
-			max: 2,
-		},
-	}
-}
-
 func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 	return map[string]interface{}{
 		"HighSellPercentage": botConfig.HighSellPercentage,

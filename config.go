@@ -16,20 +16,3 @@ type Config struct {
 	TotalRevenue float64
 	Selection    float64
 }
-
-type ConfigRestriction struct {
-	HighSellPercentage MinMaxFloat64
-
-	TrailingTopPercentage           MinMaxFloat64
-	TrailingUpdateTimesBeforeFinish MinMaxInt
-}
-
-type MinMaxInt struct {
-	min int
-	max int
-}
-
-type MinMaxFloat64 struct {
-	min float64
-	max float64
-}
