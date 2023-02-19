@@ -123,6 +123,8 @@ func (indicator *BackTrailingBuyIndicator) calculateStopPrice(closePrice, percen
 	return closePrice + ((closePrice * percentage) / 100)
 }
 
+// --------------------------------
+
 type BuysCountIndicator struct {
 	config *Config
 	buffer *Buffer
@@ -142,7 +144,8 @@ func NewBuysCountIndicator(
 }
 
 func (indicator *BuysCountIndicator) HasSignal() bool {
-	return UNSOLD_BUYS_COUNT > indicator.db.CountUnsoldBuys()
+	val := indicator.db.CountUnsoldBuys()
+	return UNSOLD_BUYS_COUNT > val
 }
 
 func (indicator *BuysCountIndicator) IsStarted() bool {

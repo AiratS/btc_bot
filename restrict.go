@@ -21,7 +21,7 @@ func GetBotConfigRestrictions() ConfigRestriction {
 	return ConfigRestriction{
 		HighSellPercentage: MinMaxFloat64{
 			min: 0.5,
-			max: 7,
+			max: 1,
 		},
 
 		TrailingTopPercentage: MinMaxFloat64{

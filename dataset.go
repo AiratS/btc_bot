@@ -10,8 +10,9 @@ var importedCandles *[]Candle
 
 func GetDatasetDates() []string {
 	return []string{
-		"2021-10",
+		//"2021-10",
 		//"2022-04",
+		"2023-01",
 	}
 }
 

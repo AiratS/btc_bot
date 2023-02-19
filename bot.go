@@ -7,16 +7,17 @@ type Bot struct {
 	BuyIndicators  []BuyIndicator
 	SellIndicators []SellIndicator
 	buffer         *Buffer
-	db             Database
+	db             *Database
 }
 
 func NewBot(config *Config) Bot {
 	buffer := NewBuffer(resolveBufferSize(config))
+	db := NewDatabase()
 
 	bot := Bot{
 		Config: config,
 		buffer: &buffer,
-		db:     NewDatabase(),
+		db:     &db,
 	}
 
 	setupBuyIndicators(&bot)
@@ -46,6 +47,10 @@ func (bot *Bot) runBuyIndicators() {
 	}
 
 	if len(bot.BuyIndicators) == signalsCount {
+		for _, indicator := range bot.BuyIndicators {
+			indicator.Finish()
+		}
+
 		candle := bot.buffer.GetLastCandle()
 		LogAndPrint(fmt.Sprintf("Buy signal, Created at: %s, ExchangeRate: %f", candle.CloseTime, bot.buffer.GetLastCandleClosePrice()))
 		bot.buy()
@@ -133,13 +138,13 @@ func setupBuyIndicators(bot *Bot) {
 	backTrailingBuyIndicator := NewBackTrailingBuyIndicator(
 		bot.Config,
 		bot.buffer,
-		&bot.db,
+		bot.db,
 	)
 
 	buysCountIndicator := NewBuysCountIndicator(
 		bot.Config,
 		bot.buffer,
-		&bot.db,
+		bot.db,
 	)
 
 	bot.BuyIndicators = []BuyIndicator{
@@ -152,7 +157,7 @@ func setupSellIndicators(bot *Bot) {
 	highPercentageSellIndicator := NewHighPercentageSellIndicator(
 		bot.Config,
 		bot.buffer,
-		&bot.db,
+		bot.db,
 	)
 
 	bot.SellIndicators = []SellIndicator{
