@@ -67,8 +67,8 @@ func (bot *Bot) runSellIndicators() {
 	// Sell
 	for _, buy := range getIntersectedBuys(eachIndicatorBuys) {
 		candle := bot.buffer.GetLastCandle()
-		LogAndPrint(fmt.Sprintf("Sell signal, Created At: %s, ExchangeRate: %f", candle.CloseTime, bot.buffer.GetLastCandleClosePrice()))
-		bot.sell(buy)
+		rev := bot.sell(buy)
+		LogAndPrint(fmt.Sprintf("Sell signal, Created At: %s, ExchangeRate: %f: Revenue: %f", candle.CloseTime, bot.buffer.GetLastCandleClosePrice(), rev))
 	}
 }
 
@@ -85,18 +85,21 @@ func (bot *Bot) buy() {
 	)
 }
 
-func (bot *Bot) sell(buy Buy) {
+func (bot *Bot) sell(buy Buy) float64 {
 	candle := bot.buffer.GetLastCandle()
 	exchangeRate := candle.GetPrice()
+	rev := calcRevenue(buy.Coins, exchangeRate)
 
 	bot.db.AddSell(
 		CANDLE_SYMBOL,
 		buy.Coins,
 		exchangeRate,
-		calcRevenue(buy.Coins, exchangeRate),
+		rev,
 		buy.Id,
 		candle.CloseTime,
 	)
+
+	return rev
 }
 
 func calcRevenue(coinsCounts, exchangeRate float64) float64 {

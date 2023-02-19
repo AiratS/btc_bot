@@ -120,7 +120,7 @@ func (indicator *BackTrailingBuyIndicator) resolveSignal(currentPrice float64) {
 }
 
 func (indicator *BackTrailingBuyIndicator) calculateStopPrice(closePrice, percentage float64) float64 {
-	return closePrice - ((closePrice * percentage) / 100)
+	return closePrice + ((closePrice * percentage) / 100)
 }
 
 type BuysCountIndicator struct {

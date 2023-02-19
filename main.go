@@ -30,6 +30,7 @@ func main() {
 	LogAndPrint("Gen has started!")
 
 	bots := GetInitialBots()
+	//bots := GetInitialBotsFromFile("initial.csv")
 	fitnessDatasets := ImportDatasets()
 
 	for generation := 0; generation < GENERATION_COUNT; generation++ {
