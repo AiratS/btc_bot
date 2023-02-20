@@ -147,9 +147,16 @@ func setupBuyIndicators(bot *Bot) {
 		bot.db,
 	)
 
+	waitForPeriodIndicator := NewWaitForPeriodIndicator(
+		bot.Config,
+		bot.buffer,
+		bot.db,
+	)
+
 	bot.BuyIndicators = []BuyIndicator{
 		&backTrailingBuyIndicator,
 		&buysCountIndicator,
+		&waitForPeriodIndicator,
 	}
 }
 

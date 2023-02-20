@@ -162,3 +162,41 @@ func (indicator *BuysCountIndicator) Update() {
 
 func (indicator *BuysCountIndicator) Finish() {
 }
+
+// --------------------------------
+
+type WaitForPeriodIndicator struct {
+	config *Config
+	buffer *Buffer
+	db     *Database
+}
+
+func NewWaitForPeriodIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) WaitForPeriodIndicator {
+	return WaitForPeriodIndicator{
+		config: config,
+		buffer: buffer,
+		db:     db,
+	}
+}
+
+func (indicator *WaitForPeriodIndicator) HasSignal() bool {
+	candle := indicator.buffer.GetLastCandle()
+	return indicator.db.CanBuyInGivenPeriod(candle.CloseTime, indicator.config.WaitAfterLastBuyPeriod)
+}
+
+func (indicator *WaitForPeriodIndicator) IsStarted() bool {
+	return true
+}
+
+func (indicator *WaitForPeriodIndicator) Start() {
+}
+
+func (indicator *WaitForPeriodIndicator) Update() {
+}
+
+func (indicator *WaitForPeriodIndicator) Finish() {
+}

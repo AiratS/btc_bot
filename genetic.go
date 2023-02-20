@@ -21,6 +21,8 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 		dataframe.NewSeriesFloat64("TrailingTopPercentage", nil),
 		dataframe.NewSeriesInt64("TrailingUpdateTimesBeforeFinish", nil),
 
+		dataframe.NewSeriesInt64("WaitAfterLastBuyPeriod", nil),
+
 		dataframe.NewSeriesFloat64("TotalRevenue", nil),
 		dataframe.NewSeriesFloat64("Selection", nil),
 	)
@@ -65,8 +67,10 @@ func ImportFromCsv(fileName string) []Config {
 			TrailingTopPercentage:           convertStringToFloat64(row[1]),
 			TrailingUpdateTimesBeforeFinish: convertStringToInt(row[2]),
 
-			TotalRevenue: convertStringToFloat64(row[3]),
-			Selection:    convertStringToFloat64(row[4]),
+			WaitAfterLastBuyPeriod: convertStringToInt(row[3]),
+
+			TotalRevenue: convertStringToFloat64(row[4]),
+			Selection:    convertStringToFloat64(row[5]),
 		}
 
 		bots = append(bots, bot)
@@ -83,6 +87,8 @@ func InitBotConfig() Config {
 
 		TrailingTopPercentage:           GetRandFloat64Config(restrict.TrailingTopPercentage),
 		TrailingUpdateTimesBeforeFinish: GetRandIntConfig(restrict.TrailingUpdateTimesBeforeFinish),
+
+		WaitAfterLastBuyPeriod: GetRandIntConfig(restrict.WaitAfterLastBuyPeriod),
 	}
 }
 
@@ -92,6 +98,8 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 
 		"TrailingTopPercentage":           botConfig.TrailingTopPercentage,
 		"TrailingUpdateTimesBeforeFinish": botConfig.TrailingUpdateTimesBeforeFinish,
+
+		"WaitAfterLastBuyPeriod": botConfig.WaitAfterLastBuyPeriod,
 
 		"TotalRevenue": botConfig.TotalRevenue,
 		"Selection":    botConfig.Selection,
@@ -161,6 +169,8 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 		"TrailingTopPercentage":           bot["TrailingTopPercentage"],
 		"TrailingUpdateTimesBeforeFinish": bot["TrailingUpdateTimesBeforeFinish"],
 
+		"WaitAfterLastBuyPeriod": bot["WaitAfterLastBuyPeriod"],
+
 		"TotalRevenue": bot["TotalRevenue"],
 		"Selection":    bot["Selection"],
 	}
@@ -229,6 +239,8 @@ func ConvertDataFrameToBotConfig(dataFrame map[interface{}]interface{}) Config {
 
 		TrailingTopPercentage:           convertToFloat64(dataFrame["TrailingTopPercentage"]),
 		TrailingUpdateTimesBeforeFinish: convertToInt(dataFrame["TrailingUpdateTimesBeforeFinish"]),
+
+		WaitAfterLastBuyPeriod: convertToInt(dataFrame["WaitAfterLastBuyPeriod"]),
 	}
 }
 
@@ -241,10 +253,12 @@ func makeChild(
 
 		TrailingTopPercentage:           GetFloatFatherOrMomGen(maleBotConfig.TrailingTopPercentage, femaleBotConfig.TrailingTopPercentage),
 		TrailingUpdateTimesBeforeFinish: GetIntFatherOrMomGen(maleBotConfig.TrailingUpdateTimesBeforeFinish, femaleBotConfig.TrailingUpdateTimesBeforeFinish),
+
+		WaitAfterLastBuyPeriod: GetIntFatherOrMomGen(maleBotConfig.WaitAfterLastBuyPeriod, femaleBotConfig.WaitAfterLastBuyPeriod),
 	}
 
-	for i := 0; i < 69; i++ {
-		mutateGens(&childBotConfig, GetRandInt(0, 77))
+	for i := 0; i < 2; i++ {
+		mutateGens(&childBotConfig, GetRandInt(0, 3))
 	}
 
 	return GetBotConfigMapInterface(childBotConfig)
@@ -257,6 +271,8 @@ func mutateGens(botConfig *Config, randGenNumber int) {
 
 	mutateGenFloat64(randGenNumber, 1, &(botConfig.TrailingTopPercentage), restrict.TrailingTopPercentage)
 	mutateGenInt(randGenNumber, 2, &(botConfig.TrailingUpdateTimesBeforeFinish), restrict.TrailingUpdateTimesBeforeFinish)
+
+	mutateGenInt(randGenNumber, 3, &(botConfig.WaitAfterLastBuyPeriod), restrict.WaitAfterLastBuyPeriod)
 }
 
 func mutateGenFloat64(randGenNumber, genNumber int, genValue *float64, restrictMinMax MinMaxFloat64) {

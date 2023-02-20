@@ -186,3 +186,15 @@ func CountInArray(needle float64, array *[]float64) int {
 	}
 	return count
 }
+
+func ConvertDateStringToTime(dateString string) time.Time {
+	layout := "2006-01-02 15:04:05"
+	parsedTime, _ := time.Parse(layout, dateString)
+	return parsedTime
+}
+
+func GetCurrentMinusTime(candleTime time.Time, minutes int) time.Time {
+	candleTime = candleTime.Add(-time.Minute * time.Duration(minutes))
+
+	return candleTime
+}

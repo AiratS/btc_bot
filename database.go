@@ -100,7 +100,7 @@ func (db *Database) FetchUnsoldBuysByUpperPercentage(exchangeRate, upperPercenta
         LEFT JOIN sells AS s 
         	ON s.buy_id = b.id 
         WHERE s.id IS NULL 
-            AND (b.exchange_rate + ((b.exchange_rate * $2) / 100)) <= $3   
+            AND (b.exchange_rate + ((b.exchange_rate * $1) / 100)) <= $2   
 	`
 
 	rows, _ := db.connect.Query(query, upperPercentage, exchangeRate)
@@ -160,4 +160,19 @@ func (db *Database) CountUnsoldBuys() int {
 	(*db).connect.QueryRow(query).Scan(&count)
 
 	return count
+}
+
+func (db *Database) CanBuyInGivenPeriod(createdAt string, period int) bool {
+	var count int
+	query := `
+		SELECT COUNT(s.id)
+		FROM sells AS s 
+        WHERE s.created_at > $1
+	`
+
+	candleTime := ConvertDateStringToTime(createdAt)
+	canNotBuyDuration := GetCurrentMinusTime(candleTime, period)
+	db.connect.QueryRow(query, canNotBuyDuration).Scan(&count)
+
+	return count == 0
 }

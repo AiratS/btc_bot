@@ -5,6 +5,8 @@ type ConfigRestriction struct {
 
 	TrailingTopPercentage           MinMaxFloat64
 	TrailingUpdateTimesBeforeFinish MinMaxInt
+
+	WaitAfterLastBuyPeriod MinMaxInt
 }
 
 type MinMaxInt struct {
@@ -31,6 +33,11 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		TrailingUpdateTimesBeforeFinish: MinMaxInt{
 			min: 1,
 			max: 2,
+		},
+
+		WaitAfterLastBuyPeriod: MinMaxInt{
+			min: 120,
+			max: 1000,
 		},
 	}
 }
