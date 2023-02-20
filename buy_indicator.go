@@ -200,3 +200,49 @@ func (indicator *WaitForPeriodIndicator) Update() {
 
 func (indicator *WaitForPeriodIndicator) Finish() {
 }
+
+// ---------------------------------------
+
+type BigFallIndicator struct {
+	config *Config
+	buffer *Buffer
+	db     *Database
+}
+
+func NewBigFallIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) BigFallIndicator {
+	return BigFallIndicator{
+		config: config,
+		buffer: buffer,
+		db:     db,
+	}
+}
+
+func (indicator *BigFallIndicator) HasSignal() bool {
+	count := len(indicator.buffer.GetCandles())
+	if (indicator.config.BigFallCandlesCount + 1) > count {
+		return false
+	}
+
+	firstCandle := indicator.buffer.GetBackCandle(indicator.config.BigFallCandlesCount).ClosePrice
+	lastCandle := indicator.buffer.GetLastCandle().ClosePrice
+	fallPercentage := -1 * CalcGrowth(firstCandle, lastCandle)
+
+	return fallPercentage >= indicator.config.BigFallPercentage
+}
+
+func (indicator *BigFallIndicator) IsStarted() bool {
+	return true
+}
+
+func (indicator *BigFallIndicator) Start() {
+}
+
+func (indicator *BigFallIndicator) Update() {
+}
+
+func (indicator *BigFallIndicator) Finish() {
+}

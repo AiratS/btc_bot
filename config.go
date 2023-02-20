@@ -1,11 +1,11 @@
 package main
 
 const CANDLE_SYMBOL = "BTCUSDT"
-const CANDLE_INTERVAL = "1h"
+const CANDLE_INTERVAL = "1m"
 const TOTAL_MONEY_AMOUNT = 100
 const COMMISSION = 0.15
 const DATASETS_DIRECTORY = "datasets"
-const UNSOLD_BUYS_COUNT = 1
+const UNSOLD_BUYS_COUNT = 10
 
 type Config struct {
 	HighSellPercentage float64
@@ -14,6 +14,9 @@ type Config struct {
 	TrailingUpdateTimesBeforeFinish int
 
 	WaitAfterLastBuyPeriod int
+
+	BigFallCandlesCount int
+	BigFallPercentage   float64
 
 	TotalRevenue float64
 	Selection    float64

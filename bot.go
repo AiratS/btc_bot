@@ -130,8 +130,8 @@ func getIntersectedBuys(eachIndicatorBuys [][]Buy) []Buy {
 func resolveBufferSize(config *Config) int {
 	return MaxInt([]int{
 		// add your candles
-		100,
-	})
+		config.BigFallCandlesCount,
+	}) + 10
 }
 
 func setupBuyIndicators(bot *Bot) {
@@ -153,10 +153,17 @@ func setupBuyIndicators(bot *Bot) {
 		bot.db,
 	)
 
+	bigFallIndicator := NewBigFallIndicator(
+		bot.Config,
+		bot.buffer,
+		bot.db,
+	)
+
 	bot.BuyIndicators = []BuyIndicator{
 		&backTrailingBuyIndicator,
 		&buysCountIndicator,
 		&waitForPeriodIndicator,
+		&bigFallIndicator,
 	}
 }
 

@@ -24,6 +24,12 @@ func (buffer *Buffer) GetCandles() []Candle {
 	return buffer.candles
 }
 
+func (buffer *Buffer) GetBackCandle(nBack int) Candle {
+	lastIdx := len(buffer.candles) - 1
+
+	return buffer.candles[lastIdx-nBack]
+}
+
 func (buffer *Buffer) GetLastCandle() Candle {
 	return buffer.candles[len(buffer.candles)-1]
 }
