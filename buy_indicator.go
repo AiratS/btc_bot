@@ -46,7 +46,14 @@ func (indicator *BackTrailingBuyIndicator) IsStarted() bool {
 
 func (indicator *BackTrailingBuyIndicator) Start() {
 	candle := indicator.buffer.GetLastCandle()
-	LogAndPrint(fmt.Sprintf("Trailing Started. Created at %s, ExchangeRate: %f", candle.CloseTime, candle.ClosePrice))
+
+	msg := fmt.Sprintf("Trailing Started. Created at %s, ExchangeRate: %f", candle.CloseTime, candle.ClosePrice)
+	if IS_REAL_ENABLED {
+		LogAndPrintAndSendTg(msg)
+	} else {
+		LogAndPrint(msg)
+	}
+
 	price := indicator.buffer.GetLastCandleClosePrice()
 	indicator.upperStopPrice = indicator.calculateStopPrice(
 		price,
@@ -83,7 +90,12 @@ func (indicator *BackTrailingBuyIndicator) Update() {
 
 	if newUpperStopPrice < indicator.upperStopPrice {
 		candle := indicator.buffer.GetLastCandle()
-		LogAndPrint(fmt.Sprintf("Trailing Moved. Created At: %s, StopPrice: %f", candle.CloseTime, newUpperStopPrice))
+		msg := fmt.Sprintf("Trailing Moved. Created At: %s, StopPrice: %f", candle.CloseTime, newUpperStopPrice)
+		if IS_REAL_ENABLED {
+			LogAndPrintAndSendTg(msg)
+		} else {
+			LogAndPrint(msg)
+		}
 		indicator.upperStopPrice = newUpperStopPrice
 	}
 
@@ -93,7 +105,14 @@ func (indicator *BackTrailingBuyIndicator) Update() {
 
 func (indicator *BackTrailingBuyIndicator) Finish() {
 	candle := indicator.buffer.GetLastCandle()
-	LogAndPrint(fmt.Sprintf("Trailing Finished. Created At:%s, ExchangeRate: %f", candle.CloseTime, candle.ClosePrice))
+
+	msg := fmt.Sprintf("Trailing Finished. Created At:%s, ExchangeRate: %f", candle.CloseTime, candle.ClosePrice)
+	if IS_REAL_ENABLED {
+		LogAndPrintAndSendTg(msg)
+	} else {
+		LogAndPrint(msg)
+	}
+
 	indicator.isStarted = false
 	indicator.updatesCount = 0
 	indicator.updatedTimesBeforeFinish = 0

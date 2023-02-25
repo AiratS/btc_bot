@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
+	"time"
 )
 
 type Database struct {
@@ -15,11 +16,17 @@ type Buy struct {
 	Coins        float64
 	ExchangeRate float64
 	CreatedAt    string
+	RealOrderId  int64
+	RealQuantity float64
 }
 
 func NewDatabase() Database {
 	//name := time.Now().Format("db/db_2006_01_02__15_04_05.db")
 	name := ":memory:"
+
+	if IS_REAL_ENABLED {
+		name = time.Now().Format("db/real_2006_01_02__15_04_05.db")
+	}
 	connect, _ := sql.Open("sqlite3", name)
 
 	createBuysTable(connect)
@@ -37,11 +44,13 @@ func (db *Database) Close() {
 func createBuysTable(connect *sql.DB) sql.Result {
 	query := `
 		CREATE TABLE IF NOT EXISTS buys (
-			id integer primary key AUTOINCREMENT,
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			symbol VARCHAR(255),
 			coins FLOAT,
 			exchange_rate FLOAT,
 			created_at DATETIME
+		    real_order_id INTEGER,
+			real_quantity FLOAT
 		);
 	`
 	result, _ := connect.Exec(query)
@@ -76,6 +85,33 @@ func (db *Database) AddBuy(symbol string, coinsCount float64, exchangeRate float
 	return result
 }
 
+func (db *Database) AddRealBuy(symbol string, coinsCount float64, exchangeRate float64, createdAt string, orderId int64, quantity float64) sql.Result {
+	//createdAt := time.Now().Format("2006-01-02 15:04:05")
+	query := `
+		INSERT INTO buys (symbol, coins, exchange_rate, created_at, real_order_id, real_quantity) VALUES ($1, $2, $3, $4, $5, $6);
+	`
+
+	result, err := db.connect.Exec(query, symbol, coinsCount, exchangeRate, createdAt, orderId, quantity)
+	if err != nil {
+		panic(err)
+	}
+
+	return result
+}
+
+func (db *Database) UpdateRealBuyOrderId(buyId int, orderId int64) {
+	query := `
+		UPDATE buys
+		SET real_order_id = $1
+		WHERE id = $2
+	`
+
+	_, err := db.connect.Exec(query, orderId, buyId)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func (db *Database) AddSell(
 	symbol string,
 	coinsCount float64,
@@ -108,7 +144,7 @@ func (db *Database) FetchUnsoldBuysByUpperPercentage(exchangeRate, upperPercenta
 
 	for rows.Next() {
 		buy := Buy{}
-		rows.Scan(&buy.Id, &buy.Symbol, &buy.Coins, &buy.ExchangeRate, &buy.CreatedAt)
+		rows.Scan(&buy.Id, &buy.Symbol, &buy.Coins, &buy.ExchangeRate, &buy.CreatedAt, &buy.RealOrderId, &buy.RealQuantity)
 		unsoldBuys = append(unsoldBuys, buy)
 	}
 

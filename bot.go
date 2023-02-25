@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/adshao/go-binance/v2"
+)
 
 type Bot struct {
 	Config         *Config
@@ -8,6 +11,7 @@ type Bot struct {
 	SellIndicators []SellIndicator
 	buffer         *Buffer
 	db             *Database
+	orderManager   *OrderManager
 }
 
 func NewBot(config *Config) Bot {
@@ -22,6 +26,13 @@ func NewBot(config *Config) Bot {
 
 	setupBuyIndicators(&bot)
 	setupSellIndicators(&bot)
+
+	return bot
+}
+
+func NewRealBot(config *Config, binanceClient *binance.Client) Bot {
+	orderManager = NewOrderManager(binanceClient, IS_REAL_ENABLED)
+	bot := NewBot(config)
 
 	return bot
 }
@@ -52,7 +63,10 @@ func (bot *Bot) runBuyIndicators() {
 		}
 
 		candle := bot.buffer.GetLastCandle()
-		LogAndPrint(fmt.Sprintf("Buy signal, Created at: %s, ExchangeRate: %f", candle.CloseTime, bot.buffer.GetLastCandleClosePrice()))
+
+		if !IS_REAL_ENABLED {
+			LogAndPrint(fmt.Sprintf("Buy signal, Created at: %s, ExchangeRate: %f", candle.CloseTime, bot.buffer.GetLastCandleClosePrice()))
+		}
 		bot.buy()
 	}
 }
@@ -73,7 +87,10 @@ func (bot *Bot) runSellIndicators() {
 	for _, buy := range getIntersectedBuys(eachIndicatorBuys) {
 		candle := bot.buffer.GetLastCandle()
 		rev := bot.sell(buy)
-		LogAndPrint(fmt.Sprintf("Sell signal, Created At: %s, ExchangeRate: %f: Revenue: %f", candle.CloseTime, bot.buffer.GetLastCandleClosePrice(), rev))
+
+		if !IS_REAL_ENABLED {
+			LogAndPrint(fmt.Sprintf("Sell signal, Created At: %s, ExchangeRate: %f: Revenue: %f", candle.CloseTime, bot.buffer.GetLastCandleClosePrice(), rev))
+		}
 	}
 }
 
@@ -82,18 +99,41 @@ func (bot *Bot) buy() {
 	exchangeRate := candle.GetPrice()
 
 	coinsCount := TOTAL_MONEY_AMOUNT / exchangeRate
-	bot.db.AddBuy(
-		CANDLE_SYMBOL,
-		coinsCount,
-		exchangeRate,
-		candle.CloseTime,
-	)
+
+	if IS_REAL_ENABLED {
+		orderId, quantity := bot.orderManager.CreateMarketBuyOrder(candle.Symbol, candle.ClosePrice)
+		bot.db.AddRealBuy(
+			CANDLE_SYMBOL,
+			coinsCount,
+			exchangeRate,
+			candle.CloseTime,
+			orderId,
+			quantity,
+		)
+
+		LogAndPrintAndSendTg(fmt.Sprintf("|Buy|\n Price: %f\n Quantity: %f\n OrderId: %d", candle.ClosePrice, quantity, orderId))
+	} else {
+		bot.db.AddBuy(
+			CANDLE_SYMBOL,
+			coinsCount,
+			exchangeRate,
+			candle.CloseTime,
+		)
+	}
 }
 
 func (bot *Bot) sell(buy Buy) float64 {
 	candle := bot.buffer.GetLastCandle()
 	exchangeRate := candle.GetPrice()
 	rev := calcRevenue(buy.Coins, exchangeRate)
+
+	if IS_REAL_ENABLED {
+		rev = calcRevenue(buy.RealQuantity, exchangeRate)
+		orderId := orderManager.CreateSellOrder(candle.Symbol, candle.ClosePrice, buy.RealQuantity)
+		bot.db.UpdateRealBuyOrderId(buy.Id, orderId)
+
+		LogAndPrintAndSendTg(fmt.Sprintf("|Sell|\n Price: %f - %f\n Rev: %f", buy.ExchangeRate, candle.ClosePrice, rev))
+	}
 
 	bot.db.AddSell(
 		CANDLE_SYMBOL,

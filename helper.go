@@ -132,6 +132,12 @@ func LogAndPrint(msg string) {
 	log.Println(msg)
 }
 
+func LogAndPrintAndSendTg(msg string) {
+	fmt.Println(msg)
+	log.Println(msg)
+	SendTgBotMessage(msg)
+}
+
 func GetRandIntConfig(minMax MinMaxInt) int {
 	return GetRandInt(minMax.min, minMax.max)
 }
