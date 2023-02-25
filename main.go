@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const IS_REAL_ENABLED = true
+const IS_REAL_ENABLED = false
 
 func main() {
 	// Logger

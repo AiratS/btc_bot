@@ -48,13 +48,12 @@ func createBuysTable(connect *sql.DB) sql.Result {
 			symbol VARCHAR(255),
 			coins FLOAT,
 			exchange_rate FLOAT,
-			created_at DATETIME
+			created_at DATETIME,
 		    real_order_id INTEGER,
 			real_quantity FLOAT
 		);
 	`
 	result, _ := connect.Exec(query)
-
 	return result
 }
 
@@ -79,9 +78,9 @@ func createSellsTable(connect *sql.DB) sql.Result {
 
 func (db *Database) AddBuy(symbol string, coinsCount float64, exchangeRate float64, createdAt string) sql.Result {
 	query := `
-		INSERT INTO buys (symbol, coins, exchange_rate, created_at) VALUES ($1, $2, $3, $4);
+		INSERT INTO buys (symbol, coins, exchange_rate, created_at, real_order_id, real_quantity) VALUES ($1, $2, $3, $4, $5, $6);
 	`
-	result, _ := db.connect.Exec(query, symbol, coinsCount, exchangeRate, createdAt)
+	result, _ := db.connect.Exec(query, symbol, coinsCount, exchangeRate, createdAt, 0, 0.0)
 	return result
 }
 
