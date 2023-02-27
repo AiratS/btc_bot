@@ -33,6 +33,7 @@ func NewBot(config *Config) Bot {
 func NewRealBot(config *Config, binanceClient *binance.Client) Bot {
 	orderManager = NewOrderManager(binanceClient, IS_REAL_ENABLED)
 	bot := NewBot(config)
+	bot.orderManager = &orderManager
 
 	return bot
 }
