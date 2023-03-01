@@ -146,6 +146,7 @@ func (bot *Bot) sell(buy Buy) float64 {
 	if IS_REAL_ENABLED {
 		rev = calcRevenue(buy.RealQuantity, exchangeRate)
 		orderId := orderManager.CreateSellOrder(candle.Symbol, candle.ClosePrice, buy.RealQuantity)
+		//orderId := orderManager.CreateMarketSellOrder(candle.Symbol, candle.ClosePrice, buy.RealQuantity)
 		bot.db.UpdateRealBuyOrderId(buy.Id, orderId)
 
 		LogAndPrintAndSendTg(fmt.Sprintf("SELL\nPrice: %f - %f\nRevenue: %f", buy.ExchangeRate, candle.ClosePrice, rev))
