@@ -102,9 +102,9 @@ func (manager *OrderManager) HasEnoughMoneyForBuy() bool {
 	return false
 }
 
-func (manager *OrderManager) CreateBuyOrder(symbol string, price float64) (int64, float64) {
+func (manager *OrderManager) CreateBuyOrder(symbol string, price float64) (int64, float64, float64) {
 	if !manager.isEnabled {
-		return 0, 0.0
+		return 0, 0.0, 0.0
 	}
 
 	if info, hasLotSize := manager.exchangeInfo.GetInfoForSymbol(symbol); hasLotSize {
@@ -131,15 +131,15 @@ func (manager *OrderManager) CreateBuyOrder(symbol string, price float64) (int64
 		//fmt.Println(order)
 		//fmt.Println("orderId", order.OrderID)
 
-		return order.OrderID, quantityLotSize
+		return order.OrderID, quantityLotSize, convertBinanceToFloat64(order.Price)
 	}
 
-	return 0, 0.0
+	return 0, 0.0, 0.0
 }
 
-func (manager *OrderManager) CreateMarketBuyOrder(symbol string, price float64) (int64, float64) {
+func (manager *OrderManager) CreateMarketBuyOrder(symbol string, price float64) (int64, float64, float64) {
 	if !manager.isEnabled {
-		return 0, 0.0
+		return 0, 0.0, 0.0
 	}
 
 	if info, hasLotSize := manager.exchangeInfo.GetInfoForSymbol(symbol); hasLotSize {
@@ -161,10 +161,10 @@ func (manager *OrderManager) CreateMarketBuyOrder(symbol string, price float64) 
 			panic(err)
 		}
 
-		return order.OrderID, quantityLotSize
+		return order.OrderID, quantityLotSize, convertBinanceToFloat64(order.Price)
 	}
 
-	return 0, 0.0
+	return 0, 0.0, 0.0
 }
 
 func (manager *OrderManager) MoveStopPrice(symbol string, orderId int64, stopPrice, quantity float64) int64 {

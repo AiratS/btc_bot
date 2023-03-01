@@ -104,15 +104,15 @@ func (bot *Bot) buy() {
 	coinsCount := TOTAL_MONEY_AMOUNT / exchangeRate
 
 	if IS_REAL_ENABLED {
-		price := candle.ClosePrice
+		rawPrice := candle.ClosePrice
 
 		if USE_REAL_MONEY &&
 			!bot.orderManager.HasEnoughMoneyForBuy() ||
-			!bot.orderManager.CanBuyForPrice(CANDLE_SYMBOL, price) {
+			!bot.orderManager.CanBuyForPrice(CANDLE_SYMBOL, rawPrice) {
 			return
 		}
 
-		orderId, quantity := bot.orderManager.CreateMarketBuyOrder(candle.Symbol, price)
+		orderId, quantity, orderPrice := bot.orderManager.CreateMarketBuyOrder(candle.Symbol, rawPrice)
 
 		if !USE_REAL_MONEY {
 			quantity = coinsCount
@@ -121,13 +121,13 @@ func (bot *Bot) buy() {
 		bot.db.AddRealBuy(
 			CANDLE_SYMBOL,
 			coinsCount,
-			exchangeRate,
+			orderPrice,
 			candle.CloseTime,
 			orderId,
 			quantity,
 		)
 
-		LogAndPrintAndSendTg(fmt.Sprintf("BUY\nPrice: %f\nQuantity: %f\nOrderId: %d", price, quantity, orderId))
+		LogAndPrintAndSendTg(fmt.Sprintf("BUY\nPrice: %f\nQuantity: %f\nOrderId: %d", orderPrice, quantity, orderId))
 	} else {
 		bot.db.AddBuy(
 			CANDLE_SYMBOL,
