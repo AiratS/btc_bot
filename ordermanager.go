@@ -15,9 +15,9 @@ type OrderManager struct {
 	exchangeInfo  *ExchangeInfo
 }
 
-func NewOrderManager(binanceClient *binance.Client, isEnabled bool) OrderManager {
+func NewOrderManager(binanceClient *binance.Client) OrderManager {
 	res, err := binanceClient.NewExchangeInfoService().
-		Symbols("BTCUSDT").
+		Symbols(CANDLE_SYMBOL).
 		Do(context.Background())
 
 	if err != nil {
@@ -93,7 +93,7 @@ func (manager *OrderManager) HasEnoughMoneyForBuy() bool {
 
 	for _, balance := range res.Balances {
 		if balance.Asset == "USDT" {
-			freeMoney := convertToFloat64(balance.Free)
+			freeMoney := convertBinanceToFloat64(balance.Free)
 
 			return freeMoney >= ORDER_MONEY
 		}

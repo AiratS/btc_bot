@@ -1,6 +1,8 @@
 package main
 
-import "github.com/adshao/go-binance/v2"
+import (
+	"github.com/adshao/go-binance/v2"
+)
 
 type ExchangeInfo struct {
 	symbolInfoMap map[string]ExchangeInfoContainer
@@ -33,18 +35,20 @@ func NewExchangeInfo(res *binance.ExchangeInfo) ExchangeInfo {
 			filterType := filter["filterType"]
 
 			if filterType == string(binance.SymbolFilterTypeLotSize) {
+				//fmt.Println(filter)
 				symbolInfoContainer.LotSize = LotSize{
-					minQty:   convertToFloat64(filter["minQty"]),
-					maxQty:   convertToFloat64(filter["maxQty"]),
-					stepSize: convertToFloat64(filter["stepSize"]),
+					minQty:   convertBinanceToFloat64(filter["minQty"]),
+					maxQty:   convertBinanceToFloat64(filter["maxQty"]),
+					stepSize: convertBinanceToFloat64(filter["stepSize"]),
 				}
 			}
 
 			if filterType == string(binance.SymbolFilterTypePriceFilter) {
+				//fmt.Println(convertBinanceToFloat64(filter["minPrice"]))
 				symbolInfoContainer.PriceFilter = PriceFilter{
-					minPrice: convertToFloat64(filter["minPrice"]),
-					maxPrice: convertToFloat64(filter["maxPrice"]),
-					tickSize: convertToFloat64(filter["tickSize"]),
+					minPrice: convertBinanceToFloat64(filter["minPrice"]),
+					maxPrice: convertBinanceToFloat64(filter["maxPrice"]),
+					tickSize: convertBinanceToFloat64(filter["tickSize"]),
 				}
 			}
 		}

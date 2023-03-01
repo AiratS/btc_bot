@@ -7,8 +7,12 @@ import (
 	"time"
 )
 
-const BINANCE_API_KEY = "vYnGaa6tvn1JNFe3NSGOGen2Y5hAoBL7n4p59Etiu9nm9X4vZyaejmwec7pFuHM6"
-const BINANCE_SECRET_KEY = "Bb0oU4WdHCmF6HRLZbBvr0EVaLSOn2HMgAlOo5C9shu7Xzp2FK7cHSMjntwSL9gP"
+//const BINANCE_API_KEY = "vYnGaa6tvn1JNFe3NSGOGen2Y5hAoBL7n4p59Etiu9nm9X4vZyaejmwec7pFuHM6"
+//const BINANCE_SECRET_KEY = "Bb0oU4WdHCmF6HRLZbBvr0EVaLSOn2HMgAlOo5C9shu7Xzp2FK7cHSMjntwSL9gP"
+
+const BINANCE_API_KEY = "vWNmAhOl6ad99Ytgfb2NElNBN5jzTYkToxv6kxjv6ddGQY8sMuPSv9Eq9lNoL4UB"
+const BINANCE_SECRET_KEY = "rVUQ6YeLm6yFRwBvnpzDdKpjEEZ9bOqRLHDKaNLUERL4Kcckl08prdnEqciksWNj"
+
 const TG_API_KEY = "5174010399:AAGfCYIHJ6ToTIovKhgemgJXWQCi3A4CxJg" // телеграм амайзинг
 
 var tgBot *tgbotapi.BotAPI

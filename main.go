@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const IS_REAL_ENABLED = false
+const IS_REAL_ENABLED = true
 const USE_REAL_MONEY = false
 
 func main() {

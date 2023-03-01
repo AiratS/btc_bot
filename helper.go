@@ -182,6 +182,14 @@ func convertToFloat64(value interface{}) float64 {
 	return math.NaN()
 }
 
+func convertBinanceToFloat64(value interface{}) float64 {
+	val, err := strconv.ParseFloat(fmt.Sprintf("%v", value), 64)
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func CountInArray(needle float64, array *[]float64) int {
 	count := 0
 	searchArray := *array
