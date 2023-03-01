@@ -212,3 +212,7 @@ func GetCurrentMinusTime(candleTime time.Time, minutes int) time.Time {
 
 	return candleTime
 }
+
+func CalcUpperPrice(price, percentage float64) float64 {
+	return price + ((price * percentage) / 100)
+}

@@ -31,6 +31,11 @@ func (buffer *Buffer) GetBackCandle(nBack int) Candle {
 }
 
 func (buffer *Buffer) GetLastCandle() Candle {
+	//return Candle{
+	//	Symbol:     CANDLE_SYMBOL,
+	//	CloseTime:  time.Now().Format("2006-01-02 15:04:05"),
+	//	ClosePrice: 23398.11,
+	//}
 	return buffer.candles[len(buffer.candles)-1]
 }
 

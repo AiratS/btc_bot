@@ -130,6 +130,12 @@ func (bot *Bot) buy() {
 		)
 
 		LogAndPrintAndSendTg(fmt.Sprintf("BUY\nPrice: %f\nQuantity: %f\nOrderId: %d", orderPrice, quantity, orderId))
+
+		if USE_REAL_MONEY {
+			upperPrice := CalcUpperPrice(orderPrice, bot.Config.HighSellPercentage)
+			sellOrderId := orderManager.CreateSellOrder(candle.Symbol, upperPrice, quantity)
+			LogAndPrintAndSendTg(fmt.Sprintf("SELL_ORDER\nOrderId: %d\nUpperPrice: %f", sellOrderId, upperPrice))
+		}
 	} else {
 		bot.db.AddBuy(
 			CANDLE_SYMBOL,
@@ -147,9 +153,9 @@ func (bot *Bot) sell(buy Buy) float64 {
 
 	if IS_REAL_ENABLED {
 		rev = calcRevenue(buy.RealQuantity, exchangeRate)
-		orderId := orderManager.CreateSellOrder(candle.Symbol, candle.ClosePrice, buy.RealQuantity)
+		//orderId := orderManager.CreateSellOrder(candle.Symbol, candle.ClosePrice, buy.RealQuantity)
 		//orderId := orderManager.CreateMarketSellOrder(candle.Symbol, candle.ClosePrice, buy.RealQuantity)
-		bot.db.UpdateRealBuyOrderId(buy.Id, orderId)
+		//bot.db.UpdateRealBuyOrderId(buy.Id, orderId)
 
 		LogAndPrintAndSendTg(fmt.Sprintf("SELL\nPrice: %f - %f\nRevenue: %f", buy.ExchangeRate, candle.ClosePrice, rev))
 	}
