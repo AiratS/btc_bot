@@ -6,6 +6,7 @@ import (
 )
 
 const IS_REAL_ENABLED = false
+const USE_REAL_MONEY = false
 
 func main() {
 	// Logger

@@ -123,7 +123,7 @@ func (db *Database) AddSell(
 	query := `
 		INSERT INTO sells (symbol, coins, exchange_rate, revenue, buy_id, created_at) VALUES ($1, $2, $3, $4, $5, $6);
 	`
-	result, _ := db.connect.Exec(query, symbol, exchangeRate, coinsCount, revenue, buyId, createdAt)
+	result, _ := db.connect.Exec(query, symbol, coinsCount, exchangeRate, revenue, buyId, createdAt)
 	return result
 }
 

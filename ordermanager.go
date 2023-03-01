@@ -29,7 +29,7 @@ func NewOrderManager(binanceClient *binance.Client, isEnabled bool) OrderManager
 
 	return OrderManager{
 		binanceClient: binanceClient,
-		isEnabled:     false,
+		isEnabled:     USE_REAL_MONEY,
 		exchangeInfo:  &info,
 	}
 }

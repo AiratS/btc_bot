@@ -64,10 +64,12 @@ func (bot *Bot) runBuyIndicators() {
 		}
 
 		candle := bot.buffer.GetLastCandle()
+		price := bot.buffer.GetLastCandleClosePrice()
 
 		if !IS_REAL_ENABLED {
-			LogAndPrint(fmt.Sprintf("Buy signal, Created at: %s, ExchangeRate: %f", candle.CloseTime, bot.buffer.GetLastCandleClosePrice()))
+			LogAndPrint(fmt.Sprintf("Buy signal, Created at: %s, ExchangeRate: %f", candle.CloseTime, price))
 		}
+
 		bot.buy()
 	}
 }
@@ -102,7 +104,20 @@ func (bot *Bot) buy() {
 	coinsCount := TOTAL_MONEY_AMOUNT / exchangeRate
 
 	if IS_REAL_ENABLED {
-		orderId, quantity := bot.orderManager.CreateMarketBuyOrder(candle.Symbol, candle.ClosePrice)
+		price := candle.ClosePrice
+
+		if USE_REAL_MONEY &&
+			!bot.orderManager.HasEnoughMoneyForBuy() ||
+			!bot.orderManager.CanBuyForPrice(CANDLE_SYMBOL, price) {
+			return
+		}
+
+		orderId, quantity := bot.orderManager.CreateMarketBuyOrder(candle.Symbol, price)
+
+		if !USE_REAL_MONEY {
+			quantity = coinsCount
+		}
+
 		bot.db.AddRealBuy(
 			CANDLE_SYMBOL,
 			coinsCount,
@@ -112,7 +127,7 @@ func (bot *Bot) buy() {
 			quantity,
 		)
 
-		LogAndPrintAndSendTg(fmt.Sprintf("|Buy|\n Price: %f\n Quantity: %f\n OrderId: %d", candle.ClosePrice, quantity, orderId))
+		LogAndPrintAndSendTg(fmt.Sprintf("BUY\nPrice: %f\nQuantity: %f\nOrderId: %d", price, quantity, orderId))
 	} else {
 		bot.db.AddBuy(
 			CANDLE_SYMBOL,
@@ -133,7 +148,7 @@ func (bot *Bot) sell(buy Buy) float64 {
 		orderId := orderManager.CreateSellOrder(candle.Symbol, candle.ClosePrice, buy.RealQuantity)
 		bot.db.UpdateRealBuyOrderId(buy.Id, orderId)
 
-		LogAndPrintAndSendTg(fmt.Sprintf("|Sell|\n Price: %f - %f\n Rev: %f", buy.ExchangeRate, candle.ClosePrice, rev))
+		LogAndPrintAndSendTg(fmt.Sprintf("SELL\nPrice: %f - %f\nRevenue: %f", buy.ExchangeRate, candle.ClosePrice, rev))
 	}
 
 	bot.db.AddSell(
