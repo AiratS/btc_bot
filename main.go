@@ -7,6 +7,7 @@ import (
 
 const IS_REAL_ENABLED = true
 const USE_REAL_MONEY = false
+const REAL_MONEY_DB_NAME = "amazing_real"
 
 func main() {
 	// Logger

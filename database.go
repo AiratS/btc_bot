@@ -26,6 +26,10 @@ func NewDatabase() Database {
 
 	if IS_REAL_ENABLED {
 		name = time.Now().Format("db/real_2006_01_02__15_04_05.db")
+
+		if USE_REAL_MONEY {
+			name = REAL_MONEY_DB_NAME + ".db"
+		}
 	}
 	connect, _ := sql.Open("sqlite3", name)
 
