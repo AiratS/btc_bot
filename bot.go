@@ -106,6 +106,8 @@ func (bot *Bot) buy() {
 	if IS_REAL_ENABLED {
 		rawPrice := candle.ClosePrice
 
+		LogAndPrintAndSendTg(fmt.Sprintf("GOT_BUY_SIGNAL\nPrice: %f", rawPrice))
+
 		if USE_REAL_MONEY &&
 			!bot.orderManager.HasEnoughMoneyForBuy() ||
 			!bot.orderManager.CanBuyForPrice(CANDLE_SYMBOL, rawPrice) {
