@@ -129,8 +129,9 @@ func (manager *OrderManager) CreateBuyOrder(symbol string, price float64) (int64
 		}
 
 		realBuyPrice := getRealBuyPrice(priceConverted, order)
+		realQuantity := getRealBuyQuantity(quantityLotSize, order)
 
-		return order.OrderID, quantityLotSize, realBuyPrice
+		return order.OrderID, realQuantity, realBuyPrice
 	}
 
 	return 0, 0.0, 0.0
@@ -161,8 +162,9 @@ func (manager *OrderManager) CreateMarketBuyOrder(symbol string, price float64) 
 		}
 
 		realBuyPrice := getRealBuyPrice(priceConverted, order)
+		realQuantity := getRealBuyQuantity(quantityLotSize, order)
 
-		return order.OrderID, quantityLotSize, realBuyPrice
+		return order.OrderID, realQuantity, realBuyPrice
 	}
 
 	return 0, 0.0, 0.0
@@ -174,6 +176,19 @@ func getRealBuyPrice(rawPrice float64, order *binance.CreateOrderResponse) float
 	}
 
 	return rawPrice
+}
+
+func getRealBuyQuantity(rawQuantity float64, order *binance.CreateOrderResponse) float64 {
+	if 0 == len(order.Fills) {
+		return rawQuantity
+	}
+
+	realQuantity := 0.0
+	for _, fill := range order.Fills {
+		realQuantity += convertBinanceToFloat64(fill.Quantity)
+	}
+
+	return realQuantity
 }
 
 func (manager *OrderManager) MoveStopPrice(symbol string, orderId int64, stopPrice, quantity float64) int64 {
