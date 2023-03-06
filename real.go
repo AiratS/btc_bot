@@ -31,6 +31,8 @@ func GetRealBotConfig() Config {
 
 		BigFallCandlesCount: 1,
 		BigFallPercentage:   0.1,
+
+		DesiredPriceCandles: 1,
 	}
 }
 

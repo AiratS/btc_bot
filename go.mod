@@ -6,6 +6,7 @@ require (
 	github.com/adshao/go-binance/v2 v2.4.1
 	github.com/go-gota/gota v0.12.0
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
+	github.com/markcheno/go-talib v0.0.0-20190307022042-cd53a9264d70
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/rocketlaunchr/dataframe-go v0.0.0-20211025052708-a1030444159b
 )

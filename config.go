@@ -18,6 +18,8 @@ type Config struct {
 	BigFallCandlesCount int
 	BigFallPercentage   float64
 
+	DesiredPriceCandles int
+
 	TotalRevenue float64
 	Selection    float64
 }

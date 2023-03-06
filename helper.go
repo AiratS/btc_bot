@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -215,4 +216,52 @@ func GetCurrentMinusTime(candleTime time.Time, minutes int) time.Time {
 
 func CalcUpperPrice(price, percentage float64) float64 {
 	return price + ((price * percentage) / 100)
+}
+
+func GetOpenPrices(candles []Candle) []float64 {
+	var values []float64
+
+	for _, candle := range candles {
+		values = append(values, candle.GetPrice())
+	}
+
+	return values
+}
+
+func GetClosePrices(candles []Candle) []float64 {
+	var values []float64
+
+	for _, candle := range candles {
+		values = append(values, candle.GetPrice())
+	}
+
+	return values
+}
+
+func GetAvg(values []float64) float64 {
+	total := 0.0
+	for _, value := range values {
+		total += value
+	}
+
+	return total / float64(len(values))
+}
+
+func Median(data []float64) float64 {
+	dataCopy := make([]float64, len(data))
+	copy(dataCopy, data)
+
+	sort.Float64s(dataCopy)
+
+	var median float64
+	l := len(dataCopy)
+	if l == 0 {
+		return 0
+	} else if l%2 == 0 {
+		median = (dataCopy[l/2-1] + dataCopy[l/2]) / 2
+	} else {
+		median = dataCopy[l/2]
+	}
+
+	return median
 }

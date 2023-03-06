@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const IS_REAL_ENABLED = true
+const IS_REAL_ENABLED = false
 const USE_REAL_MONEY = false
 const REAL_MONEY_DB_NAME = "amazing_real"
 

@@ -26,6 +26,8 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 		dataframe.NewSeriesInt64("BigFallCandlesCount", nil),
 		dataframe.NewSeriesFloat64("BigFallPercentage", nil),
 
+		dataframe.NewSeriesInt64("DesiredPriceCandles", nil),
+
 		dataframe.NewSeriesFloat64("TotalRevenue", nil),
 		dataframe.NewSeriesFloat64("Selection", nil),
 	)
@@ -75,8 +77,10 @@ func ImportFromCsv(fileName string) []Config {
 			BigFallCandlesCount: convertStringToInt(row[4]),
 			BigFallPercentage:   convertStringToFloat64(row[5]),
 
-			TotalRevenue: convertStringToFloat64(row[6]),
-			Selection:    convertStringToFloat64(row[7]),
+			DesiredPriceCandles: convertStringToInt(row[6]),
+
+			TotalRevenue: convertStringToFloat64(row[7]),
+			Selection:    convertStringToFloat64(row[8]),
 		}
 
 		bots = append(bots, bot)
@@ -98,6 +102,8 @@ func InitBotConfig() Config {
 
 		BigFallCandlesCount: GetRandIntConfig(restrict.BigFallCandlesCount),
 		BigFallPercentage:   GetRandFloat64Config(restrict.BigFallPercentage),
+
+		DesiredPriceCandles: GetRandIntConfig(restrict.DesiredPriceCandles),
 	}
 }
 
@@ -112,6 +118,8 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 
 		"BigFallCandlesCount": botConfig.BigFallCandlesCount,
 		"BigFallPercentage":   botConfig.BigFallPercentage,
+
+		"DesiredPriceCandles": botConfig.DesiredPriceCandles,
 
 		"TotalRevenue": botConfig.TotalRevenue,
 		"Selection":    botConfig.Selection,
@@ -186,6 +194,8 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 		"BigFallCandlesCount": bot["BigFallCandlesCount"],
 		"BigFallPercentage":   bot["BigFallPercentage"],
 
+		"DesiredPriceCandles": bot["DesiredPriceCandles"],
+
 		"TotalRevenue": bot["TotalRevenue"],
 		"Selection":    bot["Selection"],
 	}
@@ -259,6 +269,8 @@ func ConvertDataFrameToBotConfig(dataFrame map[interface{}]interface{}) Config {
 
 		BigFallCandlesCount: convertToInt(dataFrame["BigFallCandlesCount"]),
 		BigFallPercentage:   convertToFloat64(dataFrame["BigFallPercentage"]),
+
+		DesiredPriceCandles: convertToInt(dataFrame["DesiredPriceCandles"]),
 	}
 }
 
@@ -276,10 +288,12 @@ func makeChild(
 
 		BigFallCandlesCount: GetIntFatherOrMomGen(maleBotConfig.BigFallCandlesCount, femaleBotConfig.BigFallCandlesCount),
 		BigFallPercentage:   GetFloatFatherOrMomGen(maleBotConfig.BigFallPercentage, femaleBotConfig.BigFallPercentage),
+
+		DesiredPriceCandles: GetIntFatherOrMomGen(maleBotConfig.DesiredPriceCandles, femaleBotConfig.DesiredPriceCandles),
 	}
 
-	for i := 0; i < 4; i++ {
-		mutateGens(&childBotConfig, GetRandInt(0, 5))
+	for i := 0; i < 3; i++ {
+		mutateGens(&childBotConfig, GetRandInt(0, 6))
 	}
 
 	return GetBotConfigMapInterface(childBotConfig)
@@ -297,6 +311,8 @@ func mutateGens(botConfig *Config, randGenNumber int) {
 
 	mutateGenInt(randGenNumber, 4, &(botConfig.BigFallCandlesCount), restrict.BigFallCandlesCount)
 	mutateGenFloat64(randGenNumber, 5, &(botConfig.BigFallPercentage), restrict.BigFallPercentage)
+
+	mutateGenInt(randGenNumber, 6, &(botConfig.DesiredPriceCandles), restrict.DesiredPriceCandles)
 }
 
 func mutateGenFloat64(randGenNumber, genNumber int, genValue *float64, restrictMinMax MinMaxFloat64) {

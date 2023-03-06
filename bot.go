@@ -102,6 +102,7 @@ func (bot *Bot) buy() {
 	exchangeRate := candle.GetPrice()
 
 	coinsCount := TOTAL_MONEY_AMOUNT / exchangeRate
+	desiredPrice := bot.calcDesiredPrice(exchangeRate)
 
 	if IS_REAL_ENABLED {
 		rawPrice := candle.ClosePrice
@@ -124,6 +125,7 @@ func (bot *Bot) buy() {
 			CANDLE_SYMBOL,
 			coinsCount,
 			orderPrice,
+			desiredPrice,
 			candle.CloseTime,
 			orderId,
 			quantity,
@@ -141,9 +143,24 @@ func (bot *Bot) buy() {
 			CANDLE_SYMBOL,
 			coinsCount,
 			exchangeRate,
+			desiredPrice,
 			candle.CloseTime,
 		)
 	}
+}
+
+func (bot *Bot) calcDesiredPrice(currentPrice float64) float64 {
+	upperPrice := CalcUpperPrice(currentPrice, bot.Config.HighSellPercentage)
+	if bot.Config.DesiredPriceCandles > len(bot.buffer.GetCandles()) {
+		return upperPrice
+	}
+
+	medPrice := Median(GetClosePrices(bot.buffer.GetCandles()))
+	if upperPrice < medPrice {
+		return medPrice
+	}
+
+	return upperPrice
 }
 
 func (bot *Bot) sell(buy Buy) float64 {
@@ -196,6 +213,7 @@ func resolveBufferSize(config *Config) int {
 	return MaxInt([]int{
 		// add your candles
 		config.BigFallCandlesCount,
+		config.DesiredPriceCandles,
 	}) + 10
 }
 
@@ -233,13 +251,20 @@ func setupBuyIndicators(bot *Bot) {
 }
 
 func setupSellIndicators(bot *Bot) {
-	highPercentageSellIndicator := NewHighPercentageSellIndicator(
+	//highPercentageSellIndicator := NewHighPercentageSellIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
+
+	desiredPriceSellIndicator := NewDesiredPriceSellIndicator(
 		bot.Config,
 		bot.buffer,
 		bot.db,
 	)
 
 	bot.SellIndicators = []SellIndicator{
-		&highPercentageSellIndicator,
+		//&highPercentageSellIndicator,
+		&desiredPriceSellIndicator,
 	}
 }
