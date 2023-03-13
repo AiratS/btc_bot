@@ -88,10 +88,13 @@ func (bot *Bot) runSellIndicators() {
 
 	// Sell
 	for _, buy := range getIntersectedBuys(eachIndicatorBuys) {
-		candle := bot.buffer.GetLastCandle()
-		rev := bot.sell(buy)
-
-		if !IS_REAL_ENABLED {
+		if IS_REAL_ENABLED {
+			if orderManager.IsBuySold(CANDLE_SYMBOL, buy.RealOrderId) {
+				bot.sell(buy)
+			}
+		} else {
+			rev := bot.sell(buy)
+			candle := bot.buffer.GetLastCandle()
 			LogAndPrint(fmt.Sprintf("Sell signal, Created At: %s, ExchangeRate: %f: Revenue: %f", candle.CloseTime, bot.buffer.GetLastCandleClosePrice(), rev))
 		}
 	}
@@ -121,7 +124,7 @@ func (bot *Bot) buy() {
 			quantity = coinsCount
 		}
 
-		bot.db.AddRealBuy(
+		buyInsertResult := bot.db.AddRealBuy(
 			CANDLE_SYMBOL,
 			coinsCount,
 			orderPrice,
@@ -136,6 +139,10 @@ func (bot *Bot) buy() {
 		if USE_REAL_MONEY {
 			upperPrice := CalcUpperPrice(orderPrice, bot.Config.HighSellPercentage)
 			sellOrderId := orderManager.CreateSellOrder(candle.Symbol, upperPrice, quantity)
+
+			buyId, _ := buyInsertResult.LastInsertId()
+			bot.db.UpdateRealBuyOrderId(buyId, sellOrderId)
+
 			LogAndPrintAndSendTg(fmt.Sprintf("SELL_ORDER\nOrderId: %d\nUpperPrice: %f", sellOrderId, upperPrice))
 		}
 	} else {

@@ -54,8 +54,9 @@ func NewDesiredPriceSellIndicator(
 }
 
 func (indicator *DesiredPriceSellIndicator) HasSignal() (bool, []Buy) {
-	currentPrice := indicator.buffer.GetLastCandleClosePrice()
-	buys := indicator.db.FetchUnsoldBuysByDesiredPrice(currentPrice)
+	candle := indicator.buffer.GetLastCandle()
+	maxPrice := Max([]float64{candle.ClosePrice, candle.HighPrice})
+	buys := indicator.db.FetchUnsoldBuysByDesiredPrice(maxPrice)
 
 	return len(buys) > 0, buys
 }

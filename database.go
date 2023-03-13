@@ -12,7 +12,7 @@ type Database struct {
 }
 
 type Buy struct {
-	Id           int
+	Id           int64
 	Symbol       string
 	Coins        float64
 	ExchangeRate float64
@@ -90,7 +90,6 @@ func (db *Database) AddBuy(symbol string, coinsCount, exchangeRate, desiredPrice
 	result, err := db.connect.Exec(query, symbol, coinsCount, exchangeRate, desiredPrice, createdAt, 0, 0.0)
 
 	if err != nil {
-
 		fmt.Println(err)
 	}
 
@@ -111,7 +110,7 @@ func (db *Database) AddRealBuy(symbol string, coinsCount, exchangeRate, desiredP
 	return result
 }
 
-func (db *Database) UpdateRealBuyOrderId(buyId int, orderId int64) {
+func (db *Database) UpdateRealBuyOrderId(buyId int64, orderId int64) {
 	query := `
 		UPDATE buys
 		SET real_order_id = $1
@@ -129,7 +128,7 @@ func (db *Database) AddSell(
 	coinsCount float64,
 	exchangeRate float64,
 	revenue float64,
-	buyId int,
+	buyId int64,
 	createdAt string,
 ) sql.Result {
 	//createdAt := time.Now().Format("2006-01-02 15:04:05")
