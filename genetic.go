@@ -28,6 +28,10 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 
 		dataframe.NewSeriesInt64("DesiredPriceCandles", nil),
 
+		dataframe.NewSeriesInt64("GradientDescentCandles", nil),
+		dataframe.NewSeriesInt64("GradientDescentPeriod", nil),
+		dataframe.NewSeriesFloat64("GradientDescentGradient", nil),
+
 		dataframe.NewSeriesFloat64("TotalRevenue", nil),
 		dataframe.NewSeriesFloat64("Selection", nil),
 	)
@@ -79,8 +83,12 @@ func ImportFromCsv(fileName string) []Config {
 
 			DesiredPriceCandles: convertStringToInt(row[6]),
 
-			TotalRevenue: convertStringToFloat64(row[7]),
-			Selection:    convertStringToFloat64(row[8]),
+			GradientDescentCandles:  convertStringToInt(row[7]),
+			GradientDescentPeriod:   convertStringToInt(row[8]),
+			GradientDescentGradient: convertStringToFloat64(row[9]),
+
+			TotalRevenue: convertStringToFloat64(row[10]),
+			Selection:    convertStringToFloat64(row[11]),
 		}
 
 		bots = append(bots, bot)
@@ -104,6 +112,10 @@ func InitBotConfig() Config {
 		BigFallPercentage:   GetRandFloat64Config(restrict.BigFallPercentage),
 
 		DesiredPriceCandles: GetRandIntConfig(restrict.DesiredPriceCandles),
+
+		GradientDescentCandles:  GetRandIntConfig(restrict.GradientDescentCandles),
+		GradientDescentPeriod:   GetRandIntConfig(restrict.GradientDescentPeriod),
+		GradientDescentGradient: GetRandFloat64Config(restrict.GradientDescentGradient),
 	}
 }
 
@@ -120,6 +132,10 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 		"BigFallPercentage":   botConfig.BigFallPercentage,
 
 		"DesiredPriceCandles": botConfig.DesiredPriceCandles,
+
+		"GradientDescentCandles":  botConfig.GradientDescentCandles,
+		"GradientDescentPeriod":   botConfig.GradientDescentPeriod,
+		"GradientDescentGradient": botConfig.GradientDescentGradient,
 
 		"TotalRevenue": botConfig.TotalRevenue,
 		"Selection":    botConfig.Selection,
@@ -196,6 +212,10 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 
 		"DesiredPriceCandles": bot["DesiredPriceCandles"],
 
+		"GradientDescentCandles":  bot["GradientDescentCandles"],
+		"GradientDescentPeriod":   bot["GradientDescentPeriod"],
+		"GradientDescentGradient": bot["GradientDescentGradient"],
+
 		"TotalRevenue": bot["TotalRevenue"],
 		"Selection":    bot["Selection"],
 	}
@@ -271,6 +291,10 @@ func ConvertDataFrameToBotConfig(dataFrame map[interface{}]interface{}) Config {
 		BigFallPercentage:   convertToFloat64(dataFrame["BigFallPercentage"]),
 
 		DesiredPriceCandles: convertToInt(dataFrame["DesiredPriceCandles"]),
+
+		GradientDescentCandles:  convertToInt(dataFrame["GradientDescentCandles"]),
+		GradientDescentPeriod:   convertToInt(dataFrame["GradientDescentPeriod"]),
+		GradientDescentGradient: convertToFloat64(dataFrame["GradientDescentGradient"]),
 	}
 }
 
@@ -290,10 +314,14 @@ func makeChild(
 		BigFallPercentage:   GetFloatFatherOrMomGen(maleBotConfig.BigFallPercentage, femaleBotConfig.BigFallPercentage),
 
 		DesiredPriceCandles: GetIntFatherOrMomGen(maleBotConfig.DesiredPriceCandles, femaleBotConfig.DesiredPriceCandles),
+
+		GradientDescentCandles:  GetIntFatherOrMomGen(maleBotConfig.GradientDescentCandles, femaleBotConfig.GradientDescentCandles),
+		GradientDescentPeriod:   GetIntFatherOrMomGen(maleBotConfig.GradientDescentPeriod, femaleBotConfig.GradientDescentPeriod),
+		GradientDescentGradient: GetFloatFatherOrMomGen(maleBotConfig.GradientDescentGradient, femaleBotConfig.GradientDescentGradient),
 	}
 
-	for i := 0; i < 3; i++ {
-		mutateGens(&childBotConfig, GetRandInt(0, 6))
+	for i := 0; i < 6; i++ {
+		mutateGens(&childBotConfig, GetRandInt(0, 9))
 	}
 
 	return GetBotConfigMapInterface(childBotConfig)
@@ -313,6 +341,10 @@ func mutateGens(botConfig *Config, randGenNumber int) {
 	mutateGenFloat64(randGenNumber, 5, &(botConfig.BigFallPercentage), restrict.BigFallPercentage)
 
 	mutateGenInt(randGenNumber, 6, &(botConfig.DesiredPriceCandles), restrict.DesiredPriceCandles)
+
+	mutateGenInt(randGenNumber, 7, &(botConfig.GradientDescentCandles), restrict.GradientDescentCandles)
+	mutateGenInt(randGenNumber, 8, &(botConfig.GradientDescentPeriod), restrict.GradientDescentPeriod)
+	mutateGenFloat64(randGenNumber, 9, &(botConfig.GradientDescentGradient), restrict.GradientDescentGradient)
 }
 
 func mutateGenFloat64(randGenNumber, genNumber int, genValue *float64, restrictMinMax MinMaxFloat64) {

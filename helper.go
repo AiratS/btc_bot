@@ -265,3 +265,15 @@ func Median(data []float64) float64 {
 
 	return median
 }
+
+func FilterZeroPrices(prices []float64) []float64 {
+	var values []float64
+
+	for _, price := range prices {
+		if 0 < price {
+			values = append(values, price)
+		}
+	}
+
+	return values
+}

@@ -221,15 +221,17 @@ func resolveBufferSize(config *Config) int {
 		// add your candles
 		config.BigFallCandlesCount,
 		config.DesiredPriceCandles,
+		config.GradientDescentCandles,
+		config.GradientDescentPeriod,
 	}) + 10
 }
 
 func setupBuyIndicators(bot *Bot) {
-	backTrailingBuyIndicator := NewBackTrailingBuyIndicator(
-		bot.Config,
-		bot.buffer,
-		bot.db,
-	)
+	//backTrailingBuyIndicator := NewBackTrailingBuyIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
 
 	buysCountIndicator := NewBuysCountIndicator(
 		bot.Config,
@@ -249,11 +251,18 @@ func setupBuyIndicators(bot *Bot) {
 		bot.db,
 	)
 
+	gradientDescentIndicator := NewGradientDescentIndicator(
+		bot.Config,
+		bot.buffer,
+		bot.db,
+	)
+
 	bot.BuyIndicators = []BuyIndicator{
-		&backTrailingBuyIndicator,
+		//&backTrailingBuyIndicator,
 		&buysCountIndicator,
 		&waitForPeriodIndicator,
 		&bigFallIndicator,
+		&gradientDescentIndicator,
 	}
 }
 

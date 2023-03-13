@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/markcheno/go-talib"
+)
 
 type BuyIndicator interface {
 	HasSignal() bool
@@ -264,4 +267,58 @@ func (indicator *BigFallIndicator) Update() {
 }
 
 func (indicator *BigFallIndicator) Finish() {
+}
+
+// ---------------------------------------
+
+type GradientDescentIndicator struct {
+	config *Config
+	buffer *Buffer
+	db     *Database
+}
+
+func NewGradientDescentIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) GradientDescentIndicator {
+	return GradientDescentIndicator{
+		config: config,
+		buffer: buffer,
+		db:     db,
+	}
+}
+
+func (indicator *GradientDescentIndicator) HasSignal() bool {
+	count := len(indicator.buffer.GetCandles())
+	if (indicator.config.GradientDescentCandles + 1) > count {
+		return false
+	}
+
+	closePrices := GetClosePrices(indicator.buffer.GetCandles())
+	smoothedPrices := FilterZeroPrices(talib.Sma(closePrices, indicator.config.GradientDescentPeriod))
+	smoothedLen := len(smoothedPrices)
+	if 4 > smoothedLen {
+		return false
+	}
+
+	x := float64(indicator.config.GradientDescentCandles)
+	y := smoothedPrices[0] - smoothedPrices[smoothedLen-1]
+	gradient := y / x
+
+	return -indicator.config.GradientDescentGradient <= gradient &&
+		gradient <= indicator.config.GradientDescentGradient
+}
+
+func (indicator *GradientDescentIndicator) IsStarted() bool {
+	return true
+}
+
+func (indicator *GradientDescentIndicator) Start() {
+}
+
+func (indicator *GradientDescentIndicator) Update() {
+}
+
+func (indicator *GradientDescentIndicator) Finish() {
 }
