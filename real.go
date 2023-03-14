@@ -33,6 +33,10 @@ func GetRealBotConfig() Config {
 		BigFallPercentage:   0.1,
 
 		DesiredPriceCandles: 1,
+
+		GradientDescentCandles:  1,
+		GradientDescentPeriod:   1,
+		GradientDescentGradient: 1,
 	}
 }
 
