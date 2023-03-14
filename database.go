@@ -99,7 +99,7 @@ func (db *Database) AddBuy(symbol string, coinsCount, exchangeRate, desiredPrice
 func (db *Database) AddRealBuy(symbol string, coinsCount, exchangeRate, desiredPrice float64, createdAt string, orderId int64, quantity float64) sql.Result {
 	//createdAt := time.Now().Format("2006-01-02 15:04:05")
 	query := `
-		INSERT INTO buys (symbol, coins, exchange_rate, desired_price, created_at, real_order_id, real_quantity) VALUES ($1, $2, $3, $4, $5, $6);
+		INSERT INTO buys (symbol, coins, exchange_rate, desired_price, created_at, real_order_id, real_quantity) VALUES ($1, $2, $3, $4, $5, $6, $7);
 	`
 
 	result, err := db.connect.Exec(query, symbol, coinsCount, exchangeRate, desiredPrice, createdAt, orderId, quantity)
