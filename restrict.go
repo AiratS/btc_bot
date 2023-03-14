@@ -31,8 +31,8 @@ type MinMaxFloat64 struct {
 func GetBotConfigRestrictions() ConfigRestriction {
 	return ConfigRestriction{
 		HighSellPercentage: MinMaxFloat64{
-			min: 0.3,
-			max: 1,
+			min: 1,
+			max: 4,
 		},
 
 		TrailingTopPercentage: MinMaxFloat64{

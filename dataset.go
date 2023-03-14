@@ -10,9 +10,17 @@ var importedCandles *[]Candle
 
 func GetDatasetDates() []string {
 	return []string{
-		//"2021-10",
+		//"2024-01",
+		//"2024-02",
+		//"2024-03",
 		//"2022-04",
-		"2023-01",
+		//"2021-10",
+
+		//"2023-01",
+
+		//"2022-01",
+		//"2022-02",
+		"2022-03",
 	}
 }
 
@@ -25,7 +33,15 @@ func ImportDatasets() *[]Candle {
 			panic(fmt.Sprintf("No dataset for date: %s", fileName))
 		}
 
-		candles = append(candles, CsvFileToCandles(fileName)...)
+		fileCandles := CsvFileToCandles(fileName)
+		firstC := fileCandles[0]
+		lastC := fileCandles[len(fileCandles)-1]
+
+		fmt.Println(firstC, lastC)
+
+		for _, aCandles := range fileCandles {
+			candles = append(candles, aCandles)
+		}
 	}
 
 	importedCandles = &candles
@@ -36,8 +52,10 @@ func ImportDatasets() *[]Candle {
 func CsvFileToCandles(fileName string) []Candle {
 	var candles []Candle
 
-	file, _ := os.Open(fileName)
+	file, err := os.Open(fileName)
 	csvDataFrame := dataframe.ReadCSV(file)
+
+	fmt.Println(err)
 
 	for i := 0; i < csvDataFrame.Nrow(); i++ {
 		row := csvDataFrame.Subset(i)
