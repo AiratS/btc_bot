@@ -89,7 +89,11 @@ func (bot *Bot) runSellIndicators() {
 	// Sell
 	for _, buy := range getIntersectedBuys(eachIndicatorBuys) {
 		if IS_REAL_ENABLED {
-			if orderManager.IsBuySold(CANDLE_SYMBOL, buy.RealOrderId) {
+			if USE_REAL_MONEY && orderManager.IsBuySold(CANDLE_SYMBOL, buy.RealOrderId) {
+				bot.sell(buy)
+			}
+
+			if !USE_REAL_MONEY {
 				bot.sell(buy)
 			}
 		} else {
