@@ -8,6 +8,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -128,6 +129,14 @@ func getKlineCandleListFirstIdx(candles *[]Candle, candlesCount int) int {
 	return firstIdx
 }
 
+func Log(msg string) {
+	if IS_REAL_ENABLED {
+		LogAndPrintAndSendTg(msg)
+	} else {
+		LogAndPrint(msg)
+	}
+}
+
 func LogAndPrint(msg string) {
 	fmt.Println(msg)
 	log.Println(msg)
@@ -218,6 +227,10 @@ func CalcUpperPrice(price, percentage float64) float64 {
 	return price + ((price * percentage) / 100)
 }
 
+func CalcBottomPrice(price, percentage float64) float64 {
+	return price - ((price * percentage) / 100)
+}
+
 func GetOpenPrices(candles []Candle) []float64 {
 	var values []float64
 
@@ -276,4 +289,18 @@ func FilterZeroPrices(prices []float64) []float64 {
 	}
 
 	return values
+}
+
+func Int64SliceToStringSlice(items []int64) []string {
+	var stringItems []string
+
+	for _, item := range items {
+		stringItems = append(stringItems, fmt.Sprintf("%d", item))
+	}
+
+	return stringItems
+}
+
+func JoinInt64(items []int64) string {
+	return strings.Join(Int64SliceToStringSlice(items), ", ")
 }

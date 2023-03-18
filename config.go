@@ -24,6 +24,9 @@ type Config struct {
 	GradientDescentPeriod   int
 	GradientDescentGradient float64
 
+	TrailingSellActivationAdditionPercentage float64
+	TrailingSellStopPercentage               float64
+
 	TotalRevenue float64
 	Selection    float64
 }

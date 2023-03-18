@@ -78,6 +78,7 @@ func (bot *Bot) runSellIndicators() {
 	var eachIndicatorBuys [][]Buy
 
 	for _, indicator := range bot.SellIndicators {
+		indicator.Update()
 		hasSignal, buys := indicator.HasSignal()
 		if !hasSignal {
 			return
@@ -91,16 +92,25 @@ func (bot *Bot) runSellIndicators() {
 		if IS_REAL_ENABLED {
 			if USE_REAL_MONEY && orderManager.IsBuySold(CANDLE_SYMBOL, buy.RealOrderId) {
 				bot.sell(buy)
+				bot.finishSellIndicators(buy)
 			}
 
 			if !USE_REAL_MONEY {
 				bot.sell(buy)
+				bot.finishSellIndicators(buy)
 			}
 		} else {
 			rev := bot.sell(buy)
+			bot.finishSellIndicators(buy)
 			candle := bot.buffer.GetLastCandle()
 			LogAndPrint(fmt.Sprintf("Sell signal, Created At: %s, ExchangeRate: %f: Revenue: %f", candle.CloseTime, bot.buffer.GetLastCandleClosePrice(), rev))
 		}
+	}
+}
+
+func (bot *Bot) finishSellIndicators(buy Buy) {
+	for _, indicator := range bot.SellIndicators {
+		indicator.Finish(buy.Id)
 	}
 }
 
@@ -138,25 +148,35 @@ func (bot *Bot) buy() {
 			quantity,
 		)
 
+		buyId, _ := buyInsertResult.LastInsertId()
+		bot.runAfterBuySellIndicators(buyId)
+
 		LogAndPrintAndSendTg(fmt.Sprintf("BUY\nPrice: %f\nQuantity: %f\nOrderId: %d", orderPrice, quantity, orderId))
 
 		if USE_REAL_MONEY {
 			upperPrice := CalcUpperPrice(orderPrice, bot.Config.HighSellPercentage)
 			sellOrderId := orderManager.CreateSellOrder(candle.Symbol, upperPrice, quantity)
 
-			buyId, _ := buyInsertResult.LastInsertId()
 			bot.db.UpdateRealBuyOrderId(buyId, sellOrderId)
 
 			LogAndPrintAndSendTg(fmt.Sprintf("SELL_ORDER\nOrderId: %d\nUpperPrice: %f", sellOrderId, upperPrice))
 		}
 	} else {
-		bot.db.AddBuy(
+		buyInsertResult := bot.db.AddBuy(
 			CANDLE_SYMBOL,
 			coinsCount,
 			exchangeRate,
 			desiredPrice,
 			candle.CloseTime,
 		)
+		buyId, _ := buyInsertResult.LastInsertId()
+		bot.runAfterBuySellIndicators(buyId)
+	}
+}
+
+func (bot *Bot) runAfterBuySellIndicators(buyId int64) {
+	for _, indicator := range bot.SellIndicators {
+		indicator.RunAfterBuy(buyId)
 	}
 }
 
@@ -277,7 +297,13 @@ func setupSellIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	desiredPriceSellIndicator := NewDesiredPriceSellIndicator(
+	//desiredPriceSellIndicator := NewDesiredPriceSellIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
+
+	trailingSellIndicator := NewTrailingSellIndicator(
 		bot.Config,
 		bot.buffer,
 		bot.db,
@@ -285,6 +311,7 @@ func setupSellIndicators(bot *Bot) {
 
 	bot.SellIndicators = []SellIndicator{
 		//&highPercentageSellIndicator,
-		&desiredPriceSellIndicator,
+		//&desiredPriceSellIndicator,
+		&trailingSellIndicator,
 	}
 }

@@ -185,6 +185,50 @@ func (db *Database) FetchUnsoldBuysByDesiredPrice(exchangeRate float64) []Buy {
 	return unsoldBuys
 }
 
+func (db *Database) FetchUnsoldBuys() []Buy {
+	unsoldBuys := []Buy{}
+	query := `
+		SELECT b.*
+		FROM buys AS b 
+        LEFT JOIN sells AS s 
+        	ON s.buy_id = b.id 
+        WHERE s.id IS NULL
+	`
+
+	rows, _ := db.connect.Query(query)
+	defer rows.Close()
+
+	for rows.Next() {
+		buy := Buy{}
+		rows.Scan(&buy.Id, &buy.Symbol, &buy.Coins, &buy.ExchangeRate, &buy.DesiredPrice, &buy.CreatedAt, &buy.RealOrderId, &buy.RealQuantity)
+		unsoldBuys = append(unsoldBuys, buy)
+	}
+
+	return unsoldBuys
+}
+
+func (db *Database) FetchUnsoldBuysById(buyIds []int64) []Buy {
+	unsoldBuys := []Buy{}
+	query := fmt.Sprintf(`
+		SELECT b.*
+		FROM buys AS b 
+        LEFT JOIN sells AS s 
+        	ON s.buy_id = b.id 
+        WHERE s.id IS NULL AND b.id IN(%s)
+	`, JoinInt64(buyIds))
+
+	rows, _ := db.connect.Query(query, JoinInt64(buyIds))
+	defer rows.Close()
+
+	for rows.Next() {
+		buy := Buy{}
+		rows.Scan(&buy.Id, &buy.Symbol, &buy.Coins, &buy.ExchangeRate, &buy.DesiredPrice, &buy.CreatedAt, &buy.RealOrderId, &buy.RealQuantity)
+		unsoldBuys = append(unsoldBuys, buy)
+	}
+
+	return unsoldBuys
+}
+
 type revenue struct {
 	value float64
 }
