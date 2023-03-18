@@ -16,6 +16,9 @@ type ConfigRestriction struct {
 	GradientDescentCandles  MinMaxInt
 	GradientDescentPeriod   MinMaxInt
 	GradientDescentGradient MinMaxFloat64
+
+	TrailingSellActivationAdditionPercentage MinMaxFloat64
+	TrailingSellStopPercentage               MinMaxFloat64
 }
 
 type MinMaxInt struct {
@@ -31,8 +34,8 @@ type MinMaxFloat64 struct {
 func GetBotConfigRestrictions() ConfigRestriction {
 	return ConfigRestriction{
 		HighSellPercentage: MinMaxFloat64{
-			min: 1,
-			max: 4,
+			min: 0.4,
+			max: 2,
 		},
 
 		TrailingTopPercentage: MinMaxFloat64{
@@ -45,8 +48,8 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 
 		WaitAfterLastBuyPeriod: MinMaxInt{
-			min: 4,
-			max: 15,
+			min: 10,
+			max: 60,
 		},
 
 		BigFallCandlesCount: MinMaxInt{
@@ -74,6 +77,15 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		GradientDescentGradient: MinMaxFloat64{
 			min: 0,
 			max: 5,
+		},
+
+		TrailingSellActivationAdditionPercentage: MinMaxFloat64{
+			min: 0.4,
+			max: 1,
+		},
+		TrailingSellStopPercentage: MinMaxFloat64{
+			min: 0.4,
+			max: 2,
 		},
 	}
 }

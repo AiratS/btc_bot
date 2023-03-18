@@ -37,6 +37,9 @@ func GetRealBotConfig() Config {
 		GradientDescentCandles:  1,
 		GradientDescentPeriod:   1,
 		GradientDescentGradient: 1,
+
+		TrailingSellActivationAdditionPercentage: 1,
+		TrailingSellStopPercentage:               1,
 	}
 }
 

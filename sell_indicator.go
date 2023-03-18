@@ -184,7 +184,7 @@ func (indicator *TrailingSellIndicator) HasSignal() (bool, []Buy) {
 	currentPrice := indicator.buffer.GetLastCandleClosePrice()
 
 	for buyId, buyItem := range indicator.buys {
-		if buyItem.stopPrice <= currentPrice {
+		if buyItem.isActivated && buyItem.stopPrice >= currentPrice {
 			unsoldBuyIds = append(unsoldBuyIds, buyId)
 		}
 	}

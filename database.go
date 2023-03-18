@@ -279,9 +279,9 @@ func (db *Database) CountUnsoldBuys() int {
 func (db *Database) CanBuyInGivenPeriod(createdAt string, period int) bool {
 	var count int
 	query := `
-		SELECT COUNT(s.id)
-		FROM sells AS s 
-        WHERE s.created_at > $1
+		SELECT COUNT(id)
+		FROM buys
+        WHERE created_at > $1
 	`
 
 	candleTime := ConvertDateStringToTime(createdAt)

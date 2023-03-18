@@ -32,6 +32,9 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 		dataframe.NewSeriesInt64("GradientDescentPeriod", nil),
 		dataframe.NewSeriesFloat64("GradientDescentGradient", nil),
 
+		dataframe.NewSeriesFloat64("TrailingSellActivationAdditionPercentage", nil),
+		dataframe.NewSeriesFloat64("TrailingSellStopPercentage", nil),
+
 		dataframe.NewSeriesFloat64("TotalRevenue", nil),
 		dataframe.NewSeriesFloat64("Selection", nil),
 	)
@@ -87,8 +90,11 @@ func ImportFromCsv(fileName string) []Config {
 			GradientDescentPeriod:   convertStringToInt(row[8]),
 			GradientDescentGradient: convertStringToFloat64(row[9]),
 
-			TotalRevenue: convertStringToFloat64(row[10]),
-			Selection:    convertStringToFloat64(row[11]),
+			TrailingSellActivationAdditionPercentage: convertStringToFloat64(row[10]),
+			TrailingSellStopPercentage:               convertStringToFloat64(row[11]),
+
+			TotalRevenue: convertStringToFloat64(row[12]),
+			Selection:    convertStringToFloat64(row[13]),
 		}
 
 		bots = append(bots, bot)
@@ -116,6 +122,9 @@ func InitBotConfig() Config {
 		GradientDescentCandles:  GetRandIntConfig(restrict.GradientDescentCandles),
 		GradientDescentPeriod:   GetRandIntConfig(restrict.GradientDescentPeriod),
 		GradientDescentGradient: GetRandFloat64Config(restrict.GradientDescentGradient),
+
+		TrailingSellActivationAdditionPercentage: GetRandFloat64Config(restrict.TrailingSellActivationAdditionPercentage),
+		TrailingSellStopPercentage:               GetRandFloat64Config(restrict.TrailingSellStopPercentage),
 	}
 }
 
@@ -136,6 +145,9 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 		"GradientDescentCandles":  botConfig.GradientDescentCandles,
 		"GradientDescentPeriod":   botConfig.GradientDescentPeriod,
 		"GradientDescentGradient": botConfig.GradientDescentGradient,
+
+		"TrailingSellActivationAdditionPercentage": botConfig.TrailingSellActivationAdditionPercentage,
+		"TrailingSellStopPercentage":               botConfig.TrailingSellStopPercentage,
 
 		"TotalRevenue": botConfig.TotalRevenue,
 		"Selection":    botConfig.Selection,
@@ -216,6 +228,9 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 		"GradientDescentPeriod":   bot["GradientDescentPeriod"],
 		"GradientDescentGradient": bot["GradientDescentGradient"],
 
+		"TrailingSellActivationAdditionPercentage": bot["TrailingSellActivationAdditionPercentage"],
+		"TrailingSellStopPercentage":               bot["TrailingSellStopPercentage"],
+
 		"TotalRevenue": bot["TotalRevenue"],
 		"Selection":    bot["Selection"],
 	}
@@ -295,6 +310,9 @@ func ConvertDataFrameToBotConfig(dataFrame map[interface{}]interface{}) Config {
 		GradientDescentCandles:  convertToInt(dataFrame["GradientDescentCandles"]),
 		GradientDescentPeriod:   convertToInt(dataFrame["GradientDescentPeriod"]),
 		GradientDescentGradient: convertToFloat64(dataFrame["GradientDescentGradient"]),
+
+		TrailingSellActivationAdditionPercentage: convertToFloat64(dataFrame["TrailingSellActivationAdditionPercentage"]),
+		TrailingSellStopPercentage:               convertToFloat64(dataFrame["TrailingSellStopPercentage"]),
 	}
 }
 
@@ -318,10 +336,13 @@ func makeChild(
 		GradientDescentCandles:  GetIntFatherOrMomGen(maleBotConfig.GradientDescentCandles, femaleBotConfig.GradientDescentCandles),
 		GradientDescentPeriod:   GetIntFatherOrMomGen(maleBotConfig.GradientDescentPeriod, femaleBotConfig.GradientDescentPeriod),
 		GradientDescentGradient: GetFloatFatherOrMomGen(maleBotConfig.GradientDescentGradient, femaleBotConfig.GradientDescentGradient),
+
+		TrailingSellActivationAdditionPercentage: GetFloatFatherOrMomGen(maleBotConfig.TrailingSellActivationAdditionPercentage, femaleBotConfig.TrailingSellActivationAdditionPercentage),
+		TrailingSellStopPercentage:               GetFloatFatherOrMomGen(maleBotConfig.TrailingSellStopPercentage, femaleBotConfig.TrailingSellStopPercentage),
 	}
 
-	for i := 0; i < 6; i++ {
-		mutateGens(&childBotConfig, GetRandInt(0, 9))
+	for i := 0; i < 7; i++ {
+		mutateGens(&childBotConfig, GetRandInt(0, 11))
 	}
 
 	return GetBotConfigMapInterface(childBotConfig)
@@ -345,6 +366,9 @@ func mutateGens(botConfig *Config, randGenNumber int) {
 	mutateGenInt(randGenNumber, 7, &(botConfig.GradientDescentCandles), restrict.GradientDescentCandles)
 	mutateGenInt(randGenNumber, 8, &(botConfig.GradientDescentPeriod), restrict.GradientDescentPeriod)
 	mutateGenFloat64(randGenNumber, 9, &(botConfig.GradientDescentGradient), restrict.GradientDescentGradient)
+
+	mutateGenFloat64(randGenNumber, 10, &(botConfig.TrailingSellActivationAdditionPercentage), restrict.TrailingSellActivationAdditionPercentage)
+	mutateGenFloat64(randGenNumber, 11, &(botConfig.TrailingSellStopPercentage), restrict.TrailingSellStopPercentage)
 }
 
 func mutateGenFloat64(randGenNumber, genNumber int, genValue *float64, restrictMinMax MinMaxFloat64) {
