@@ -13,6 +13,9 @@ import (
 const BINANCE_API_KEY = "vWNmAhOl6ad99Ytgfb2NElNBN5jzTYkToxv6kxjv6ddGQY8sMuPSv9Eq9lNoL4UB"
 const BINANCE_SECRET_KEY = "rVUQ6YeLm6yFRwBvnpzDdKpjEEZ9bOqRLHDKaNLUERL4Kcckl08prdnEqciksWNj"
 
+//const TG_API_KEY = "5055344139:AAGZrvVouQPWdU3Jn6p_4ipvCwSDOubVn-4" // телеграм фаболос//
+//const TG_API_KEY = "2083210132:AAHHp9h2dziqJbB1J9ySmv3vBoG8FCDLVag" // телеграм лакки//
+//const TG_API_KEY = "5421904898:AAGda6XvZlYZIUFD4ZStPo2U9kGH7_2CTng" // телеграм Ayaz
 const TG_API_KEY = "5174010399:AAGfCYIHJ6ToTIovKhgemgJXWQCi3A4CxJg" // телеграм амайзинг
 
 var tgBot *tgbotapi.BotAPI
