@@ -4,6 +4,7 @@ import (
 	"fmt"
 	binance "github.com/adshao/go-binance/v2"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"io/ioutil"
 	"time"
 )
 
@@ -83,10 +84,31 @@ func KlineEventHandler(event *binance.WsKlineEvent) {
 }
 
 func SendTgBotMessage(msg string) {
-	// 324037113
-	chats := []int64{135933418, 324037113}
-	for _, chatID := range chats {
+	// 324037113, 135933418
+	for _, chatID := range getChatIDs() {
 		msg := tgbotapi.NewMessage(chatID, msg)
 		tgBot.Send(msg)
 	}
+}
+
+func SendImage(fileName string) {
+	photoBytes, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		fmt.Println(err)
+	}
+	photoFileBytes := tgbotapi.FileBytes{
+		Name:  "picture",
+		Bytes: photoBytes,
+	}
+
+	for _, chatID := range getChatIDs() {
+		_, err2 := tgBot.Send(tgbotapi.NewPhoto(chatID, photoFileBytes))
+		if err2 != nil {
+			fmt.Println(err2)
+		}
+	}
+}
+
+func getChatIDs() []int64 {
+	return []int64{324037113, 135933418}
 }
