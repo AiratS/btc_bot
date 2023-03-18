@@ -133,7 +133,7 @@ func Log(msg string) {
 	if IS_REAL_ENABLED {
 		LogAndPrintAndSendTg(msg)
 	} else {
-		LogAndPrint(msg)
+		LogAndPrint(msg + "\n------------------------------\n")
 	}
 }
 

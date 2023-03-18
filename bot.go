@@ -67,7 +67,7 @@ func (bot *Bot) runBuyIndicators() {
 		price := bot.buffer.GetLastCandleClosePrice()
 
 		if !IS_REAL_ENABLED {
-			Log(fmt.Sprintf("BUY\n%s\nExchangeRate: %f", candle.CloseTime, price))
+			Log(fmt.Sprintf("BUY: %s\nExchangeRate: %f", candle.CloseTime, price))
 		}
 
 		bot.buy()
