@@ -67,7 +67,7 @@ func (bot *Bot) runBuyIndicators() {
 		price := bot.buffer.GetLastCandleClosePrice()
 
 		if !IS_REAL_ENABLED {
-			LogAndPrint(fmt.Sprintf("Buy signal, Created at: %s, ExchangeRate: %f", candle.CloseTime, price))
+			Log(fmt.Sprintf("BUY\n%s\nExchangeRate: %f", candle.CloseTime, price))
 		}
 
 		bot.buy()
@@ -103,7 +103,12 @@ func (bot *Bot) runSellIndicators() {
 			rev := bot.sell(buy)
 			bot.finishSellIndicators(buy)
 			candle := bot.buffer.GetLastCandle()
-			LogAndPrint(fmt.Sprintf("Sell signal, Created At: %s, ExchangeRate: %f: Revenue: %f", candle.CloseTime, bot.buffer.GetLastCandleClosePrice(), rev))
+			Log(fmt.Sprintf(
+				"SELL: %s\nExchangeRate: %f\nRevenue: %f",
+				candle.CloseTime,
+				bot.buffer.GetLastCandleClosePrice(),
+				rev,
+			))
 		}
 	}
 }
@@ -124,7 +129,7 @@ func (bot *Bot) buy() {
 	if IS_REAL_ENABLED {
 		rawPrice := candle.ClosePrice
 
-		LogAndPrintAndSendTg(fmt.Sprintf("GOT_BUY_SIGNAL\nPrice: %f", rawPrice))
+		Log(fmt.Sprintf("GOT_BUY_SIGNAL\nPrice: %f", rawPrice))
 
 		if USE_REAL_MONEY &&
 			(!bot.orderManager.HasEnoughMoneyForBuy() ||
@@ -151,7 +156,7 @@ func (bot *Bot) buy() {
 		buyId, _ := buyInsertResult.LastInsertId()
 		bot.runAfterBuySellIndicators(buyId)
 
-		LogAndPrintAndSendTg(fmt.Sprintf("BUY\nPrice: %f\nQuantity: %f\nOrderId: %d", orderPrice, quantity, orderId))
+		Log(fmt.Sprintf("BUY\nPrice: %f\nQuantity: %f\nOrderId: %d", orderPrice, quantity, orderId))
 
 		if USE_REAL_MONEY {
 			upperPrice := CalcUpperPrice(orderPrice, bot.Config.HighSellPercentage)
@@ -159,7 +164,7 @@ func (bot *Bot) buy() {
 
 			bot.db.UpdateRealBuyOrderId(buyId, sellOrderId)
 
-			LogAndPrintAndSendTg(fmt.Sprintf("SELL_ORDER\nOrderId: %d\nUpperPrice: %f", sellOrderId, upperPrice))
+			Log(fmt.Sprintf("SELL_ORDER\nOrderId: %d\nUpperPrice: %f", sellOrderId, upperPrice))
 		}
 	} else {
 		buyInsertResult := bot.db.AddBuy(
@@ -205,7 +210,7 @@ func (bot *Bot) sell(buy Buy) float64 {
 		//orderId := orderManager.CreateMarketSellOrder(candle.Symbol, candle.ClosePrice, buy.RealQuantity)
 		//bot.db.UpdateRealBuyOrderId(buy.Id, orderId)
 
-		LogAndPrintAndSendTg(fmt.Sprintf("SELL\nPrice: %f - %f\nRevenue: %f", buy.ExchangeRate, candle.ClosePrice, rev))
+		Log(fmt.Sprintf("SELL\nPrice: %f - %f\nRevenue: %f", buy.ExchangeRate, candle.ClosePrice, rev))
 	}
 
 	bot.db.AddSell(
