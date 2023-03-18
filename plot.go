@@ -7,15 +7,21 @@ import (
 )
 
 type PlotData struct {
-	BuyId    int64  `json:"buyId"`
-	BuyTime  string `json:"buyTime"`
-	SellTime string `json:"sellTime"`
+	BuyId        int64                  `json:"buyId"`
+	BuyTime      string                 `json:"buyTime"`
+	SellTime     string                 `json:"sellTime"`
+	TrailingSell []TrailingSellPlotData `json:"trailingSell"`
+}
+
+type TrailingSellPlotData struct {
+	Time      string  `json:"time"`
+	StopPrice float64 `json:"stopPrice"`
 }
 
 var plots map[int64]*PlotData
 
 func PlotAddBuy(buyId int64, buyTime string) {
-	if 1 < BOTS_COUNT {
+	if !canPlot() {
 		return
 	}
 
@@ -28,19 +34,30 @@ func PlotAddBuy(buyId int64, buyTime string) {
 }
 
 func PlotAddSell(buyId int64, sellTime string) {
-	if 1 < BOTS_COUNT {
+	if !canPlot() {
 		return
 	}
-
-	initPlots()
 
 	if item, ok := plots[buyId]; ok {
 		item.SellTime = sellTime
 	}
 }
 
+func PlotAddTrailingSellPoint(buyId int64, time string, stopPrice float64) {
+	if !canPlot() {
+		return
+	}
+
+	if item, ok := plots[buyId]; ok {
+		item.TrailingSell = append(item.TrailingSell, TrailingSellPlotData{
+			Time:      time,
+			StopPrice: stopPrice,
+		})
+	}
+}
+
 func PlotToJson(fileName string) {
-	if 1 < BOTS_COUNT {
+	if !canPlot() {
 		return
 	}
 
@@ -61,4 +78,8 @@ func initPlots() {
 	if 0 == len(plots) {
 		plots = map[int64]*PlotData{}
 	}
+}
+
+func canPlot() bool {
+	return 1 == BOTS_COUNT && 1 == GENERATION_COUNT
 }

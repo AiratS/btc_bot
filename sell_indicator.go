@@ -147,6 +147,9 @@ func (indicator *TrailingSellIndicator) updateByBuyId(buyId int64) {
 					buyId,
 					newStopPrice,
 				))
+
+				currentCandle := indicator.buffer.GetLastCandle()
+				PlotAddTrailingSellPoint(buyId, currentCandle.CloseTime, newStopPrice)
 			}
 
 			return
@@ -169,6 +172,9 @@ func (indicator *TrailingSellIndicator) activate(buyId int64) {
 			indicator.buys[buyId].buyPrice,
 			indicator.config.HighSellPercentage,
 		)
+
+		currentCandle := indicator.buffer.GetLastCandle()
+		PlotAddTrailingSellPoint(buyId, currentCandle.CloseTime, buyItem.stopPrice)
 	}
 }
 

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # Configs
-EXTRA_ROWS = 100
+EXTRA_ROWS = 600
 DATA_FILE = 'data.json'
 DATASET_FILE = 'datasets/BTCUSDT-1m-2023-01.csv'
 
@@ -58,13 +58,13 @@ def create_plot(data):
     # Plot
     plot_df = df[MIN_INDEX:MAX_INDEX]
 
-    ax = plot_df.plot(x='CLOSE_TIME', y='OPEN_PRICE')
+    ax = plot_df.plot(x='CLOSE_TIME', y='CLOSE_PRICE')
 
-    min_price = plot_df['OPEN_PRICE'].min()
-    max_price = plot_df['OPEN_PRICE'].max()
+    min_price = plot_df['CLOSE_PRICE'].min()
+    max_price = plot_df['CLOSE_PRICE'].max()
     ax.set_ylim(min_price - 10, max_price + 10)
 
-    buy_price = buy_df.iloc[0]['OPEN_PRICE']
+    buy_price = buy_df.iloc[0]['CLOSE_PRICE']
     ax.annotate(
         'BUY: ' + str(buy_price),
         xy=(data['buyTime'], buy_price),
@@ -72,7 +72,7 @@ def create_plot(data):
         arrowprops=dict(facecolor='red', shrink=0.05)
     )
 
-    sell_price = sell_df.iloc[0]['OPEN_PRICE']
+    sell_price = sell_df.iloc[0]['CLOSE_PRICE']
     ax.annotate(
         'SELL: ' + str(sell_price),
         xy=(data['sellTime'], sell_price),

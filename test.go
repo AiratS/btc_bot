@@ -73,9 +73,11 @@ func RunTest() {
 		)
 	}
 
-	PlotToJson("data.json")
-	fmt.Println("Build plots")
-	BuildPlots()
+	if canPlot() {
+		PlotToJson("data.json")
+		fmt.Println("Build plots")
+		BuildPlots()
+	}
 }
 
 func fixRevenue(revenue float64) float64 {
