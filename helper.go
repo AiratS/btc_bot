@@ -219,8 +219,13 @@ func ConvertDateStringToTime(dateString string) time.Time {
 	return parsedTime
 }
 
-func GetCurrentMinusTime(candleTime time.Time, minutes int) time.Time {
-	candleTime = candleTime.Add(-time.Minute * time.Duration(minutes))
+func GetCurrentMinusTime(candleTime time.Time, durationRaw int) time.Time {
+	duration := time.Minute
+	if CANDLE_INTERVAL == "1s" {
+		duration = time.Second
+	}
+
+	candleTime = candleTime.Add(-duration * time.Duration(durationRaw))
 
 	return candleTime
 }
