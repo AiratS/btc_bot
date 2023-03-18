@@ -197,6 +197,14 @@ func (indicator *TrailingSellIndicator) HasSignal() (bool, []Buy) {
 	return len(buys) > 0, buys
 }
 
+func (indicator *TrailingSellIndicator) GetBuyItemByBuyId(buyId int64) (bool, *TrailingBuy) {
+	if buyItem, ok := indicator.buys[buyId]; ok {
+		return true, buyItem
+	}
+
+	return false, &TrailingBuy{}
+}
+
 func (indicator *TrailingSellIndicator) calculateStopPrice(closePrice, percentage float64) float64 {
 	return closePrice - ((closePrice * percentage) / 100)
 }

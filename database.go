@@ -20,6 +20,7 @@ type Buy struct {
 	CreatedAt    string
 	RealOrderId  int64
 	RealQuantity float64
+	HasSellOrder int64
 }
 
 func NewDatabase() Database {
@@ -57,10 +58,15 @@ func createBuysTable(connect *sql.DB) sql.Result {
 		    desired_price FLOAT,
 			created_at DATETIME,
 		    real_order_id INTEGER,
-			real_quantity FLOAT
+			real_quantity FLOAT,
+		    has_sell_order INTEGER
 		);
 	`
-	result, _ := connect.Exec(query)
+	result, err := connect.Exec(query)
+	if err != nil {
+		panic(err)
+	}
+
 	return result
 }
 
@@ -76,7 +82,10 @@ func createSellsTable(connect *sql.DB) sql.Result {
 			created_at DATETIME
 		);
 	`
-	result, _ := connect.Exec(query)
+	result, err := connect.Exec(query)
+	if err != nil {
+		panic(err)
+	}
 
 	return result
 }
@@ -85,12 +94,11 @@ func createSellsTable(connect *sql.DB) sql.Result {
 
 func (db *Database) AddBuy(symbol string, coinsCount, exchangeRate, desiredPrice float64, createdAt string) sql.Result {
 	query := `
-		INSERT INTO buys (symbol, coins, exchange_rate, desired_price, created_at, real_order_id, real_quantity) VALUES ($1, $2, $3, $4, $5, $6, $7);
+		INSERT INTO buys (symbol, coins, exchange_rate, desired_price, created_at, real_order_id, real_quantity, has_sell_order) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 	`
-	result, err := db.connect.Exec(query, symbol, coinsCount, exchangeRate, desiredPrice, createdAt, 0, 0.0)
-
+	result, err := db.connect.Exec(query, symbol, coinsCount, exchangeRate, desiredPrice, createdAt, 0, 0.0, 0)
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 
 	return result
@@ -99,10 +107,10 @@ func (db *Database) AddBuy(symbol string, coinsCount, exchangeRate, desiredPrice
 func (db *Database) AddRealBuy(symbol string, coinsCount, exchangeRate, desiredPrice float64, createdAt string, orderId int64, quantity float64) sql.Result {
 	//createdAt := time.Now().Format("2006-01-02 15:04:05")
 	query := `
-		INSERT INTO buys (symbol, coins, exchange_rate, desired_price, created_at, real_order_id, real_quantity) VALUES ($1, $2, $3, $4, $5, $6, $7);
+		INSERT INTO buys (symbol, coins, exchange_rate, desired_price, created_at, real_order_id, real_quantity, has_sell_order) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 	`
 
-	result, err := db.connect.Exec(query, symbol, coinsCount, exchangeRate, desiredPrice, createdAt, orderId, quantity)
+	result, err := db.connect.Exec(query, symbol, coinsCount, exchangeRate, desiredPrice, createdAt, orderId, quantity, 0)
 	if err != nil {
 		panic(err)
 	}
@@ -113,7 +121,7 @@ func (db *Database) AddRealBuy(symbol string, coinsCount, exchangeRate, desiredP
 func (db *Database) UpdateRealBuyOrderId(buyId int64, orderId int64) {
 	query := `
 		UPDATE buys
-		SET real_order_id = $1
+		SET real_order_id = $1, has_sell_order = 1
 		WHERE id = $2
 	`
 
@@ -135,7 +143,11 @@ func (db *Database) AddSell(
 	query := `
 		INSERT INTO sells (symbol, coins, exchange_rate, revenue, buy_id, created_at) VALUES ($1, $2, $3, $4, $5, $6);
 	`
-	result, _ := db.connect.Exec(query, symbol, coinsCount, exchangeRate, revenue, buyId, createdAt)
+	result, err := db.connect.Exec(query, symbol, coinsCount, exchangeRate, revenue, buyId, createdAt)
+	if err != nil {
+		panic(err)
+	}
+
 	return result
 }
 
@@ -150,12 +162,15 @@ func (db *Database) FetchUnsoldBuysByUpperPercentage(exchangeRate, upperPercenta
             AND (b.exchange_rate + ((b.exchange_rate * $1) / 100)) <= $2   
 	`
 
-	rows, _ := db.connect.Query(query, upperPercentage, exchangeRate)
+	rows, err := db.connect.Query(query, upperPercentage, exchangeRate)
+	if err != nil {
+		panic(err)
+	}
 	defer rows.Close()
 
 	for rows.Next() {
 		buy := Buy{}
-		rows.Scan(&buy.Id, &buy.Symbol, &buy.Coins, &buy.ExchangeRate, &buy.DesiredPrice, &buy.CreatedAt, &buy.RealOrderId, &buy.RealQuantity)
+		rows.Scan(&buy.Id, &buy.Symbol, &buy.Coins, &buy.ExchangeRate, &buy.DesiredPrice, &buy.CreatedAt, &buy.RealOrderId, &buy.RealQuantity, &buy.HasSellOrder)
 		unsoldBuys = append(unsoldBuys, buy)
 	}
 
@@ -173,12 +188,15 @@ func (db *Database) FetchUnsoldBuysByDesiredPrice(exchangeRate float64) []Buy {
             AND b.desired_price <= $1  
 	`
 
-	rows, _ := db.connect.Query(query, exchangeRate)
+	rows, err := db.connect.Query(query, exchangeRate)
+	if err != nil {
+		panic(err)
+	}
 	defer rows.Close()
 
 	for rows.Next() {
 		buy := Buy{}
-		rows.Scan(&buy.Id, &buy.Symbol, &buy.Coins, &buy.ExchangeRate, &buy.DesiredPrice, &buy.CreatedAt, &buy.RealOrderId, &buy.RealQuantity)
+		rows.Scan(&buy.Id, &buy.Symbol, &buy.Coins, &buy.ExchangeRate, &buy.DesiredPrice, &buy.CreatedAt, &buy.RealOrderId, &buy.RealQuantity, &buy.HasSellOrder)
 		unsoldBuys = append(unsoldBuys, buy)
 	}
 
@@ -195,12 +213,15 @@ func (db *Database) FetchUnsoldBuys() []Buy {
         WHERE s.id IS NULL
 	`
 
-	rows, _ := db.connect.Query(query)
+	rows, err := db.connect.Query(query)
+	if err != nil {
+		panic(err)
+	}
 	defer rows.Close()
 
 	for rows.Next() {
 		buy := Buy{}
-		rows.Scan(&buy.Id, &buy.Symbol, &buy.Coins, &buy.ExchangeRate, &buy.DesiredPrice, &buy.CreatedAt, &buy.RealOrderId, &buy.RealQuantity)
+		rows.Scan(&buy.Id, &buy.Symbol, &buy.Coins, &buy.ExchangeRate, &buy.DesiredPrice, &buy.CreatedAt, &buy.RealOrderId, &buy.RealQuantity, &buy.HasSellOrder)
 		unsoldBuys = append(unsoldBuys, buy)
 	}
 
@@ -217,12 +238,15 @@ func (db *Database) FetchUnsoldBuysById(buyIds []int64) []Buy {
         WHERE s.id IS NULL AND b.id IN(%s)
 	`, JoinInt64(buyIds))
 
-	rows, _ := db.connect.Query(query, JoinInt64(buyIds))
+	rows, err := db.connect.Query(query, JoinInt64(buyIds))
+	if err != nil {
+		panic(err)
+	}
 	defer rows.Close()
 
 	for rows.Next() {
 		buy := Buy{}
-		rows.Scan(&buy.Id, &buy.Symbol, &buy.Coins, &buy.ExchangeRate, &buy.DesiredPrice, &buy.CreatedAt, &buy.RealOrderId, &buy.RealQuantity)
+		rows.Scan(&buy.Id, &buy.Symbol, &buy.Coins, &buy.ExchangeRate, &buy.DesiredPrice, &buy.CreatedAt, &buy.RealOrderId, &buy.RealQuantity, &buy.HasSellOrder)
 		unsoldBuys = append(unsoldBuys, buy)
 	}
 

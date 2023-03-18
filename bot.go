@@ -3,15 +3,18 @@ package main
 import (
 	"fmt"
 	"github.com/adshao/go-binance/v2"
+	"reflect"
 )
 
 type Bot struct {
-	Config         *Config
-	BuyIndicators  []BuyIndicator
-	SellIndicators []SellIndicator
-	buffer         *Buffer
-	db             *Database
-	orderManager   *OrderManager
+	Config                         *Config
+	BuyIndicators                  []BuyIndicator
+	SellIndicators                 []SellIndicator
+	buffer                         *Buffer
+	db                             *Database
+	orderManager                   *OrderManager
+	IsTrailingSellIndicatorEnabled bool
+	trailingSellIndicator          *TrailingSellIndicator
 }
 
 func NewBot(config *Config) Bot {
@@ -19,9 +22,10 @@ func NewBot(config *Config) Bot {
 	db := NewDatabase()
 
 	bot := Bot{
-		Config: config,
-		buffer: &buffer,
-		db:     &db,
+		Config:                         config,
+		buffer:                         &buffer,
+		db:                             &db,
+		IsTrailingSellIndicatorEnabled: false,
 	}
 
 	setupBuyIndicators(&bot)
@@ -90,9 +94,21 @@ func (bot *Bot) runSellIndicators() {
 	// Sell
 	for _, buy := range getIntersectedBuys(eachIndicatorBuys) {
 		if IS_REAL_ENABLED {
-			if USE_REAL_MONEY && orderManager.IsBuySold(CANDLE_SYMBOL, buy.RealOrderId) {
+			if USE_REAL_MONEY && !bot.IsTrailingSellIndicatorEnabled && orderManager.IsBuySold(CANDLE_SYMBOL, buy.RealOrderId) {
 				bot.sell(buy)
 				bot.finishSellIndicators(buy)
+			}
+
+			// has sell order
+			if USE_REAL_MONEY && bot.IsTrailingSellIndicatorEnabled {
+				if buy.HasSellOrder == 0 {
+					bot.createRealMoneySellOrder(buy)
+					bot.finishSellIndicators(buy)
+				} else {
+					if orderManager.IsBuySold(CANDLE_SYMBOL, buy.RealOrderId) {
+						bot.sell(buy)
+					}
+				}
 			}
 
 			if !USE_REAL_MONEY {
@@ -158,13 +174,9 @@ func (bot *Bot) buy() {
 
 		Log(fmt.Sprintf("BUY\nPrice: %f\nQuantity: %f\nOrderId: %d", orderPrice, quantity, orderId))
 
-		if USE_REAL_MONEY {
+		if USE_REAL_MONEY && !bot.IsTrailingSellIndicatorEnabled {
 			upperPrice := CalcUpperPrice(orderPrice, bot.Config.HighSellPercentage)
-			sellOrderId := orderManager.CreateSellOrder(candle.Symbol, upperPrice, quantity)
-
-			bot.db.UpdateRealBuyOrderId(buyId, sellOrderId)
-
-			Log(fmt.Sprintf("SELL_ORDER\nOrderId: %d\nUpperPrice: %f", sellOrderId, upperPrice))
+			bot.createSellOrder(buyId, upperPrice, quantity)
 		}
 	} else {
 		buyInsertResult := bot.db.AddBuy(
@@ -199,6 +211,23 @@ func (bot *Bot) calcDesiredPrice(currentPrice float64) float64 {
 	return upperPrice
 }
 
+func (bot *Bot) createRealMoneySellOrder(buy Buy) {
+	if !IS_REAL_ENABLED || !USE_REAL_MONEY || !bot.IsTrailingSellIndicatorEnabled {
+		return
+	}
+
+	candle := bot.buffer.GetLastCandle()
+	exchangeRate := candle.GetPrice()
+	rev := calcRevenue(buy.RealQuantity, exchangeRate)
+
+	if ok, buyItem := bot.trailingSellIndicator.GetBuyItemByBuyId(buy.Id); ok {
+		orderId := bot.createSellOrder(buy.Id, buyItem.stopPrice, buy.RealQuantity)
+		bot.db.UpdateRealBuyOrderId(buy.Id, orderId)
+
+		Log(fmt.Sprintf("CREATE_SELL_ORDER\nPrice: %f - %f\nCalcedRevenue: %f", buy.ExchangeRate, candle.ClosePrice, rev))
+	}
+}
+
 func (bot *Bot) sell(buy Buy) float64 {
 	candle := bot.buffer.GetLastCandle()
 	exchangeRate := candle.GetPrice()
@@ -223,6 +252,16 @@ func (bot *Bot) sell(buy Buy) float64 {
 	)
 
 	return rev
+}
+
+func (bot *Bot) createSellOrder(buyId int64, sellPrice, quantity float64) int64 {
+	//orderId := orderManager.CreateMarketSellOrder(CANDLE_SYMBOL, sellPrice, quantity)
+	sellOrderId := orderManager.CreateSellOrder(CANDLE_SYMBOL, sellPrice, quantity)
+	bot.db.UpdateRealBuyOrderId(buyId, sellOrderId)
+
+	Log(fmt.Sprintf("SELL_ORDER\nOrderId: %d\nUpperPrice: %f", sellOrderId, sellPrice))
+
+	return sellOrderId
 }
 
 func calcRevenue(coinsCounts, exchangeRate float64) float64 {
@@ -318,5 +357,19 @@ func setupSellIndicators(bot *Bot) {
 		//&highPercentageSellIndicator,
 		//&desiredPriceSellIndicator,
 		&trailingSellIndicator,
+	}
+
+	bot.setIsTrailingSellIndicatorEnabled()
+	if bot.IsTrailingSellIndicatorEnabled {
+		bot.trailingSellIndicator = &trailingSellIndicator
+	}
+}
+
+func (bot *Bot) setIsTrailingSellIndicatorEnabled() {
+	for _, indicator := range bot.SellIndicators {
+		if "*main.TrailingSellIndicator" == reflect.TypeOf(indicator).String() {
+			bot.IsTrailingSellIndicatorEnabled = true
+			return
+		}
 	}
 }
