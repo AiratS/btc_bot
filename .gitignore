@@ -1,7 +1,9 @@
 go_build_btc_bot
 datasets
 db
+plots/*.png
 .idea
 *.txt
 *.csv
+data.json
 .idea/

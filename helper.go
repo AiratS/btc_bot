@@ -6,6 +6,8 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -303,4 +305,23 @@ func Int64SliceToStringSlice(items []int64) []string {
 
 func JoinInt64(items []int64) string {
 	return strings.Join(Int64SliceToStringSlice(items), ", ")
+}
+
+func BuildPlots() {
+	files, _ := filepath.Glob("plots/*.png")
+	for _, file := range files {
+		os.Remove(file)
+	}
+
+	// Create plots
+	app := "python3.9"
+	arg0 := "main.py"
+
+	cmd := exec.Command(app, arg0)
+	_, err := cmd.Output()
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 }

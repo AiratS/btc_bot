@@ -72,6 +72,10 @@ func RunTest() {
 			SelectNBots(BOTS_COUNT-BEST_BOTS_FROM_PREV_GEN, childBots),
 		)
 	}
+
+	PlotToJson("data.json")
+	fmt.Println("Build plots")
+	BuildPlots()
 }
 
 func fixRevenue(revenue float64) float64 {

@@ -188,6 +188,7 @@ func (bot *Bot) buy() {
 		)
 		buyId, _ := buyInsertResult.LastInsertId()
 		bot.runAfterBuySellIndicators(buyId)
+		PlotAddBuy(buyId, candle.CloseTime)
 	}
 }
 
@@ -250,6 +251,7 @@ func (bot *Bot) sell(buy Buy) float64 {
 		buy.Id,
 		candle.CloseTime,
 	)
+	PlotAddSell(buy.Id, candle.CloseTime)
 
 	return rev
 }
