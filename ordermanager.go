@@ -104,7 +104,7 @@ func (manager *OrderManager) HasEnoughMoneyForBuy() bool {
 
 func (manager *OrderManager) CreateBuyOrder(symbol string, price float64) (int64, float64, float64) {
 	if !manager.isEnabled {
-		return 0, 0.0, 0.0
+		return 0, 0.0, price
 	}
 
 	if info, hasLotSize := manager.exchangeInfo.GetInfoForSymbol(symbol); hasLotSize {
@@ -139,7 +139,7 @@ func (manager *OrderManager) CreateBuyOrder(symbol string, price float64) (int64
 
 func (manager *OrderManager) CreateMarketBuyOrder(symbol string, price float64) (int64, float64, float64) {
 	if !manager.isEnabled {
-		return 0, 0.0, 0.0
+		return 0, 0.0, price
 	}
 
 	if info, hasLotSize := manager.exchangeInfo.GetInfoForSymbol(symbol); hasLotSize {

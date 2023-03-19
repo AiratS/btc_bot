@@ -91,8 +91,8 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 
 		TotalMoneyAmount: MinMaxFloat64{
-			min: 25,
-			max: 100,
+			min: 13,
+			max: 50,
 		},
 	}
 }
