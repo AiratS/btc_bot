@@ -13,18 +13,21 @@ type Bot struct {
 	buffer                         *Buffer
 	db                             *Database
 	orderManager                   *OrderManager
+	balance                        *Balance
 	IsTrailingSellIndicatorEnabled bool
 	trailingSellIndicator          *TrailingSellIndicator
 }
 
 func NewBot(config *Config) Bot {
 	buffer := NewBuffer(resolveBufferSize(config))
-	db := NewDatabase()
+	db := NewDatabase(*config)
+	balance := NewBalance(*config)
 
 	bot := Bot{
 		Config:                         config,
 		buffer:                         &buffer,
 		db:                             &db,
+		balance:                        &balance,
 		IsTrailingSellIndicatorEnabled: false,
 	}
 
@@ -139,7 +142,7 @@ func (bot *Bot) buy() {
 	candle := bot.buffer.GetLastCandle()
 	exchangeRate := candle.GetPrice()
 
-	coinsCount := TOTAL_MONEY_AMOUNT / exchangeRate
+	coinsCount := bot.Config.TotalMoneyAmount / exchangeRate
 	desiredPrice := bot.calcDesiredPrice(exchangeRate)
 
 	if IS_REAL_ENABLED {
@@ -150,6 +153,10 @@ func (bot *Bot) buy() {
 		if USE_REAL_MONEY &&
 			(!bot.orderManager.HasEnoughMoneyForBuy() ||
 				!bot.orderManager.CanBuyForPrice(CANDLE_SYMBOL, rawPrice)) {
+			return
+		}
+
+		if !USE_REAL_MONEY && !bot.balance.HasEnoughMoneyForBuy() {
 			return
 		}
 
@@ -168,6 +175,7 @@ func (bot *Bot) buy() {
 			orderId,
 			quantity,
 		)
+		bot.balance.buy()
 
 		buyId, _ := buyInsertResult.LastInsertId()
 		bot.runAfterBuySellIndicators(buyId)
@@ -186,6 +194,8 @@ func (bot *Bot) buy() {
 			desiredPrice,
 			candle.CloseTime,
 		)
+		bot.balance.buy()
+
 		buyId, _ := buyInsertResult.LastInsertId()
 		bot.runAfterBuySellIndicators(buyId)
 		PlotAddBuy(buyId, candle.CloseTime)
@@ -251,6 +261,8 @@ func (bot *Bot) sell(buy Buy) float64 {
 		buy.Id,
 		candle.CloseTime,
 	)
+	bot.balance.sell()
+
 	PlotAddSell(buy.Id, candle.CloseTime)
 
 	return rev
@@ -303,11 +315,11 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	buysCountIndicator := NewBuysCountIndicator(
-		bot.Config,
-		bot.buffer,
-		bot.db,
-	)
+	//buysCountIndicator := NewBuysCountIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
 
 	waitForPeriodIndicator := NewWaitForPeriodIndicator(
 		bot.Config,
@@ -329,7 +341,7 @@ func setupBuyIndicators(bot *Bot) {
 
 	bot.BuyIndicators = []BuyIndicator{
 		//&backTrailingBuyIndicator,
-		&buysCountIndicator,
+		//&buysCountIndicator,
 		&waitForPeriodIndicator,
 		&bigFallIndicator,
 		&gradientDescentIndicator,

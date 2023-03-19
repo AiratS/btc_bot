@@ -19,6 +19,8 @@ type ConfigRestriction struct {
 
 	TrailingSellActivationAdditionPercentage MinMaxFloat64
 	TrailingSellStopPercentage               MinMaxFloat64
+
+	TotalMoneyAmount MinMaxFloat64
 }
 
 type MinMaxInt struct {
@@ -86,6 +88,11 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		TrailingSellStopPercentage: MinMaxFloat64{
 			min: 0.4,
 			max: 2,
+		},
+
+		TotalMoneyAmount: MinMaxFloat64{
+			min: 25,
+			max: 100,
 		},
 	}
 }

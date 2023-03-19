@@ -9,6 +9,7 @@ import (
 
 type Database struct {
 	connect *sql.DB
+	config  Config
 }
 
 type Buy struct {
@@ -23,7 +24,7 @@ type Buy struct {
 	HasSellOrder int64
 }
 
-func NewDatabase() Database {
+func NewDatabase(config Config) Database {
 	//name := time.Now().Format("db/db_2006_01_02__15_04_05.db")
 	name := ":memory:"
 
@@ -41,6 +42,7 @@ func NewDatabase() Database {
 
 	return Database{
 		connect: connect,
+		config:  config,
 	}
 }
 
@@ -264,7 +266,7 @@ func (db *Database) GetTotalRevenue() float64 {
 		FROM sells 
 		GROUP BY symbol
 	`
-	row := (*db).connect.QueryRow(query, TOTAL_MONEY_AMOUNT)
+	row := (*db).connect.QueryRow(query, db.config.TotalMoneyAmount)
 	row.Scan(&rev.value)
 
 	return rev.value

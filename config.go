@@ -2,7 +2,7 @@ package main
 
 const CANDLE_SYMBOL = "BTCUSDT"
 const CANDLE_INTERVAL = "1m"
-const TOTAL_MONEY_AMOUNT = 100
+const BALANCE_MONEY = 1000.0
 const COMMISSION = 0.15
 const DATASETS_DIRECTORY = "datasets"
 const UNSOLD_BUYS_COUNT = 20
@@ -26,6 +26,8 @@ type Config struct {
 
 	TrailingSellActivationAdditionPercentage float64
 	TrailingSellStopPercentage               float64
+
+	TotalMoneyAmount float64
 
 	TotalRevenue float64
 	Selection    float64
