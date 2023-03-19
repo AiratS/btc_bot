@@ -210,6 +210,7 @@ func (bot *Bot) runAfterBuySellIndicators(buyId int64) {
 
 func (bot *Bot) calcDesiredPrice(currentPrice float64) float64 {
 	upperPrice := CalcUpperPrice(currentPrice, bot.Config.HighSellPercentage)
+	return upperPrice
 	if bot.Config.DesiredPriceCandles > len(bot.buffer.GetCandles()) {
 		return upperPrice
 	}
