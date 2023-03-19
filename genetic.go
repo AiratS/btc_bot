@@ -38,7 +38,7 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 		dataframe.NewSeriesFloat64("TotalMoneyAmount", nil),
 
 		dataframe.NewSeriesFloat64("TotalRevenue", nil),
-		dataframe.NewSeriesFloat64("TotalBuysCount", nil),
+		dataframe.NewSeriesInt64("TotalBuysCount", nil),
 		dataframe.NewSeriesFloat64("Selection", nil),
 	)
 }
