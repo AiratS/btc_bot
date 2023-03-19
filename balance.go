@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type Balance struct {
 	config         Config
 	inBalanceMoney float64
@@ -25,6 +27,12 @@ func (balance *Balance) buy() {
 	}
 
 	balance.buysCount++
+
+	Log(fmt.Sprintf(
+		"Balance__BUY\nBuysCount: %d\nInBalanceMoney:%f",
+		balance.buysCount,
+		balance.inBalanceMoney,
+	))
 }
 
 func (balance *Balance) sell() {
@@ -34,4 +42,13 @@ func (balance *Balance) sell() {
 	}
 
 	balance.inBalanceMoney += balance.config.TotalMoneyAmount
+	if balance.inBalanceMoney > BALANCE_MONEY {
+		balance.inBalanceMoney = BALANCE_MONEY
+	}
+
+	Log(fmt.Sprintf(
+		"Balance__SELL\nBuysCount: %d\nInBalanceMoney:%f",
+		balance.buysCount,
+		balance.inBalanceMoney,
+	))
 }

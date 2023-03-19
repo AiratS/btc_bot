@@ -145,6 +145,10 @@ func (bot *Bot) buy() {
 	coinsCount := bot.Config.TotalMoneyAmount / exchangeRate
 	desiredPrice := bot.calcDesiredPrice(exchangeRate)
 
+	if !USE_REAL_MONEY && !bot.balance.HasEnoughMoneyForBuy() {
+		return
+	}
+
 	if IS_REAL_ENABLED {
 		rawPrice := candle.ClosePrice
 
@@ -153,10 +157,6 @@ func (bot *Bot) buy() {
 		if USE_REAL_MONEY &&
 			(!bot.orderManager.HasEnoughMoneyForBuy() ||
 				!bot.orderManager.CanBuyForPrice(CANDLE_SYMBOL, rawPrice)) {
-			return
-		}
-
-		if !USE_REAL_MONEY && !bot.balance.HasEnoughMoneyForBuy() {
 			return
 		}
 
