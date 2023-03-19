@@ -28,11 +28,12 @@ func RunTest() {
 
 			if *botNumber < BEST_BOTS_FROM_PREV_GEN && generation > 0 {
 				rev := convertToFloat64(bot["TotalRevenue"])
+				totalBuysCount := convertToInt(bot["TotalBuysCount"])
 				successPercentage := convertToFloat64(bot["SuccessPercentage"])
 
 				fmt.Println(fmt.Sprintf("Gen: %d, Bot: %d", generation, *botNumber))
 				fmt.Println(fmt.Sprintf("Gen: %d, Bot: %d, Revenue: %f, SuccessPercentage: %f\n", generation, *botNumber, rev, successPercentage))
-				SetBotTotalRevenue(bots, *botNumber, rev)
+				SetBotTotalRevenue(bots, *botNumber, rev, totalBuysCount)
 				continue
 			}
 
@@ -49,7 +50,7 @@ func RunTest() {
 		for i := 0; i < channelsCount; i++ {
 			botRevenue := <-botRevenueChan
 			rev := fixRevenue(botRevenue.Revenue)
-			SetBotTotalRevenue(bots, botRevenue.BotNumber, rev)
+			SetBotTotalRevenue(bots, botRevenue.BotNumber, rev, botRevenue.TotalBuysCount)
 			fmt.Println(fmt.Sprintf(
 				"Gen: %d, Bot: %d, Buys Count: %d, Revenue: %f\n",
 				generation,

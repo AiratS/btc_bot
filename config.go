@@ -29,6 +29,7 @@ type Config struct {
 
 	TotalMoneyAmount float64
 
-	TotalRevenue float64
-	Selection    float64
+	TotalRevenue   float64
+	TotalBuysCount int
+	Selection      float64
 }

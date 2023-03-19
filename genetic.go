@@ -38,6 +38,7 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 		dataframe.NewSeriesFloat64("TotalMoneyAmount", nil),
 
 		dataframe.NewSeriesFloat64("TotalRevenue", nil),
+		dataframe.NewSeriesFloat64("TotalBuysCount", nil),
 		dataframe.NewSeriesFloat64("Selection", nil),
 	)
 }
@@ -97,8 +98,9 @@ func ImportFromCsv(fileName string) []Config {
 
 			TotalMoneyAmount: convertStringToFloat64(row[12]),
 
-			TotalRevenue: convertStringToFloat64(row[13]),
-			Selection:    convertStringToFloat64(row[14]),
+			TotalRevenue:   convertStringToFloat64(row[13]),
+			TotalBuysCount: convertStringToInt(row[14]),
+			Selection:      convertStringToFloat64(row[15]),
 		}
 
 		bots = append(bots, bot)
@@ -157,8 +159,9 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 
 		"TotalMoneyAmount": botConfig.TotalMoneyAmount,
 
-		"TotalRevenue": botConfig.TotalRevenue,
-		"Selection":    botConfig.Selection,
+		"TotalRevenue":   botConfig.TotalRevenue,
+		"TotalBuysCount": botConfig.TotalBuysCount,
+		"Selection":      botConfig.Selection,
 	}
 }
 
@@ -166,10 +169,12 @@ func SetBotTotalRevenue(
 	bots *dataframe.DataFrame,
 	botNumber int,
 	revenue float64,
+	totalBuysCount int,
 ) {
 	bots.UpdateRow(botNumber, nil, map[string]interface{}{
-		"TotalRevenue": revenue,
-		"Selection":    revenue,
+		"TotalRevenue":   revenue,
+		"TotalBuysCount": totalBuysCount,
+		"Selection":      revenue,
 	})
 }
 
@@ -241,8 +246,9 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 
 		"TotalMoneyAmount": bot["TotalMoneyAmount"],
 
-		"TotalRevenue": bot["TotalRevenue"],
-		"Selection":    bot["Selection"],
+		"TotalRevenue":   bot["TotalRevenue"],
+		"TotalBuysCount": bot["TotalBuysCount"],
+		"Selection":      bot["Selection"],
 	}
 }
 
