@@ -260,11 +260,11 @@ type revenue struct {
 func (db *Database) GetTotalRevenue() float64 {
 	rev := revenue{}
 	query := `
-		SELECT (SUM(revenue) - COUNT(id) * 100) AS rev 
+		SELECT (SUM(revenue) - COUNT(id) * $1) AS rev 
 		FROM sells 
 		GROUP BY symbol
 	`
-	row := (*db).connect.QueryRow(query)
+	row := (*db).connect.QueryRow(query, TOTAL_MONEY_AMOUNT)
 	row.Scan(&rev.value)
 
 	return rev.value
