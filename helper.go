@@ -298,6 +298,16 @@ func FilterZeroPrices(prices []float64) []float64 {
 	return values
 }
 
+func Sum(values []float64) float64 {
+	result := 0.0
+
+	for _, value := range values {
+		result += value
+	}
+
+	return result
+}
+
 func Int64SliceToStringSlice(items []int64) []string {
 	var stringItems []string
 

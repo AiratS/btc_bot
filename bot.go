@@ -328,11 +328,11 @@ func setupBuyIndicators(bot *Bot) {
 		bot.db,
 	)
 
-	bigFallIndicator := NewBigFallIndicator(
-		bot.Config,
-		bot.buffer,
-		bot.db,
-	)
+	//bigFallIndicator := NewBigFallIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
 
 	gradientDescentIndicator := NewGradientDescentIndicator(
 		bot.Config,
@@ -344,7 +344,7 @@ func setupBuyIndicators(bot *Bot) {
 		//&backTrailingBuyIndicator,
 		//&buysCountIndicator,
 		&waitForPeriodIndicator,
-		&bigFallIndicator,
+		//&bigFallIndicator,
 		&gradientDescentIndicator,
 	}
 }
@@ -356,11 +356,11 @@ func setupSellIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	//desiredPriceSellIndicator := NewDesiredPriceSellIndicator(
-	//	bot.Config,
-	//	bot.buffer,
-	//	bot.db,
-	//)
+	desiredPriceSellIndicator := NewDesiredPriceSellIndicator(
+		bot.Config,
+		bot.buffer,
+		bot.db,
+	)
 
 	trailingSellIndicator := NewTrailingSellIndicator(
 		bot.Config,
@@ -370,8 +370,8 @@ func setupSellIndicators(bot *Bot) {
 
 	bot.SellIndicators = []SellIndicator{
 		//&highPercentageSellIndicator,
-		//&desiredPriceSellIndicator,
-		&trailingSellIndicator,
+		&desiredPriceSellIndicator,
+		//&trailingSellIndicator,
 	}
 
 	bot.setIsTrailingSellIndicatorEnabled()

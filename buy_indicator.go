@@ -287,12 +287,54 @@ func (indicator *GradientDescentIndicator) HasSignal() bool {
 		return false
 	}
 
+	//// Проверяем, что весь период падали
+	//fallingPercentage := indicator.calcFallingPercentage(smoothedPrices)
+	//if fallingPercentage < 80 {
+	//	return false
+	//}
+	//
+	////  Проверяем, что мы находимся на дне падающего участка
+	//x := float64(indicator.config.GradientDescentCandles)
+	//y := smoothedPrices[smoothedLen-2] - smoothedPrices[smoothedLen-1]
+	//currentGradient := y / x
+	//
+	//return -indicator.config.GradientDescentGradient <= currentGradient &&
+	//	currentGradient <= indicator.config.GradientDescentGradient
+
 	x := float64(indicator.config.GradientDescentCandles)
 	y := smoothedPrices[0] - smoothedPrices[smoothedLen-1]
 	gradient := y / x
 
 	return -indicator.config.GradientDescentGradient <= gradient &&
 		gradient <= indicator.config.GradientDescentGradient
+}
+
+func (indicator *GradientDescentIndicator) mapGradients(smoothedPrices []float64) []float64 {
+	var gradients []float64
+
+	for index, price := range smoothedPrices {
+		if index == 0 {
+			continue
+		}
+		gradients = append(gradients, smoothedPrices[index-1]-price)
+	}
+
+	return gradients
+}
+
+func (indicator *GradientDescentIndicator) calcFallingPercentage(smoothedPrices []float64) float64 {
+	fallingCount := 0
+	gradients := indicator.mapGradients(smoothedPrices)
+
+	for _, gradient := range gradients {
+		if gradient > 0 {
+			fallingCount++
+		}
+	}
+
+	total := len(smoothedPrices)
+
+	return (float64(fallingCount) * 100.0) / float64(total)
 }
 
 func (indicator *GradientDescentIndicator) IsStarted() bool {

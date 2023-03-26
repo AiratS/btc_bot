@@ -29,8 +29,8 @@ func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int) 
 
 	rev := bot.db.GetTotalRevenue()
 	buyCount := bot.db.GetBuysCount()
-	//commission := float64(buyCount) * COMMISSION
-	commission := 0.0
+	commission := float64(buyCount) * COMMISSION
+	//commission := 0.0
 	datasetRevenue := rev - commission
 	unsold := bot.db.CountUnsoldBuys()
 	fmt.Println(unsold)
