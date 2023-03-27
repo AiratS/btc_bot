@@ -35,6 +35,7 @@ func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, 
 	//commission := 0.0
 	datasetRevenue := rev - commission
 	unsold := bot.db.CountUnsoldBuys()
+	//avgSellTime := bot.db.GetMedianSellTime()
 	avgSellTime := bot.db.GetAvgSellTime()
 
 	fmt.Println(unsold)

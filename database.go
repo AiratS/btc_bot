@@ -319,6 +319,28 @@ func (db *Database) GetAvgSellTime() float64 {
 	return sellTime
 }
 
+func (db *Database) GetMedianSellTime() float64 {
+	var sellTimes []float64
+	query := `
+		SELECT (JULIANDAY(s.created_at) - JULIANDAY(b.created_at))
+		FROM buys AS b
+        INNER JOIN sells AS s ON b.id = s.buy_id
+	`
+	rows, err := db.connect.Query(query)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var sellTime float64
+		rows.Scan(&sellTime)
+		sellTimes = append(sellTimes, sellTime)
+	}
+
+	return Median(sellTimes)
+}
+
 func (db *Database) CanBuyInGivenPeriod(createdAt string, period int) bool {
 	var count int
 	query := `
