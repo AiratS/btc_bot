@@ -8,19 +8,21 @@ type BotRevenue struct {
 	BotNumber      int
 	Revenue        float64
 	TotalBuysCount int
+	AvgSellTime    float64
 }
 
 func Fitness(botConfig Config, botNumber int, botRevenue chan BotRevenue, fitnessDatasets *[]Candle) {
-	totalRevenue, totalBuysCount := doBuysAndSells(fitnessDatasets, botConfig)
+	totalRevenue, totalBuysCount, avgSellTime := doBuysAndSells(fitnessDatasets, botConfig)
 
 	botRevenue <- BotRevenue{
 		BotNumber:      botNumber,
 		Revenue:        totalRevenue,
 		TotalBuysCount: totalBuysCount,
+		AvgSellTime:    avgSellTime,
 	}
 }
 
-func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int) {
+func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, float64) {
 	bot := NewBot(&botConfig)
 
 	for _, candle := range *fitnessDatasets {
@@ -33,10 +35,12 @@ func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int) 
 	//commission := 0.0
 	datasetRevenue := rev - commission
 	unsold := bot.db.CountUnsoldBuys()
+	avgSellTime := bot.db.GetAvgSellTime()
+
 	fmt.Println(unsold)
 	bot.Kill()
 
 	fmt.Println(fmt.Sprintf(" DatasetRevenue: %f, TotalBuys: %d", datasetRevenue, buyCount))
 
-	return datasetRevenue, buyCount
+	return datasetRevenue, buyCount, avgSellTime
 }

@@ -302,6 +302,23 @@ func (db *Database) CountUnsoldBuys() int {
 	return count
 }
 
+func (db *Database) GetAvgSellTime() float64 {
+	var sellTime float64
+	query := `
+		SELECT AVG(JULIANDAY(s.created_at) - JULIANDAY(b.created_at))
+		FROM buys AS b
+        INNER JOIN sells AS s ON b.id = s.buy_id
+	`
+	row := db.connect.QueryRow(query)
+	row.Scan(&sellTime)
+
+	if row.Err() != nil {
+		panic(row.Err())
+	}
+
+	return sellTime
+}
+
 func (db *Database) CanBuyInGivenPeriod(createdAt string, period int) bool {
 	var count int
 	query := `

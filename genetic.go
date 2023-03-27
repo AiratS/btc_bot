@@ -12,6 +12,7 @@ const BOTS_COUNT = 25
 const BEST_BOTS_COUNT = 7
 const BEST_BOTS_FROM_PREV_GEN = 3
 const GENERATION_COUNT = 20
+const SELL_TIME_PUNISHMENT = 1.0
 const DEFAULT_REVENUE = -1000000
 
 func InitBotsDataFrame() *dataframe.DataFrame {
@@ -39,6 +40,7 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 
 		dataframe.NewSeriesFloat64("TotalRevenue", nil),
 		dataframe.NewSeriesInt64("TotalBuysCount", nil),
+		dataframe.NewSeriesFloat64("AvgSellTime", nil),
 		dataframe.NewSeriesFloat64("Selection", nil),
 	)
 }
@@ -100,7 +102,8 @@ func ImportFromCsv(fileName string) []Config {
 
 			TotalRevenue:   convertStringToFloat64(row[13]),
 			TotalBuysCount: convertStringToInt(row[14]),
-			Selection:      convertStringToFloat64(row[15]),
+			AvgSellTime:    convertStringToFloat64(row[15]),
+			Selection:      convertStringToFloat64(row[16]),
 		}
 
 		bots = append(bots, bot)
@@ -161,6 +164,7 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 
 		"TotalRevenue":   botConfig.TotalRevenue,
 		"TotalBuysCount": botConfig.TotalBuysCount,
+		"AvgSellTime":    botConfig.AvgSellTime,
 		"Selection":      botConfig.Selection,
 	}
 }
@@ -170,11 +174,18 @@ func SetBotTotalRevenue(
 	botNumber int,
 	revenue float64,
 	totalBuysCount int,
+	avgSellTime float64,
 ) {
+	selectionDivider := avgSellTime * SELL_TIME_PUNISHMENT
+	if avgSellTime == 0 {
+		selectionDivider = 0.1
+	}
+
 	bots.UpdateRow(botNumber, nil, map[string]interface{}{
 		"TotalRevenue":   revenue,
 		"TotalBuysCount": totalBuysCount,
-		"Selection":      revenue,
+		"AvgSellTime":    avgSellTime,
+		"Selection":      revenue / selectionDivider,
 	})
 }
 
@@ -248,6 +259,7 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 
 		"TotalRevenue":   bot["TotalRevenue"],
 		"TotalBuysCount": bot["TotalBuysCount"],
+		"AvgSellTime":    bot["AvgSellTime"],
 		"Selection":      bot["Selection"],
 	}
 }

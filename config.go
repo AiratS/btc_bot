@@ -31,5 +31,6 @@ type Config struct {
 
 	TotalRevenue   float64
 	TotalBuysCount int
+	AvgSellTime    float64
 	Selection      float64
 }
