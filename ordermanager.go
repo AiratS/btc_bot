@@ -7,7 +7,7 @@ import (
 	"math"
 )
 
-const ORDER_MONEY = 13
+const ORDER_MONEY = 2.8
 
 type OrderManager struct {
 	binanceClient *binance.Client
@@ -293,6 +293,10 @@ func calcQuantity(exchangeRate, orderMoney float64) float64 {
 
 func valueToLotSize(value, step float64) float64 {
 	return math.Round(value/step) * step
+}
+
+func valueToLotSizeCeil(value, step float64) float64 {
+	return math.Ceil(value/step) * step
 }
 
 func valueToPriceSize(value, tickSize float64) float64 {

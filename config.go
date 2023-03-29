@@ -1,6 +1,6 @@
 package main
 
-const CANDLE_SYMBOL = "BTCUSDT"
+const CANDLE_SYMBOL = "BTCBUSD"
 const CANDLE_INTERVAL = "1m"
 const BALANCE_MONEY = 1000.0
 const COMMISSION = 0.15

@@ -202,6 +202,14 @@ func convertBinanceToFloat64(value interface{}) float64 {
 	return val
 }
 
+func convertBinanceToInt(value interface{}) int {
+	val, err := strconv.Atoi(value.(string))
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 func CountInArray(needle float64, array *[]float64) int {
 	count := 0
 	searchArray := *array
