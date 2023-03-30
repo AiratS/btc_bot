@@ -21,6 +21,7 @@ type ConfigRestriction struct {
 	TrailingSellStopPercentage               MinMaxFloat64
 
 	TotalMoneyAmount MinMaxFloat64
+	Leverage         MinMaxInt
 }
 
 type MinMaxInt struct {
@@ -93,6 +94,10 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		TotalMoneyAmount: MinMaxFloat64{
 			min: 13,
 			max: 50,
+		},
+		Leverage: MinMaxInt{
+			min: 1,
+			max: 10,
 		},
 	}
 }

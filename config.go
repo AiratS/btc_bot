@@ -28,6 +28,7 @@ type Config struct {
 	TrailingSellStopPercentage               float64
 
 	TotalMoneyAmount float64
+	Leverage         int
 
 	TotalRevenue   float64
 	TotalBuysCount int

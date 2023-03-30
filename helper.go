@@ -349,44 +349,44 @@ func BuildPlots() {
 	}
 }
 
-func GetLeverageLiquidationPercentage() float64 {
-	if LEVERAGE == 1 {
+func GetLeverageLiquidationPercentage(leverage int) float64 {
+	if leverage == 1 {
 		return 100
 	}
 
-	if LEVERAGE == 2 {
+	if leverage == 2 {
 		return 50
 	}
 
-	if LEVERAGE == 3 {
+	if leverage == 3 {
 		return 33
 	}
 
-	if LEVERAGE == 4 {
+	if leverage == 4 {
 		return 25
 	}
 
-	if LEVERAGE == 5 {
+	if leverage == 5 {
 		return 20
 	}
 
-	if LEVERAGE == 6 {
+	if leverage == 6 {
 		return 16.5
 	}
 
-	if LEVERAGE == 7 {
+	if leverage == 7 {
 		return 14.3
 	}
 
-	if LEVERAGE == 8 {
+	if leverage == 8 {
 		return 12.3
 	}
 
-	if LEVERAGE == 9 {
+	if leverage == 9 {
 		return 11.2
 	}
 
-	if LEVERAGE == 10 {
+	if leverage == 10 {
 		return 10
 	}
 

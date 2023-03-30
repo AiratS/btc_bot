@@ -205,7 +205,7 @@ func (bot *Bot) buy() {
 			bot.createAndUpdateSellOrder(buyId, upperPrice, quantity)
 		}
 	} else {
-		coinsCount = (bot.Config.TotalMoneyAmount * LEVERAGE) / exchangeRate
+		coinsCount = (bot.Config.TotalMoneyAmount * float64(bot.Config.Leverage)) / exchangeRate
 
 		buyInsertResult := bot.db.AddBuy(
 			CANDLE_SYMBOL,
