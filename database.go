@@ -292,7 +292,7 @@ func (db *Database) GetTotalRevenue() float64 {
 		FROM sells 
 		GROUP BY symbol
 	`
-	row := (*db).connect.QueryRow(query, db.config.TotalMoneyAmount)
+	row := (*db).connect.QueryRow(query, db.config.TotalMoneyAmount*LEVERAGE)
 	row.Scan(&rev.value)
 
 	return rev.value
