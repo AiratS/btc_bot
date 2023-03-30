@@ -179,6 +179,32 @@ func (db *Database) FetchUnsoldBuysByUpperPercentage(exchangeRate, upperPercenta
 	return unsoldBuys
 }
 
+func (db *Database) FetchUnsoldBuysByLowerPercentage(exchangeRate, lowerPercentage float64) []Buy {
+	unsoldBuys := []Buy{}
+	query := `
+		SELECT b.*
+		FROM buys AS b 
+        LEFT JOIN sells AS s 
+        	ON s.buy_id = b.id 
+        WHERE s.id IS NULL 
+            AND (b.exchange_rate - ((b.exchange_rate * $1) / 100)) >= $2   
+	`
+
+	rows, err := db.connect.Query(query, lowerPercentage, exchangeRate)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		buy := Buy{}
+		rows.Scan(&buy.Id, &buy.Symbol, &buy.Coins, &buy.ExchangeRate, &buy.DesiredPrice, &buy.CreatedAt, &buy.RealOrderId, &buy.RealQuantity, &buy.HasSellOrder)
+		unsoldBuys = append(unsoldBuys, buy)
+	}
+
+	return unsoldBuys
+}
+
 func (db *Database) FetchUnsoldBuysByDesiredPrice(exchangeRate float64) []Buy {
 	unsoldBuys := []Buy{}
 	query := `

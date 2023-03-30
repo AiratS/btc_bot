@@ -297,6 +297,10 @@ func (bot *Bot) sell(buy Buy) float64 {
 		Log(fmt.Sprintf("SELL\nPrice: %f - %f\nRevenue: %f", buy.ExchangeRate, candle.ClosePrice, rev))
 	}
 
+	if ENABLE_FUTURES && buy.ExchangeRate > exchangeRate {
+		rev = 0
+	}
+
 	bot.db.AddSell(
 		CANDLE_SYMBOL,
 		buy.Coins,
@@ -401,6 +405,21 @@ func setupBuyIndicators(bot *Bot) {
 }
 
 func setupSellIndicators(bot *Bot) {
+	if ENABLE_FUTURES {
+		leverageSellIndicator := NewLeverageSellIndicator(
+			bot.Config,
+			bot.buffer,
+			bot.db,
+		)
+
+		bot.SellIndicators = []SellIndicator{
+			//&highPercentageSellIndicator,
+			&leverageSellIndicator,
+			//&trailingSellIndicator,
+		}
+		return
+	}
+
 	//highPercentageSellIndicator := NewHighPercentageSellIndicator(
 	//	bot.Config,
 	//	bot.buffer,

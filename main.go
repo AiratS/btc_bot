@@ -6,7 +6,7 @@ import (
 )
 
 const IS_REAL_ENABLED = false
-const ENABLE_FUTURES = false
+const ENABLE_FUTURES = true
 const USE_REAL_MONEY = false
 const REAL_MONEY_DB_NAME = "amazing_real"
 

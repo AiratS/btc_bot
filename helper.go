@@ -348,3 +348,19 @@ func BuildPlots() {
 		return
 	}
 }
+
+func GetLeverageLiquidationPercentage() float64 {
+	if LEVERAGE == 2 {
+		return 50
+	}
+
+	if LEVERAGE == 5 {
+		return 20
+	}
+
+	if LEVERAGE == 10 {
+		return 10
+	}
+
+	return 1
+}

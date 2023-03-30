@@ -214,3 +214,64 @@ func (indicator *TrailingSellIndicator) GetBuyItemByBuyId(buyId int64) (bool, *T
 func (indicator *TrailingSellIndicator) calculateStopPrice(closePrice, percentage float64) float64 {
 	return closePrice - ((closePrice * percentage) / 100)
 }
+
+// ------------------------------------
+
+type LeverageSellIndicator struct {
+	config *Config
+	buffer *Buffer
+	db     *Database
+}
+
+func NewLeverageSellIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) LeverageSellIndicator {
+	return LeverageSellIndicator{
+		config: config,
+		buffer: buffer,
+		db:     db,
+	}
+}
+
+func (indicator *LeverageSellIndicator) HasSignal() (bool, []Buy) {
+	candle := indicator.buffer.GetLastCandle()
+
+	var buys []Buy
+	upperBuys := indicator.db.FetchUnsoldBuysByUpperPercentage(candle.ClosePrice, indicator.config.HighSellPercentage)
+	lowerBuys := indicator.db.FetchUnsoldBuysByLowerPercentage(candle.ClosePrice, GetLeverageLiquidationPercentage())
+
+	for _, buy := range upperBuys {
+		if !indicator.hasSuchBuy(buy.Id, buys) {
+			buys = append(buys, buy)
+		}
+	}
+
+	for _, buy := range lowerBuys {
+		if !indicator.hasSuchBuy(buy.Id, buys) {
+			buys = append(buys, buy)
+		}
+	}
+
+	return len(buys) > 0, buys
+}
+
+func (indicator *LeverageSellIndicator) hasSuchBuy(buyId int64, buys []Buy) bool {
+	for _, buy := range buys {
+		if buy.Id == buyId {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (indicator *LeverageSellIndicator) RunAfterBuy(buyId int64) {
+}
+
+func (indicator *LeverageSellIndicator) Update() {
+}
+
+func (indicator *LeverageSellIndicator) Finish(buyId int64) {
+}
