@@ -3,7 +3,7 @@ package main
 const CANDLE_SYMBOL = "BTCBUSD"
 const CANDLE_INTERVAL = "30m"
 const BALANCE_MONEY = 1000.0
-const COMMISSION = 0.15
+const COMMISSION = 0.06
 const DATASETS_DIRECTORY = "datasets"
 const UNSOLD_BUYS_COUNT = 20
 

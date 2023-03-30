@@ -358,8 +358,32 @@ func GetLeverageLiquidationPercentage() float64 {
 		return 50
 	}
 
+	if LEVERAGE == 3 {
+		return 33
+	}
+
+	if LEVERAGE == 4 {
+		return 25
+	}
+
 	if LEVERAGE == 5 {
 		return 20
+	}
+
+	if LEVERAGE == 6 {
+		return 16.5
+	}
+
+	if LEVERAGE == 7 {
+		return 14.3
+	}
+
+	if LEVERAGE == 8 {
+		return 12.3
+	}
+
+	if LEVERAGE == 9 {
+		return 11.2
 	}
 
 	if LEVERAGE == 10 {
