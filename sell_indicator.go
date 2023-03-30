@@ -239,9 +239,12 @@ func (indicator *LeverageSellIndicator) HasSignal() (bool, []Buy) {
 	candle := indicator.buffer.GetLastCandle()
 
 	var buys []Buy
-	upperBuys := indicator.db.FetchUnsoldBuysByUpperPercentage(candle.ClosePrice, indicator.config.HighSellPercentage)
+	upperBuys := indicator.db.FetchUnsoldBuysByUpperPercentage(
+		candle.HighPrice,
+		indicator.config.HighSellPercentage,
+	)
 	lowerBuys := indicator.db.FetchUnsoldBuysByLowerPercentage(
-		candle.ClosePrice,
+		candle.LowPrice,
 		GetLeverageLiquidationPercentage(indicator.config.Leverage),
 	)
 
