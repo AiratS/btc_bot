@@ -178,8 +178,9 @@ func SetBotTotalRevenue(
 ) {
 	selectionDivider := avgSellTime * SELL_TIME_PUNISHMENT
 	if avgSellTime == 0 {
-		selectionDivider = 0.1
+		selectionDivider = 1
 	}
+	selectionDivider = 1
 
 	bots.UpdateRow(botNumber, nil, map[string]interface{}{
 		"TotalRevenue":   revenue,
