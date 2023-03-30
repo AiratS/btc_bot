@@ -34,7 +34,7 @@ func NewFuturesOrderManager(futuresClient *futures.Client) FuturesOrderManager {
 		isEnabled:     USE_REAL_MONEY,
 		exchangeInfo:  &info,
 	}
-	//service.adjustConfiguration()
+	service.adjustConfiguration()
 
 	return service
 }
