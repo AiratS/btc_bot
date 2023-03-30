@@ -6,6 +6,7 @@ import (
 )
 
 const IS_REAL_ENABLED = false
+const ENABLE_FUTURES = false
 const USE_REAL_MONEY = false
 const REAL_MONEY_DB_NAME = "amazing_real"
 
@@ -28,7 +29,11 @@ func main() {
 	log.SetOutput(f)
 
 	if IS_REAL_ENABLED {
-		RunRealTime()
+		if ENABLE_FUTURES {
+			RunFuturesRealTime()
+		} else {
+			RunRealTime()
+		}
 		return
 	}
 

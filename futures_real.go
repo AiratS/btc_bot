@@ -1,16 +1,44 @@
 package main
 
 import (
+	"fmt"
 	"github.com/adshao/go-binance/v2/futures"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"time"
 )
 
 func RunFuturesRealTime() {
 	client := futures.NewClient(BINANCE_API_KEY, BINANCE_SECRET_KEY)
-	futuresClient := NewFuturesOrderManager(client)
+	tgBot, _ = tgbotapi.NewBotAPI(TG_API_KEY)
 
-	futuresClient.IsBuySold(CANDLE_SYMBOL, 32332357883)
+	candleConverter = NewSecToMinCandleConverter()
+	config := GetRealBotConfig()
+	realBot = NewFuturesRealBot(&config, client)
 
-	//futuresClient.CreateFuturesMarketByOrder(CANDLE_SYMBOL, 28370)
-	//futuresClient.CreateSellOrder(CANDLE_SYMBOL, 28400, 0.001)
-	//futuresClient.HasEnoughMoneyForBuy()
+	errHandler := func(err error) {
+		fmt.Println(err)
+	}
+
+	for {
+		fmt.Println("Connect to binance...")
+		symbols := map[string]string{CANDLE_SYMBOL: CANDLE_INTERVAL}
+		doneC, _, err := futures.WsCombinedKlineServe(symbols, KlineEventHandlerFutures, errHandler)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		<-doneC
+
+		fmt.Println("Disconnected, Reconnect in 3 seconds")
+		time.Sleep(time.Second * 3)
+	}
+}
+
+func KlineEventHandlerFutures(event *futures.WsKlineEvent) {
+	secCandle := WebSocketCandleToKlineCandleFutures(event.Kline)
+	fmt.Println(fmt.Sprintf("FUTURES: %s - Coin: %s, Price: %f", secCandle.CloseTime, secCandle.Symbol, secCandle.ClosePrice))
+
+	if convertedCandle, ok := candleConverter.Convert(secCandle); ok {
+		realBot.DoStuff(convertedCandle)
+	}
 }

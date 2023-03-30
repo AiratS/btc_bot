@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/adshao/go-binance/v2"
+	"github.com/adshao/go-binance/v2/futures"
 	"strconv"
 )
 
@@ -41,6 +42,39 @@ func (candle *Candle) GetPrice() float64 {
 
 // Candle source converter
 func WebSocketCandleToKlineCandle(wsKline binance.WsKline) Candle {
+	openPrice, openPriceErr := strconv.ParseFloat(wsKline.Open, 64)
+	closePrice, closePriceErr := strconv.ParseFloat(wsKline.Close, 64)
+	highPrice, highPriceErr := strconv.ParseFloat(wsKline.High, 64)
+	lowPrice, lowPriceErr := strconv.ParseFloat(wsKline.Low, 64)
+	volume, volumeErr := strconv.ParseFloat(wsKline.Volume, 64)
+
+	if openPriceErr != nil ||
+		closePriceErr != nil ||
+		highPriceErr != nil ||
+		lowPriceErr != nil ||
+		volumeErr != nil {
+
+		panic("Can not convert Websocket candle.")
+	}
+
+	return Candle{
+		Symbol:     wsKline.Symbol,
+		OpenTime:   FormatTimestamp(wsKline.StartTime),
+		CloseTime:  FormatTimestamp(wsKline.EndTime),
+		OpenPrice:  openPrice,
+		HighPrice:  highPrice,
+		LowPrice:   lowPrice,
+		ClosePrice: closePrice,
+		Volume:     volume,
+		//QuoteAssetVolume:         wsKline.QuoteVolume,
+		NumberOfTrades: wsKline.TradeNum,
+		//TakerBuyBaseAssetVolume:  wsKline.ActiveBuyVolume,
+		//TakerBuyQuoteAssetVolume: wsKline.ActiveBuyQuoteVolume,
+		IsClosed: wsKline.IsFinal,
+	}
+}
+
+func WebSocketCandleToKlineCandleFutures(wsKline futures.WsKline) Candle {
 	openPrice, openPriceErr := strconv.ParseFloat(wsKline.Open, 64)
 	closePrice, closePriceErr := strconv.ParseFloat(wsKline.Close, 64)
 	highPrice, highPriceErr := strconv.ParseFloat(wsKline.High, 64)

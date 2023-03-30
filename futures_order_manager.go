@@ -34,7 +34,7 @@ func NewFuturesOrderManager(futuresClient *futures.Client) FuturesOrderManager {
 		isEnabled:     USE_REAL_MONEY,
 		exchangeInfo:  &info,
 	}
-	service.adjustConfiguration()
+	//service.adjustConfiguration()
 
 	return service
 }
@@ -87,8 +87,19 @@ func (manager *FuturesOrderManager) getPositionInfo() PositionInfo {
 	panic("No futures position info.")
 }
 
-func (manager *FuturesOrderManager) HasEnoughMoneyForBuy() bool {
+func (manager *FuturesOrderManager) CanBuyForPrice(symbol string, price float64) bool {
+	if info, hasLotSize := manager.exchangeInfo.GetInfoForSymbol(symbol); hasLotSize {
+		quantityLotSize := valueToLotSize(calcQuantity(price, ORDER_MONEY), info.LotSize.stepSize)
+		priceConverted := valueToPriceSize(price, info.PriceFilter.tickSize)
+
+		return info.LotSize.minQty <= quantityLotSize && quantityLotSize <= info.LotSize.maxQty &&
+			info.PriceFilter.minPrice <= priceConverted && priceConverted <= info.PriceFilter.maxPrice
+	}
+
 	return false
+}
+
+func (manager *FuturesOrderManager) HasEnoughMoneyForBuy() bool {
 	res, err := manager.futuresClient.NewGetBalanceService().
 		Do(context.Background())
 
@@ -124,10 +135,10 @@ func (manager *FuturesOrderManager) IsBuySold(symbol string, orderId int64) bool
 	return res.Status == "FILLED"
 }
 
-func (manager *FuturesOrderManager) CreateFuturesMarketByOrder(symbol string, price float64) (int64, float64, float64) {
-	//if !manager.isEnabled {
-	//	return 0, 0.0, price
-	//}
+func (manager *FuturesOrderManager) CreateMarketBuyOrder(symbol string, price float64) (int64, float64, float64) {
+	if !manager.isEnabled {
+		return 0, 0.0, price
+	}
 
 	if info, hasLotSize := manager.exchangeInfo.GetInfoForSymbol(symbol); hasLotSize {
 		quantityLotSize := valueToLotSize(calcQuantity(price, manager.getOrderMoney()), info.LotSize.stepSize)
@@ -135,7 +146,6 @@ func (manager *FuturesOrderManager) CreateFuturesMarketByOrder(symbol string, pr
 
 		fmt.Println(fmt.Sprintf("CreateBuyOrder: %f, %f", priceConverted, quantityLotSize))
 
-		//return 0, 0, 0
 		order, err := manager.futuresClient.
 			NewCreateOrderService().
 			Symbol(symbol).
@@ -159,9 +169,9 @@ func (manager *FuturesOrderManager) CreateFuturesMarketByOrder(symbol string, pr
 }
 
 func (manager *FuturesOrderManager) CreateSellOrder(symbol string, stopPrice, quantity float64) int64 {
-	//if !manager.isEnabled {
-	//	return 0
-	//}
+	if !manager.isEnabled {
+		return 0
+	}
 
 	if info, hasLotSize := manager.exchangeInfo.GetInfoForSymbol(symbol); hasLotSize {
 		priceConverted := valueToPriceSize(stopPrice, info.PriceFilter.tickSize)
@@ -194,16 +204,15 @@ func (manager *FuturesOrderManager) getOrderMoney() float64 {
 }
 
 func (manager *FuturesOrderManager) getRealBuyPrice(rawPrice float64, order *futures.CreateOrderResponse) float64 {
-	return 0
 	//if len(order.Fills) > 0 {
 	//	return convertBinanceToFloat64(order.Fills[len(order.Fills)-1].Price)
 	//}
-	//
-	//return rawPrice
+
+	return rawPrice
 }
 
 func (manager *FuturesOrderManager) getRealBuyQuantity(rawQuantity float64, order *futures.CreateOrderResponse) float64 {
-	return 0
+	return rawQuantity
 	//if 0 == len(order.Fills) {
 	//	return rawQuantity
 	//}
