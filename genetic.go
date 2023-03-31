@@ -26,6 +26,7 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 		dataframe.NewSeriesInt64("WaitAfterLastBuyPeriod", nil),
 
 		dataframe.NewSeriesInt64("BigFallCandlesCount", nil),
+		dataframe.NewSeriesInt64("BigFallSmoothPeriod", nil),
 		dataframe.NewSeriesFloat64("BigFallPercentage", nil),
 
 		dataframe.NewSeriesInt64("DesiredPriceCandles", nil),
@@ -89,24 +90,25 @@ func ImportFromCsv(fileName string) []Config {
 			WaitAfterLastBuyPeriod: convertStringToInt(row[3]),
 
 			BigFallCandlesCount: convertStringToInt(row[4]),
-			BigFallPercentage:   convertStringToFloat64(row[5]),
+			BigFallSmoothPeriod: convertStringToInt(row[5]),
+			BigFallPercentage:   convertStringToFloat64(row[6]),
 
-			DesiredPriceCandles: convertStringToInt(row[6]),
+			DesiredPriceCandles: convertStringToInt(row[7]),
 
-			GradientDescentCandles:  convertStringToInt(row[7]),
-			GradientDescentPeriod:   convertStringToInt(row[8]),
-			GradientDescentGradient: convertStringToFloat64(row[9]),
+			GradientDescentCandles:  convertStringToInt(row[8]),
+			GradientDescentPeriod:   convertStringToInt(row[9]),
+			GradientDescentGradient: convertStringToFloat64(row[10]),
 
-			TrailingSellActivationAdditionPercentage: convertStringToFloat64(row[10]),
-			TrailingSellStopPercentage:               convertStringToFloat64(row[11]),
+			TrailingSellActivationAdditionPercentage: convertStringToFloat64(row[11]),
+			TrailingSellStopPercentage:               convertStringToFloat64(row[12]),
 
-			TotalMoneyAmount: convertStringToFloat64(row[12]),
-			Leverage:         convertStringToInt(row[13]),
+			TotalMoneyAmount: convertStringToFloat64(row[13]),
+			Leverage:         convertStringToInt(row[14]),
 
-			TotalRevenue:   convertStringToFloat64(row[14]),
-			TotalBuysCount: convertStringToInt(row[15]),
-			AvgSellTime:    convertStringToFloat64(row[16]),
-			Selection:      convertStringToFloat64(row[17]),
+			TotalRevenue:   convertStringToFloat64(row[15]),
+			TotalBuysCount: convertStringToInt(row[16]),
+			AvgSellTime:    convertStringToFloat64(row[17]),
+			Selection:      convertStringToFloat64(row[18]),
 		}
 
 		bots = append(bots, bot)
@@ -127,6 +129,7 @@ func InitBotConfig() Config {
 		WaitAfterLastBuyPeriod: GetRandIntConfig(restrict.WaitAfterLastBuyPeriod),
 
 		BigFallCandlesCount: GetRandIntConfig(restrict.BigFallCandlesCount),
+		BigFallSmoothPeriod: GetRandIntConfig(restrict.BigFallSmoothPeriod),
 		BigFallPercentage:   GetRandFloat64Config(restrict.BigFallPercentage),
 
 		DesiredPriceCandles: GetRandIntConfig(restrict.DesiredPriceCandles),
@@ -153,6 +156,7 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 		"WaitAfterLastBuyPeriod": botConfig.WaitAfterLastBuyPeriod,
 
 		"BigFallCandlesCount": botConfig.BigFallCandlesCount,
+		"BigFallSmoothPeriod": botConfig.BigFallSmoothPeriod,
 		"BigFallPercentage":   botConfig.BigFallPercentage,
 
 		"DesiredPriceCandles": botConfig.DesiredPriceCandles,
@@ -253,6 +257,7 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 		"WaitAfterLastBuyPeriod": bot["WaitAfterLastBuyPeriod"],
 
 		"BigFallCandlesCount": bot["BigFallCandlesCount"],
+		"BigFallSmoothPeriod": bot["BigFallSmoothPeriod"],
 		"BigFallPercentage":   bot["BigFallPercentage"],
 
 		"DesiredPriceCandles": bot["DesiredPriceCandles"],
@@ -341,6 +346,7 @@ func ConvertDataFrameToBotConfig(dataFrame map[interface{}]interface{}) Config {
 		WaitAfterLastBuyPeriod: convertToInt(dataFrame["WaitAfterLastBuyPeriod"]),
 
 		BigFallCandlesCount: convertToInt(dataFrame["BigFallCandlesCount"]),
+		BigFallSmoothPeriod: convertToInt(dataFrame["BigFallSmoothPeriod"]),
 		BigFallPercentage:   convertToFloat64(dataFrame["BigFallPercentage"]),
 
 		DesiredPriceCandles: convertToInt(dataFrame["DesiredPriceCandles"]),
@@ -370,6 +376,7 @@ func makeChild(
 		WaitAfterLastBuyPeriod: GetIntFatherOrMomGen(maleBotConfig.WaitAfterLastBuyPeriod, femaleBotConfig.WaitAfterLastBuyPeriod),
 
 		BigFallCandlesCount: GetIntFatherOrMomGen(maleBotConfig.BigFallCandlesCount, femaleBotConfig.BigFallCandlesCount),
+		BigFallSmoothPeriod: GetIntFatherOrMomGen(maleBotConfig.BigFallSmoothPeriod, femaleBotConfig.BigFallSmoothPeriod),
 		BigFallPercentage:   GetFloatFatherOrMomGen(maleBotConfig.BigFallPercentage, femaleBotConfig.BigFallPercentage),
 
 		DesiredPriceCandles: GetIntFatherOrMomGen(maleBotConfig.DesiredPriceCandles, femaleBotConfig.DesiredPriceCandles),
@@ -385,8 +392,8 @@ func makeChild(
 		Leverage:         GetIntFatherOrMomGen(maleBotConfig.Leverage, femaleBotConfig.Leverage),
 	}
 
-	for i := 0; i < 9; i++ {
-		mutateGens(&childBotConfig, GetRandInt(0, 13))
+	for i := 0; i < 10; i++ {
+		mutateGens(&childBotConfig, GetRandInt(0, 14))
 	}
 
 	return GetBotConfigMapInterface(childBotConfig)
@@ -403,19 +410,20 @@ func mutateGens(botConfig *Config, randGenNumber int) {
 	mutateGenInt(randGenNumber, 3, &(botConfig.WaitAfterLastBuyPeriod), restrict.WaitAfterLastBuyPeriod)
 
 	mutateGenInt(randGenNumber, 4, &(botConfig.BigFallCandlesCount), restrict.BigFallCandlesCount)
-	mutateGenFloat64(randGenNumber, 5, &(botConfig.BigFallPercentage), restrict.BigFallPercentage)
+	mutateGenInt(randGenNumber, 5, &(botConfig.BigFallSmoothPeriod), restrict.BigFallSmoothPeriod)
+	mutateGenFloat64(randGenNumber, 6, &(botConfig.BigFallPercentage), restrict.BigFallPercentage)
 
-	mutateGenInt(randGenNumber, 6, &(botConfig.DesiredPriceCandles), restrict.DesiredPriceCandles)
+	mutateGenInt(randGenNumber, 7, &(botConfig.DesiredPriceCandles), restrict.DesiredPriceCandles)
 
-	mutateGenInt(randGenNumber, 7, &(botConfig.GradientDescentCandles), restrict.GradientDescentCandles)
-	mutateGenInt(randGenNumber, 8, &(botConfig.GradientDescentPeriod), restrict.GradientDescentPeriod)
-	mutateGenFloat64(randGenNumber, 9, &(botConfig.GradientDescentGradient), restrict.GradientDescentGradient)
+	mutateGenInt(randGenNumber, 8, &(botConfig.GradientDescentCandles), restrict.GradientDescentCandles)
+	mutateGenInt(randGenNumber, 9, &(botConfig.GradientDescentPeriod), restrict.GradientDescentPeriod)
+	mutateGenFloat64(randGenNumber, 10, &(botConfig.GradientDescentGradient), restrict.GradientDescentGradient)
 
-	mutateGenFloat64(randGenNumber, 10, &(botConfig.TrailingSellActivationAdditionPercentage), restrict.TrailingSellActivationAdditionPercentage)
-	mutateGenFloat64(randGenNumber, 11, &(botConfig.TrailingSellStopPercentage), restrict.TrailingSellStopPercentage)
+	mutateGenFloat64(randGenNumber, 11, &(botConfig.TrailingSellActivationAdditionPercentage), restrict.TrailingSellActivationAdditionPercentage)
+	mutateGenFloat64(randGenNumber, 12, &(botConfig.TrailingSellStopPercentage), restrict.TrailingSellStopPercentage)
 
-	mutateGenFloat64(randGenNumber, 12, &(botConfig.TotalMoneyAmount), restrict.TotalMoneyAmount)
-	mutateGenInt(randGenNumber, 13, &(botConfig.Leverage), restrict.Leverage)
+	mutateGenFloat64(randGenNumber, 13, &(botConfig.TotalMoneyAmount), restrict.TotalMoneyAmount)
+	mutateGenInt(randGenNumber, 14, &(botConfig.Leverage), restrict.Leverage)
 }
 
 func mutateGenFloat64(randGenNumber, genNumber int, genValue *float64, restrictMinMax MinMaxFloat64) {

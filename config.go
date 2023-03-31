@@ -16,6 +16,7 @@ type Config struct {
 	WaitAfterLastBuyPeriod int
 
 	BigFallCandlesCount int
+	BigFallSmoothPeriod int
 	BigFallPercentage   float64
 
 	DesiredPriceCandles int

@@ -234,9 +234,22 @@ func (indicator *BigFallIndicator) HasSignal() bool {
 		return false
 	}
 
-	firstCandle := indicator.buffer.GetBackCandle(indicator.config.BigFallCandlesCount).ClosePrice
-	lastCandle := indicator.buffer.GetLastCandle().ClosePrice
-	fallPercentage := -1 * CalcGrowth(firstCandle, lastCandle)
+	//firstCandle := indicator.buffer.GetBackCandle(indicator.config.BigFallCandlesCount).ClosePrice
+	//lastCandle := indicator.buffer.GetLastCandle().ClosePrice
+	//fallPercentage := -1 * CalcGrowth(firstCandle, lastCandle)
+
+	// ----------------------
+	closePrices := GetClosePrices(indicator.buffer.GetCandles())
+	smoothedPrices := FilterZeroPrices(talib.Sma(closePrices, indicator.config.BigFallSmoothPeriod))
+	smoothedLen := len(smoothedPrices)
+	if 4 > smoothedLen {
+		return false
+	}
+
+	firstPrice := smoothedPrices[0]
+	lastPrice := smoothedPrices[smoothedLen-1]
+	fallPercentage := -1 * CalcGrowth(firstPrice, lastPrice)
+	// ----------------------
 
 	return fallPercentage >= indicator.config.BigFallPercentage
 }

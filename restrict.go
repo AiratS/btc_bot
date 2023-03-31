@@ -9,6 +9,7 @@ type ConfigRestriction struct {
 	WaitAfterLastBuyPeriod MinMaxInt
 
 	BigFallCandlesCount MinMaxInt
+	BigFallSmoothPeriod MinMaxInt
 	BigFallPercentage   MinMaxFloat64
 
 	DesiredPriceCandles MinMaxInt
@@ -56,8 +57,12 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 
 		BigFallCandlesCount: MinMaxInt{
-			min: 4,
+			min: 10,
 			max: 15,
+		},
+		BigFallSmoothPeriod: MinMaxInt{
+			min: 4,
+			max: 10,
 		},
 		BigFallPercentage: MinMaxFloat64{
 			min: 0.3,
