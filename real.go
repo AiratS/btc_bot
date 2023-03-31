@@ -34,6 +34,7 @@ func GetRealBotConfig() Config {
 		WaitAfterLastBuyPeriod: 1,
 
 		BigFallCandlesCount: 1,
+		BigFallSmoothPeriod: 1,
 		BigFallPercentage:   0.1,
 
 		DesiredPriceCandles: 1,
@@ -44,6 +45,9 @@ func GetRealBotConfig() Config {
 
 		TrailingSellActivationAdditionPercentage: 1,
 		TrailingSellStopPercentage:               1,
+
+		TotalMoneyAmount: 1000,
+		Leverage:         10,
 	}
 }
 
