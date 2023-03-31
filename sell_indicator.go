@@ -244,7 +244,7 @@ func (indicator *LeverageSellIndicator) HasSignal() (bool, []Buy) {
 		indicator.config.HighSellPercentage,
 	)
 	lowerBuys := indicator.db.FetchUnsoldBuysByLowerPercentage(
-		candle.LowPrice,
+		candle.GetPrice(),
 		GetLeverageLiquidationPercentage(indicator.config.Leverage),
 	)
 

@@ -298,6 +298,20 @@ func (db *Database) GetTotalRevenue() float64 {
 	return rev.value
 }
 
+func (db *Database) GetFuturesTotalRevenue() float64 {
+	rev := revenue{}
+	query := `
+		SELECT (SUM(revenue) - COUNT(id) * $1) AS rev 
+		FROM sells 
+		WHERE revenue != 0
+		GROUP BY symbol
+	`
+	row := (*db).connect.QueryRow(query, db.config.TotalMoneyAmount*float64(db.config.Leverage))
+	row.Scan(&rev.value)
+
+	return rev.value
+}
+
 type buysCount struct {
 	value int
 }
