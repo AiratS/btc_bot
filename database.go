@@ -13,15 +13,16 @@ type Database struct {
 }
 
 type Buy struct {
-	Id           int64
-	Symbol       string
-	Coins        float64
-	ExchangeRate float64
-	DesiredPrice float64
-	CreatedAt    string
-	RealOrderId  int64
-	RealQuantity float64
-	HasSellOrder int64
+	Id            int64
+	Symbol        string
+	Coins         float64
+	ExchangeRate  float64
+	DesiredPrice  float64
+	CreatedAt     string
+	RealOrderId   int64
+	RealQuantity  float64
+	HasSellOrder  int64
+	IsLiquidation bool
 }
 
 func NewDatabase(config Config) Database {

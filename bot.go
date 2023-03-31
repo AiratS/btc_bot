@@ -299,7 +299,7 @@ func (bot *Bot) sell(buy Buy) float64 {
 		Log(fmt.Sprintf("SELL\nPrice: %f - %f\nRevenue: %f", buy.ExchangeRate, candle.ClosePrice, rev))
 	}
 
-	if ENABLE_FUTURES && buy.ExchangeRate > exchangeRate {
+	if ENABLE_FUTURES && buy.IsLiquidation {
 		rev = 0
 	}
 
@@ -311,7 +311,10 @@ func (bot *Bot) sell(buy Buy) float64 {
 		buy.Id,
 		candle.CloseTime,
 	)
-	bot.balance.sell()
+
+	if rev != 0 {
+		bot.balance.sell()
+	}
 
 	PlotAddSell(buy.Id, candle.CloseTime)
 
