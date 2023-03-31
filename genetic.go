@@ -12,8 +12,9 @@ const BOTS_COUNT = 25
 const BEST_BOTS_COUNT = 7
 const BEST_BOTS_FROM_PREV_GEN = 3
 const GENERATION_COUNT = 20
-const SELL_TIME_PUNISHMENT = 1.0
 const DEFAULT_REVENUE = -1000000
+const ENABLE_AVG_TIME = true
+const SELL_TIME_PUNISHMENT = 1.0
 
 func InitBotsDataFrame() *dataframe.DataFrame {
 	return dataframe.NewDataFrame(
@@ -180,11 +181,14 @@ func SetBotTotalRevenue(
 	totalBuysCount int,
 	avgSellTime float64,
 ) {
-	selectionDivider := avgSellTime * SELL_TIME_PUNISHMENT
-	if avgSellTime == 0 {
-		selectionDivider = 1
+	selectionDivider := 1.0
+
+	if ENABLE_AVG_TIME {
+		selectionDivider = avgSellTime * SELL_TIME_PUNISHMENT
+		if avgSellTime == 0 {
+			selectionDivider = 1
+		}
 	}
-	selectionDivider = 1
 
 	bots.UpdateRow(botNumber, nil, map[string]interface{}{
 		"TotalRevenue":   revenue,
