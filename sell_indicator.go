@@ -236,32 +236,39 @@ func NewLeverageSellIndicator(
 }
 
 func (indicator *LeverageSellIndicator) HasSignal() (bool, []Buy) {
-	candle := indicator.buffer.GetLastCandle()
+	var resultingBuys []Buy
 
-	var buys []Buy
+	candle := indicator.buffer.GetLastCandle()
 	upperBuys := indicator.db.FetchUnsoldBuysByUpperPercentage(
 		candle.GetPrice(),
 		indicator.config.HighSellPercentage,
 	)
-	lowerBuys := indicator.db.FetchUnsoldBuysByLowerPercentage(
-		candle.GetPrice(),
+	liquidationBuys := indicator.db.FetchUnsoldBuysByLowerPercentage(
+		candle.LowPrice,
 		GetLeverageLiquidationPercentage(indicator.config.Leverage),
 	)
 
 	for _, buy := range upperBuys {
-		if !indicator.hasSuchBuy(buy.Id, buys) {
-			buys = append(buys, buy)
+		if !indicator.hasSuchBuy(buy.Id, resultingBuys) {
+			resultingBuys = append(resultingBuys, buy)
 		}
 	}
 
-	for _, buy := range lowerBuys {
-		if !indicator.hasSuchBuy(buy.Id, buys) {
-			buy.IsLiquidation = true
-			buys = append(buys, buy)
+	for _, buy := range liquidationBuys {
+		if !indicator.hasSuchBuy(buy.Id, resultingBuys) {
+			resultingBuys = append(resultingBuys, buy)
 		}
 	}
 
-	return len(buys) > 0, buys
+	// Mark liquidation buys
+	for _, resultingBuy := range resultingBuys {
+		if indicator.hasSuchBuy(resultingBuy.Id, liquidationBuys) {
+			pointerResultingBuy := &resultingBuy
+			pointerResultingBuy.IsLiquidation = true
+		}
+	}
+
+	return len(resultingBuys) > 0, resultingBuys
 }
 
 func (indicator *LeverageSellIndicator) hasSuchBuy(buyId int64, buys []Buy) bool {

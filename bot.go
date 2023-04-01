@@ -275,7 +275,7 @@ func (bot *Bot) createRealMoneySellOrder(buy Buy) {
 
 	candle := bot.buffer.GetLastCandle()
 	exchangeRate := candle.GetPrice()
-	rev := calcRevenue(buy.RealQuantity, exchangeRate)
+	rev := bot.calcRevenue(buy.RealQuantity, exchangeRate, buy)
 
 	if ok, buyItem := bot.trailingSellIndicator.GetBuyItemByBuyId(buy.Id); ok {
 		orderId := bot.createAndUpdateSellOrder(buy.Id, buyItem.stopPrice, buy.RealQuantity)
@@ -288,10 +288,10 @@ func (bot *Bot) createRealMoneySellOrder(buy Buy) {
 func (bot *Bot) sell(buy Buy) float64 {
 	candle := bot.buffer.GetLastCandle()
 	exchangeRate := candle.GetPrice()
-	rev := calcRevenue(buy.Coins, exchangeRate)
+	rev := bot.calcRevenue(buy.Coins, exchangeRate, buy)
 
 	if IS_REAL_ENABLED {
-		rev = calcRevenue(buy.RealQuantity, exchangeRate)
+		rev = bot.calcRevenue(buy.RealQuantity, exchangeRate, buy)
 		//orderId := orderManager.CreateSellOrder(candle.Symbol, candle.ClosePrice, buy.RealQuantity)
 		//orderId := orderManager.CreateMarketSellOrder(candle.Symbol, candle.ClosePrice, buy.RealQuantity)
 		//bot.db.UpdateRealBuyOrderId(buy.Id, orderId)
@@ -339,8 +339,11 @@ func (bot *Bot) CreateSellOrder(symbol string, sellPrice, quantity float64) int6
 	return bot.orderManager.CreateSellOrder(symbol, sellPrice, quantity)
 }
 
-func calcRevenue(coinsCounts, exchangeRate float64) float64 {
-	return coinsCounts * exchangeRate
+func (bot *Bot) calcRevenue(coinsCounts, exchangeRate float64, buy Buy) float64 {
+	additionalPrice := (buy.ExchangeRate * bot.Config.HighSellPercentage) / 100
+	sellPrice := buy.ExchangeRate + additionalPrice
+
+	return coinsCounts * sellPrice
 }
 
 func getIntersectedBuys(eachIndicatorBuys [][]Buy) []Buy {
