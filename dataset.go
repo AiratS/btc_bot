@@ -27,16 +27,16 @@ func GetDatasetDates() []string {
 		"2019-12",
 
 		// Own
+		//"2022-08",
+		//"2022-09",
 		//"2022-10",
-		//"2022-11",
-		//"2022-12",
 	}
 }
 
 func GetValidationDatasetDates() []string {
 	return []string{
-		"2022-07",
-		"2022-08",
+		"2022-11",
+		"2022-12",
 	}
 }
 
