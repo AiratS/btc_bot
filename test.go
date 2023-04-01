@@ -116,10 +116,19 @@ func getRandomValidationDataset(validationDatasets *[]Candle) []Candle {
 	}
 
 	count := len(*validationDatasets)
-	max := int(math.Round(float64(count) / 2))
-	start := GetRandInt(0, max)
 
-	return (*validationDatasets)[start : count-1]
+	// After half of slice
+	half := int(math.Round(float64(count) / 2))
+	start := GetRandInt(0, half)
+	end := count - 1
+
+	// Before half of slice
+	if GetRandInt(0, 1) == 1 {
+		start = 0
+		end = GetRandInt(half, count-1)
+	}
+
+	return (*validationDatasets)[start:end]
 }
 
 func fixRevenue(revenue float64) float64 {
