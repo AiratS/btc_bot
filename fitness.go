@@ -26,7 +26,10 @@ func Fitness(
 
 	// Validate bot
 	Log(fmt.Sprintf("Validate bot: %d\n", botNumber))
-	validationTotalRevenue, validationTotalBuysCount, validationAvgSellTime := doBuysAndSells(validationDatasets, botConfig)
+	validationTotalRevenue, validationTotalBuysCount, validationAvgSellTime := 0.0, 0, 0.0
+	if !NO_VALIDATION {
+		validationTotalRevenue, validationTotalBuysCount, validationAvgSellTime = doBuysAndSells(validationDatasets, botConfig)
+	}
 
 	botRevenue <- BotRevenue{
 		BotNumber: botNumber,

@@ -15,6 +15,7 @@ const DATASETS_DIRECTORY = "datasets"
 const UNSOLD_BUYS_COUNT = 20
 
 // Genetic
+const NO_VALIDATION = false
 const BOTS_COUNT = 25
 const BEST_BOTS_COUNT = 7
 const BEST_BOTS_FROM_PREV_GEN = 3

@@ -16,7 +16,10 @@ func RunTest() {
 	bots := GetInitialBots()
 	//bots := GetInitialBotsFromFile("initial.csv")
 	fitnessDatasets := ImportDatasets(GetDatasetDates())
-	validationDatasets := ImportDatasets(GetValidationDatasetDates())
+	validationDatasets := &[]Candle{}
+	if !NO_VALIDATION {
+		validationDatasets = ImportDatasets(GetValidationDatasetDates())
+	}
 
 	for generation := 0; generation < GENERATION_COUNT; generation++ {
 		var botRevenueChan = make(chan BotRevenue, 5)
@@ -108,6 +111,10 @@ func RunTest() {
 }
 
 func getRandomValidationDataset(validationDatasets *[]Candle) []Candle {
+	if NO_VALIDATION {
+		return []Candle{}
+	}
+
 	count := len(*validationDatasets)
 	max := int(math.Round(float64(count) / 2))
 	start := GetRandInt(0, max)

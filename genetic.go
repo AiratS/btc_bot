@@ -206,6 +206,10 @@ func SetBotTotalRevenue(
 		}
 	}
 
+	if NO_VALIDATION {
+		ValidationTotalRevenue = 0
+	}
+
 	bots.UpdateRow(botNumber, nil, map[string]interface{}{
 		"TotalRevenue":   revenue,
 		"TotalBuysCount": totalBuysCount,
