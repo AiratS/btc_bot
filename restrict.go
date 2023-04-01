@@ -39,7 +39,7 @@ func GetBotConfigRestrictions() ConfigRestriction {
 	return ConfigRestriction{
 		HighSellPercentage: MinMaxFloat64{
 			min: 0.2,
-			max: 1,
+			max: 2,
 		},
 
 		TrailingTopPercentage: MinMaxFloat64{
@@ -52,8 +52,8 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 
 		WaitAfterLastBuyPeriod: MinMaxInt{
-			min: 10,
-			max: 60,
+			min: 1,
+			max: 30,
 		},
 
 		BigFallCandlesCount: MinMaxInt{
@@ -65,8 +65,8 @@ func GetBotConfigRestrictions() ConfigRestriction {
 			max: 10,
 		},
 		BigFallPercentage: MinMaxFloat64{
-			min: 0.3,
-			max: 1,
+			min: 0.2,
+			max: 2,
 		},
 
 		DesiredPriceCandles: MinMaxInt{
@@ -75,12 +75,12 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 
 		GradientDescentCandles: MinMaxInt{
-			min: 40,
+			min: 6,
 			max: 60,
 		},
 		GradientDescentPeriod: MinMaxInt{
-			min: 20,
-			max: 40,
+			min: 1,
+			max: 6,
 		},
 		GradientDescentGradient: MinMaxFloat64{
 			min: 0,

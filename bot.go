@@ -391,24 +391,24 @@ func setupBuyIndicators(bot *Bot) {
 		bot.db,
 	)
 
-	//bigFallIndicator := NewBigFallIndicator(
-	//	bot.Config,
-	//	bot.buffer,
-	//	bot.db,
-	//)
-
-	gradientDescentIndicator := NewGradientDescentIndicator(
+	bigFallIndicator := NewBigFallIndicator(
 		bot.Config,
 		bot.buffer,
 		bot.db,
 	)
 
+	//gradientDescentIndicator := NewGradientDescentIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
+
 	bot.BuyIndicators = []BuyIndicator{
 		//&backTrailingBuyIndicator,
 		//&buysCountIndicator,
 		&waitForPeriodIndicator,
-		//&bigFallIndicator,
-		&gradientDescentIndicator,
+		&bigFallIndicator,
+		//&gradientDescentIndicator,
 	}
 }
 
