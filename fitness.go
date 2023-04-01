@@ -31,7 +31,13 @@ func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, 
 
 	rev := 0.0
 	if ENABLE_FUTURES {
+		liquidationsCount := bot.db.CountLiquidationBuys()
 		rev = bot.db.GetFuturesTotalRevenue()
+		rev -= float64(liquidationsCount) * bot.Config.TotalMoneyAmount
+
+		if hasInvalidBuysCount(botConfig, liquidationsCount) {
+			panic("Invalid liquidations count")
+		}
 	} else {
 		rev = bot.db.GetTotalRevenue()
 	}
@@ -50,6 +56,10 @@ func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, 
 	fmt.Println(fmt.Sprintf(" DatasetRevenue: %f, TotalBuys: %d", datasetRevenue, buyCount))
 
 	return datasetRevenue, buyCount, avgSellTime
+}
+
+func hasInvalidBuysCount(botConfig Config, liquidationsCount int) bool {
+	return (BALANCE_MONEY / botConfig.TotalMoneyAmount) < float64(liquidationsCount)
 }
 
 func calcCommission(botConfig Config, buyCount int) float64 {

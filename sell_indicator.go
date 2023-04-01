@@ -261,14 +261,15 @@ func (indicator *LeverageSellIndicator) HasSignal() (bool, []Buy) {
 	}
 
 	// Mark liquidation buys
+	var newBuys []Buy
 	for _, resultingBuy := range resultingBuys {
 		if indicator.hasSuchBuy(resultingBuy.Id, liquidationBuys) {
-			pointerResultingBuy := &resultingBuy
-			pointerResultingBuy.IsLiquidation = true
+			resultingBuy.IsLiquidation = true
 		}
+		newBuys = append(newBuys, resultingBuy)
 	}
 
-	return len(resultingBuys) > 0, resultingBuys
+	return len(newBuys) > 0, newBuys
 }
 
 func (indicator *LeverageSellIndicator) hasSuchBuy(buyId int64, buys []Buy) bool {

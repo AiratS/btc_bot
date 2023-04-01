@@ -26,7 +26,7 @@ type Buy struct {
 }
 
 func NewDatabase(config Config) Database {
-	//name := time.Now().Format("db/db_2006_01_02__15_04_05.db")
+	//name := time.Now().Format("db/testdb_2006_01_02__15_04_05.db")
 	name := ":memory:"
 
 	if IS_REAL_ENABLED {
@@ -311,6 +311,18 @@ func (db *Database) GetFuturesTotalRevenue() float64 {
 	row.Scan(&rev.value)
 
 	return rev.value
+}
+
+func (db *Database) CountLiquidationBuys() int {
+	var count int
+	query := `
+		SELECT COUNT(id)
+		FROM sells
+        WHERE revenue = 0
+	`
+	(*db).connect.QueryRow(query).Scan(&count)
+
+	return count
 }
 
 type buysCount struct {
