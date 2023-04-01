@@ -1,11 +1,27 @@
 package main
 
+// Main
+const IS_REAL_ENABLED = false
+const ENABLE_FUTURES = true
+const USE_REAL_MONEY = false
+const REAL_MONEY_DB_NAME = "amazing_real"
+
+// Candle
 const CANDLE_SYMBOL = "BTCBUSD"
 const CANDLE_INTERVAL = "30m"
 const BALANCE_MONEY = 1000.0
 const COMMISSION = 0.06
 const DATASETS_DIRECTORY = "datasets"
 const UNSOLD_BUYS_COUNT = 20
+
+// Genetic
+const BOTS_COUNT = 25
+const BEST_BOTS_COUNT = 7
+const BEST_BOTS_FROM_PREV_GEN = 3
+const GENERATION_COUNT = 20
+const DEFAULT_REVENUE = -1000000
+const ENABLE_AVG_TIME = true
+const SELL_TIME_PUNISHMENT = 1.0
 
 type Config struct {
 	HighSellPercentage float64

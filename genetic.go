@@ -8,14 +8,6 @@ import (
 	"os"
 )
 
-const BOTS_COUNT = 25
-const BEST_BOTS_COUNT = 7
-const BEST_BOTS_FROM_PREV_GEN = 3
-const GENERATION_COUNT = 20
-const DEFAULT_REVENUE = -1000000
-const ENABLE_AVG_TIME = true
-const SELL_TIME_PUNISHMENT = 1.0
-
 func InitBotsDataFrame() *dataframe.DataFrame {
 	return dataframe.NewDataFrame(
 		dataframe.NewSeriesFloat64("HighSellPercentage", nil),

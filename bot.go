@@ -369,7 +369,7 @@ func resolveBufferSize(config *Config) int {
 		config.DesiredPriceCandles,
 		config.GradientDescentCandles,
 		config.GradientDescentPeriod,
-	}) + 10
+	}) + 1
 }
 
 func setupBuyIndicators(bot *Bot) {

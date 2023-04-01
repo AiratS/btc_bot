@@ -5,11 +5,6 @@ import (
 	"os"
 )
 
-const IS_REAL_ENABLED = false
-const ENABLE_FUTURES = true
-const USE_REAL_MONEY = false
-const REAL_MONEY_DB_NAME = "amazing_real"
-
 func main() {
 	// Logger
 	logFileName := resolveLogFileName()
