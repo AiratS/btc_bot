@@ -6,28 +6,45 @@ import (
 	"os"
 )
 
-var importedCandles *[]Candle
-
 func GetDatasetDates() []string {
 	return []string{
-		//"2024-01",
-		//"2024-02",
-		//"2024-03",
-		//"2022-04",
-		//"2021-10",
+		// Learn
+		//"2022-07",
+		//"2022-08",
 
-		"2023-01",
+		// Test
+		"2019-01",
+		"2019-02",
+		"2019-03",
+		"2019-04",
+		"2019-05",
+		"2019-06",
+		"2019-07",
+		"2019-08",
+		"2019-09",
+		"2019-10",
+		"2019-11",
+		"2019-12",
 
-		//"2022-01",
-		//"2022-02",
-		//"2022-03",
+		// Own
+		//"2022-10",
+		//"2022-11",
+		//"2022-12",
 	}
 }
 
-func ImportDatasets() *[]Candle {
+func GetValidationDatasetDates() []string {
+	return []string{
+		"2022-07",
+		"2022-08",
+	}
+}
+
+func ImportDatasets(dates []string) *[]Candle {
+	var importedCandles *[]Candle
 	candles := []Candle{}
 
-	for _, date := range GetDatasetDates() {
+	for _, date := range dates {
 		fileName := fmt.Sprintf("%s/%s-%s-%s.csv", DATASETS_DIRECTORY, CANDLE_SYMBOL, CANDLE_INTERVAL, date)
 		if !FileExists(fileName) {
 			panic(fmt.Sprintf("No dataset for date: %s", fileName))

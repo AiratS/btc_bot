@@ -15,10 +15,10 @@ const DATASETS_DIRECTORY = "datasets"
 const UNSOLD_BUYS_COUNT = 20
 
 // Genetic
-const BOTS_COUNT = 50
-const BEST_BOTS_COUNT = 14
-const BEST_BOTS_FROM_PREV_GEN = 6
-const GENERATION_COUNT = 200
+const BOTS_COUNT = 25
+const BEST_BOTS_COUNT = 7
+const BEST_BOTS_FROM_PREV_GEN = 3
+const GENERATION_COUNT = 20
 const DEFAULT_REVENUE = -1000000
 const ENABLE_AVG_TIME = false
 const SELL_TIME_PUNISHMENT = 1.0
@@ -50,5 +50,10 @@ type Config struct {
 	TotalRevenue   float64
 	TotalBuysCount int
 	AvgSellTime    float64
-	Selection      float64
+
+	ValidationTotalRevenue   float64
+	ValidationTotalBuysCount int
+	ValidationAvgSellTime    float64
+
+	Selection float64
 }

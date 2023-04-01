@@ -9,16 +9,35 @@ type BotRevenue struct {
 	Revenue        float64
 	TotalBuysCount int
 	AvgSellTime    float64
+
+	ValidationRevenue        float64
+	ValidationTotalBuysCount int
+	ValidationAvgSellTime    float64
 }
 
-func Fitness(botConfig Config, botNumber int, botRevenue chan BotRevenue, fitnessDatasets *[]Candle) {
+func Fitness(
+	botConfig Config,
+	botNumber int,
+	botRevenue chan BotRevenue,
+	fitnessDatasets *[]Candle,
+	validationDatasets *[]Candle,
+) {
 	totalRevenue, totalBuysCount, avgSellTime := doBuysAndSells(fitnessDatasets, botConfig)
 
+	// Validate bot
+	Log(fmt.Sprintf("Validate bot: %d\n", botNumber))
+	validationTotalRevenue, validationTotalBuysCount, validationAvgSellTime := doBuysAndSells(validationDatasets, botConfig)
+
 	botRevenue <- BotRevenue{
-		BotNumber:      botNumber,
+		BotNumber: botNumber,
+
 		Revenue:        totalRevenue,
 		TotalBuysCount: totalBuysCount,
 		AvgSellTime:    avgSellTime,
+
+		ValidationRevenue:        validationTotalRevenue,
+		ValidationTotalBuysCount: validationTotalBuysCount,
+		ValidationAvgSellTime:    validationAvgSellTime,
 	}
 }
 

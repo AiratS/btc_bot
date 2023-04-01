@@ -36,6 +36,11 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 		dataframe.NewSeriesFloat64("TotalRevenue", nil),
 		dataframe.NewSeriesInt64("TotalBuysCount", nil),
 		dataframe.NewSeriesFloat64("AvgSellTime", nil),
+
+		dataframe.NewSeriesFloat64("ValidationTotalRevenue", nil),
+		dataframe.NewSeriesInt64("ValidationTotalBuysCount", nil),
+		dataframe.NewSeriesFloat64("ValidationAvgSellTime", nil),
+
 		dataframe.NewSeriesFloat64("Selection", nil),
 	)
 }
@@ -100,7 +105,12 @@ func ImportFromCsv(fileName string) []Config {
 			TotalRevenue:   convertStringToFloat64(row[15]),
 			TotalBuysCount: convertStringToInt(row[16]),
 			AvgSellTime:    convertStringToFloat64(row[17]),
-			Selection:      convertStringToFloat64(row[18]),
+
+			ValidationTotalRevenue:   convertStringToFloat64(row[18]),
+			ValidationTotalBuysCount: convertStringToInt(row[19]),
+			ValidationAvgSellTime:    convertStringToFloat64(row[20]),
+
+			Selection: convertStringToFloat64(row[21]),
 		}
 
 		bots = append(bots, bot)
@@ -166,16 +176,26 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 		"TotalRevenue":   botConfig.TotalRevenue,
 		"TotalBuysCount": botConfig.TotalBuysCount,
 		"AvgSellTime":    botConfig.AvgSellTime,
-		"Selection":      botConfig.Selection,
+
+		"ValidationTotalRevenue":   botConfig.ValidationTotalRevenue,
+		"ValidationTotalBuysCount": botConfig.ValidationTotalBuysCount,
+		"ValidationAvgSellTime":    botConfig.ValidationAvgSellTime,
+
+		"Selection": botConfig.Selection,
 	}
 }
 
 func SetBotTotalRevenue(
 	bots *dataframe.DataFrame,
 	botNumber int,
+
 	revenue float64,
 	totalBuysCount int,
 	avgSellTime float64,
+
+	ValidationTotalRevenue float64,
+	ValidationTotalBuysCount int,
+	ValidationAvgSellTime float64,
 ) {
 	selectionDivider := 1.0
 
@@ -190,7 +210,12 @@ func SetBotTotalRevenue(
 		"TotalRevenue":   revenue,
 		"TotalBuysCount": totalBuysCount,
 		"AvgSellTime":    avgSellTime,
-		"Selection":      revenue / selectionDivider,
+
+		"ValidationTotalRevenue":   ValidationTotalRevenue,
+		"ValidationTotalBuysCount": ValidationTotalBuysCount,
+		"ValidationAvgSellTime":    ValidationAvgSellTime,
+
+		"Selection": (revenue + ValidationTotalRevenue) / selectionDivider,
 	})
 }
 
@@ -208,6 +233,10 @@ func SortBestBots(bots *dataframe.DataFrame) *dataframe.DataFrame {
 			Key:  "Selection",
 			Desc: true,
 		},
+		//{
+		//	Key:  "ValidationTotalRevenue",
+		//	Desc: true,
+		//},
 	}
 	ctx := context.Background()
 	bots.Sort(ctx, sks)
@@ -267,7 +296,12 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 		"TotalRevenue":   bot["TotalRevenue"],
 		"TotalBuysCount": bot["TotalBuysCount"],
 		"AvgSellTime":    bot["AvgSellTime"],
-		"Selection":      bot["Selection"],
+
+		"ValidationTotalRevenue":   bot["ValidationTotalRevenue"],
+		"ValidationTotalBuysCount": bot["ValidationTotalBuysCount"],
+		"ValidationAvgSellTime":    bot["ValidationAvgSellTime"],
+
+		"Selection": bot["Selection"],
 	}
 }
 
