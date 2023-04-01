@@ -160,7 +160,6 @@ func (bot *Bot) buy() {
 	candle := bot.buffer.GetLastCandle()
 	exchangeRate := candle.GetPrice()
 
-	coinsCount := bot.Config.TotalMoneyAmount / exchangeRate
 	desiredPrice := bot.calcDesiredPrice(exchangeRate)
 
 	if !USE_REAL_MONEY && !bot.balance.HasEnoughMoneyForBuy() {
@@ -168,6 +167,7 @@ func (bot *Bot) buy() {
 	}
 
 	if IS_REAL_ENABLED {
+		coinsCount := (bot.Config.TotalMoneyAmount * LEVERAGE) / exchangeRate
 		rawPrice := candle.ClosePrice
 
 		Log(fmt.Sprintf("GOT_BUY_SIGNAL\nPrice: %f", rawPrice))
@@ -205,7 +205,7 @@ func (bot *Bot) buy() {
 			bot.createAndUpdateSellOrder(buyId, upperPrice, quantity)
 		}
 	} else {
-		coinsCount = (bot.Config.TotalMoneyAmount * float64(bot.Config.Leverage)) / exchangeRate
+		coinsCount := (bot.Config.TotalMoneyAmount * float64(bot.Config.Leverage)) / exchangeRate
 
 		buyInsertResult := bot.db.AddBuy(
 			CANDLE_SYMBOL,

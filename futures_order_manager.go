@@ -92,7 +92,7 @@ func (manager *FuturesOrderManager) getPositionInfo() PositionInfo {
 
 func (manager *FuturesOrderManager) CanBuyForPrice(symbol string, price float64) bool {
 	if info, hasLotSize := manager.exchangeInfo.GetInfoForSymbol(symbol); hasLotSize {
-		quantityLotSize := valueToLotSize(calcQuantity(price, ORDER_MONEY), info.LotSize.stepSize)
+		quantityLotSize := valueToLotSize(calcQuantity(price, manager.getOrderMoney()), info.LotSize.stepSize)
 		priceConverted := valueToPriceSize(price, info.PriceFilter.tickSize)
 
 		return info.LotSize.minQty <= quantityLotSize && quantityLotSize <= info.LotSize.maxQty &&
