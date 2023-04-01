@@ -37,8 +37,8 @@ func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, 
 	}
 
 	buyCount := bot.db.GetBuysCount()
-	commission := float64(buyCount) * COMMISSION
-	//commission := 0.0
+	//commission := float64(buyCount) * COMMISSION
+	commission := calcCommission(botConfig, buyCount)
 	datasetRevenue := rev - commission
 	unsold := bot.db.CountUnsoldBuys()
 	//avgSellTime := bot.db.GetMedianSellTime()
@@ -50,4 +50,13 @@ func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, 
 	fmt.Println(fmt.Sprintf(" DatasetRevenue: %f, TotalBuys: %d", datasetRevenue, buyCount))
 
 	return datasetRevenue, buyCount, avgSellTime
+}
+
+func calcCommission(botConfig Config, buyCount int) float64 {
+	usedMoney := botConfig.TotalMoneyAmount
+	if ENABLE_FUTURES {
+		usedMoney = botConfig.TotalMoneyAmount * float64(botConfig.Leverage)
+	}
+
+	return (float64(buyCount) * usedMoney * COMMISSION) / 100
 }
