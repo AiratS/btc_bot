@@ -55,9 +55,10 @@ type Config struct {
 	UnsoldBuysCount int
 	AvgSellTime     float64
 
-	ValidationTotalRevenue   float64
-	ValidationTotalBuysCount int
-	ValidationAvgSellTime    float64
+	ValidationTotalRevenue    float64
+	ValidationTotalBuysCount  int
+	ValidationUnsoldBuysCount int
+	ValidationAvgSellTime     float64
 
 	Selection float64
 }

@@ -42,6 +42,7 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 
 		dataframe.NewSeriesFloat64("ValidationTotalRevenue", nil),
 		dataframe.NewSeriesInt64("ValidationTotalBuysCount", nil),
+		dataframe.NewSeriesInt64("ValidationUnsoldBuysCount", nil),
 		dataframe.NewSeriesFloat64("ValidationAvgSellTime", nil),
 
 		dataframe.NewSeriesFloat64("Selection", nil),
@@ -112,11 +113,12 @@ func ImportFromCsv(fileName string) []Config {
 			UnsoldBuysCount: convertStringToInt(row[19]),
 			AvgSellTime:     convertStringToFloat64(row[20]),
 
-			ValidationTotalRevenue:   convertStringToFloat64(row[21]),
-			ValidationTotalBuysCount: convertStringToInt(row[22]),
-			ValidationAvgSellTime:    convertStringToFloat64(row[23]),
+			ValidationTotalRevenue:    convertStringToFloat64(row[21]),
+			ValidationTotalBuysCount:  convertStringToInt(row[22]),
+			ValidationUnsoldBuysCount: convertStringToInt(row[23]),
+			ValidationAvgSellTime:     convertStringToFloat64(row[24]),
 
-			Selection: convertStringToFloat64(row[24]),
+			Selection: convertStringToFloat64(row[25]),
 		}
 
 		bots = append(bots, bot)
@@ -188,9 +190,10 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 		"UnsoldBuysCount": botConfig.UnsoldBuysCount,
 		"AvgSellTime":     botConfig.AvgSellTime,
 
-		"ValidationTotalRevenue":   botConfig.ValidationTotalRevenue,
-		"ValidationTotalBuysCount": botConfig.ValidationTotalBuysCount,
-		"ValidationAvgSellTime":    botConfig.ValidationAvgSellTime,
+		"ValidationTotalRevenue":    botConfig.ValidationTotalRevenue,
+		"ValidationTotalBuysCount":  botConfig.ValidationTotalBuysCount,
+		"ValidationUnsoldBuysCount": botConfig.ValidationUnsoldBuysCount,
+		"ValidationAvgSellTime":     botConfig.ValidationAvgSellTime,
 
 		"Selection": botConfig.Selection,
 	}
@@ -207,6 +210,7 @@ func SetBotTotalRevenue(
 
 	ValidationTotalRevenue float64,
 	ValidationTotalBuysCount int,
+	ValidationUnsoldBuysCount int,
 	ValidationAvgSellTime float64,
 ) {
 	selectionDivider := 1.0
@@ -228,9 +232,10 @@ func SetBotTotalRevenue(
 		"UnsoldBuysCount": UnsoldBuysCount,
 		"AvgSellTime":     avgSellTime,
 
-		"ValidationTotalRevenue":   ValidationTotalRevenue,
-		"ValidationTotalBuysCount": ValidationTotalBuysCount,
-		"ValidationAvgSellTime":    ValidationAvgSellTime,
+		"ValidationTotalRevenue":    ValidationTotalRevenue,
+		"ValidationTotalBuysCount":  ValidationTotalBuysCount,
+		"ValidationUnsoldBuysCount": ValidationUnsoldBuysCount,
+		"ValidationAvgSellTime":     ValidationAvgSellTime,
 
 		"Selection": (revenue + ValidationTotalRevenue) / selectionDivider,
 	})
@@ -317,9 +322,10 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 		"UnsoldBuysCount": bot["UnsoldBuysCount"],
 		"AvgSellTime":     bot["AvgSellTime"],
 
-		"ValidationTotalRevenue":   bot["ValidationTotalRevenue"],
-		"ValidationTotalBuysCount": bot["ValidationTotalBuysCount"],
-		"ValidationAvgSellTime":    bot["ValidationAvgSellTime"],
+		"ValidationTotalRevenue":    bot["ValidationTotalRevenue"],
+		"ValidationTotalBuysCount":  bot["ValidationTotalBuysCount"],
+		"ValidationUnsoldBuysCount": bot["ValidationUnsoldBuysCount"],
+		"ValidationAvgSellTime":     bot["ValidationAvgSellTime"],
 
 		"Selection": bot["Selection"],
 	}

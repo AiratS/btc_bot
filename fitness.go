@@ -11,9 +11,10 @@ type BotRevenue struct {
 	UnsoldBuysCount int
 	AvgSellTime     float64
 
-	ValidationRevenue        float64
-	ValidationTotalBuysCount int
-	ValidationAvgSellTime    float64
+	ValidationRevenue         float64
+	ValidationTotalBuysCount  int
+	ValidationUnsoldBuysCount int
+	ValidationAvgSellTime     float64
 }
 
 func Fitness(
@@ -27,9 +28,9 @@ func Fitness(
 
 	// Validate bot
 	Log(fmt.Sprintf("Validate bot: %d\n", botNumber))
-	validationTotalRevenue, validationTotalBuysCount, validationAvgSellTime := 0.0, 0, 0.0
+	validationTotalRevenue, validationTotalBuysCount, ValidationUnsoldBuysCount, validationAvgSellTime := 0.0, 0, 0, 0.0
 	if !NO_VALIDATION {
-		validationTotalRevenue, validationTotalBuysCount, _, validationAvgSellTime = doBuysAndSells(validationDatasets, botConfig)
+		validationTotalRevenue, validationTotalBuysCount, ValidationUnsoldBuysCount, validationAvgSellTime = doBuysAndSells(validationDatasets, botConfig)
 	}
 
 	botRevenue <- BotRevenue{
@@ -40,9 +41,10 @@ func Fitness(
 		UnsoldBuysCount: unsoldBuysCount,
 		AvgSellTime:     avgSellTime,
 
-		ValidationRevenue:        validationTotalRevenue,
-		ValidationTotalBuysCount: validationTotalBuysCount,
-		ValidationAvgSellTime:    validationAvgSellTime,
+		ValidationRevenue:         validationTotalRevenue,
+		ValidationTotalBuysCount:  validationTotalBuysCount,
+		ValidationAvgSellTime:     validationAvgSellTime,
+		ValidationUnsoldBuysCount: ValidationUnsoldBuysCount,
 	}
 }
 
