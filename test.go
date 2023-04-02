@@ -48,11 +48,13 @@ func RunTest() {
 					rev,
 					totalBuysCount,
 					UnsoldBuysCount,
+					convertToInt(bot["LiquidationCount"]),
 					avgSellTime,
 
 					convertToFloat64(bot["ValidationTotalRevenue"]),
 					convertToInt(bot["ValidationTotalBuysCount"]),
 					convertToInt(bot["ValidationUnsoldBuysCount"]),
+					convertToInt(bot["ValidationLiquidationCount"]),
 					convertToFloat64(bot["ValidationAvgSellTime"]),
 				)
 				continue
@@ -78,11 +80,13 @@ func RunTest() {
 				rev,
 				botRevenue.TotalBuysCount,
 				botRevenue.UnsoldBuysCount,
+				botRevenue.LiquidationCount,
 				botRevenue.AvgSellTime,
 
 				fixRevenue(botRevenue.ValidationRevenue),
 				botRevenue.ValidationTotalBuysCount,
 				botRevenue.ValidationUnsoldBuysCount,
+				botRevenue.ValidationLiquidationCount,
 				botRevenue.ValidationAvgSellTime,
 			)
 			fmt.Println(fmt.Sprintf(

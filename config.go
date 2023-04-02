@@ -15,13 +15,13 @@ const DATASETS_DIRECTORY = "datasets"
 const UNSOLD_BUYS_COUNT = 20
 
 // Genetic
-const NO_VALIDATION = true
+const NO_VALIDATION = false
 const BOTS_COUNT = 25
 const BEST_BOTS_COUNT = 7
 const BEST_BOTS_FROM_PREV_GEN = 3
 const GENERATION_COUNT = 20
 const DEFAULT_REVENUE = -1000000
-const ENABLE_AVG_TIME = false
+const ENABLE_AVG_TIME = true
 const SELL_TIME_PUNISHMENT = 1.0
 
 type Config struct {
@@ -50,15 +50,17 @@ type Config struct {
 	FuturesAvgSellTimeMinutes           int
 	FuturesLeverageActivationPercentage float64
 
-	TotalRevenue    float64
-	TotalBuysCount  int
-	UnsoldBuysCount int
-	AvgSellTime     float64
+	TotalRevenue     float64
+	TotalBuysCount   int
+	UnsoldBuysCount  int
+	LiquidationCount int
+	AvgSellTime      float64
 
-	ValidationTotalRevenue    float64
-	ValidationTotalBuysCount  int
-	ValidationUnsoldBuysCount int
-	ValidationAvgSellTime     float64
+	ValidationTotalRevenue     float64
+	ValidationTotalBuysCount   int
+	ValidationUnsoldBuysCount  int
+	ValidationLiquidationCount int
+	ValidationAvgSellTime      float64
 
 	Selection float64
 }

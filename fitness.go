@@ -5,16 +5,18 @@ import (
 )
 
 type BotRevenue struct {
-	BotNumber       int
-	Revenue         float64
-	TotalBuysCount  int
-	UnsoldBuysCount int
-	AvgSellTime     float64
+	BotNumber        int
+	Revenue          float64
+	TotalBuysCount   int
+	UnsoldBuysCount  int
+	LiquidationCount int
+	AvgSellTime      float64
 
-	ValidationRevenue         float64
-	ValidationTotalBuysCount  int
-	ValidationUnsoldBuysCount int
-	ValidationAvgSellTime     float64
+	ValidationRevenue          float64
+	ValidationTotalBuysCount   int
+	ValidationUnsoldBuysCount  int
+	ValidationLiquidationCount int
+	ValidationAvgSellTime      float64
 }
 
 func Fitness(
@@ -24,31 +26,33 @@ func Fitness(
 	fitnessDatasets *[]Candle,
 	validationDatasets *[]Candle,
 ) {
-	totalRevenue, totalBuysCount, unsoldBuysCount, avgSellTime := doBuysAndSells(fitnessDatasets, botConfig)
+	totalRevenue, totalBuysCount, unsoldBuysCount, LiquidationCount, avgSellTime := doBuysAndSells(fitnessDatasets, botConfig)
 
 	// Validate bot
 	Log(fmt.Sprintf("Validate bot: %d\n", botNumber))
-	validationTotalRevenue, validationTotalBuysCount, ValidationUnsoldBuysCount, validationAvgSellTime := 0.0, 0, 0, 0.0
+	validationTotalRevenue, validationTotalBuysCount, ValidationUnsoldBuysCount, ValidationLiquidationCount, validationAvgSellTime := 0.0, 0, 0, 0, 0.0
 	if !NO_VALIDATION {
-		validationTotalRevenue, validationTotalBuysCount, ValidationUnsoldBuysCount, validationAvgSellTime = doBuysAndSells(validationDatasets, botConfig)
+		validationTotalRevenue, validationTotalBuysCount, ValidationUnsoldBuysCount, ValidationLiquidationCount, validationAvgSellTime = doBuysAndSells(validationDatasets, botConfig)
 	}
 
 	botRevenue <- BotRevenue{
 		BotNumber: botNumber,
 
-		Revenue:         totalRevenue,
-		TotalBuysCount:  totalBuysCount,
-		UnsoldBuysCount: unsoldBuysCount,
-		AvgSellTime:     avgSellTime,
+		Revenue:          totalRevenue,
+		TotalBuysCount:   totalBuysCount,
+		UnsoldBuysCount:  unsoldBuysCount,
+		LiquidationCount: LiquidationCount,
+		AvgSellTime:      avgSellTime,
 
-		ValidationRevenue:         validationTotalRevenue,
-		ValidationTotalBuysCount:  validationTotalBuysCount,
-		ValidationAvgSellTime:     validationAvgSellTime,
-		ValidationUnsoldBuysCount: ValidationUnsoldBuysCount,
+		ValidationRevenue:          validationTotalRevenue,
+		ValidationTotalBuysCount:   validationTotalBuysCount,
+		ValidationLiquidationCount: ValidationLiquidationCount,
+		ValidationAvgSellTime:      validationAvgSellTime,
+		ValidationUnsoldBuysCount:  ValidationUnsoldBuysCount,
 	}
 }
 
-func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, int, float64) {
+func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, int, int, float64) {
 	bot := NewBot(&botConfig)
 
 	for _, candle := range *fitnessDatasets {
@@ -56,8 +60,9 @@ func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, 
 	}
 
 	rev := 0.0
+	liquidationsCount := 0
 	if ENABLE_FUTURES {
-		liquidationsCount := bot.db.CountLiquidationBuys()
+		liquidationsCount = bot.db.CountLiquidationBuys()
 		rev = bot.db.GetFuturesTotalRevenue()
 		rev -= float64(liquidationsCount) * bot.Config.TotalMoneyAmount
 
@@ -81,7 +86,7 @@ func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, 
 
 	fmt.Println(fmt.Sprintf(" DatasetRevenue: %f, TotalBuys: %d, UnsoldBuys: %d", datasetRevenue, buyCount, unsold))
 
-	return datasetRevenue, buyCount, unsold, avgSellTime
+	return datasetRevenue, buyCount, unsold, liquidationsCount, avgSellTime
 }
 
 func hasInvalidBuysCount(botConfig Config, liquidationsCount int) bool {
