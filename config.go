@@ -50,9 +50,10 @@ type Config struct {
 	FuturesAvgSellTimeMinutes           int
 	FuturesLeverageActivationPercentage float64
 
-	TotalRevenue   float64
-	TotalBuysCount int
-	AvgSellTime    float64
+	TotalRevenue    float64
+	TotalBuysCount  int
+	UnsoldBuysCount int
+	AvgSellTime     float64
 
 	ValidationTotalRevenue   float64
 	ValidationTotalBuysCount int

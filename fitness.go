@@ -5,10 +5,11 @@ import (
 )
 
 type BotRevenue struct {
-	BotNumber      int
-	Revenue        float64
-	TotalBuysCount int
-	AvgSellTime    float64
+	BotNumber       int
+	Revenue         float64
+	TotalBuysCount  int
+	UnsoldBuysCount int
+	AvgSellTime     float64
 
 	ValidationRevenue        float64
 	ValidationTotalBuysCount int
@@ -22,21 +23,22 @@ func Fitness(
 	fitnessDatasets *[]Candle,
 	validationDatasets *[]Candle,
 ) {
-	totalRevenue, totalBuysCount, avgSellTime := doBuysAndSells(fitnessDatasets, botConfig)
+	totalRevenue, totalBuysCount, unsoldBuysCount, avgSellTime := doBuysAndSells(fitnessDatasets, botConfig)
 
 	// Validate bot
 	Log(fmt.Sprintf("Validate bot: %d\n", botNumber))
 	validationTotalRevenue, validationTotalBuysCount, validationAvgSellTime := 0.0, 0, 0.0
 	if !NO_VALIDATION {
-		validationTotalRevenue, validationTotalBuysCount, validationAvgSellTime = doBuysAndSells(validationDatasets, botConfig)
+		validationTotalRevenue, validationTotalBuysCount, _, validationAvgSellTime = doBuysAndSells(validationDatasets, botConfig)
 	}
 
 	botRevenue <- BotRevenue{
 		BotNumber: botNumber,
 
-		Revenue:        totalRevenue,
-		TotalBuysCount: totalBuysCount,
-		AvgSellTime:    avgSellTime,
+		Revenue:         totalRevenue,
+		TotalBuysCount:  totalBuysCount,
+		UnsoldBuysCount: unsoldBuysCount,
+		AvgSellTime:     avgSellTime,
 
 		ValidationRevenue:        validationTotalRevenue,
 		ValidationTotalBuysCount: validationTotalBuysCount,
@@ -44,7 +46,7 @@ func Fitness(
 	}
 }
 
-func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, float64) {
+func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, int, float64) {
 	bot := NewBot(&botConfig)
 
 	for _, candle := range *fitnessDatasets {
@@ -75,9 +77,9 @@ func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, 
 	fmt.Println(unsold)
 	bot.Kill()
 
-	fmt.Println(fmt.Sprintf(" DatasetRevenue: %f, TotalBuys: %d", datasetRevenue, buyCount))
+	fmt.Println(fmt.Sprintf(" DatasetRevenue: %f, TotalBuys: %d, UnsoldBuys: %d", datasetRevenue, buyCount, unsold))
 
-	return datasetRevenue, buyCount, avgSellTime
+	return datasetRevenue, buyCount, unsold, avgSellTime
 }
 
 func hasInvalidBuysCount(botConfig Config, liquidationsCount int) bool {

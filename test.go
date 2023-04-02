@@ -35,6 +35,7 @@ func RunTest() {
 			if *botNumber < BEST_BOTS_FROM_PREV_GEN && generation > 0 {
 				rev := convertToFloat64(bot["TotalRevenue"])
 				totalBuysCount := convertToInt(bot["TotalBuysCount"])
+				UnsoldBuysCount := convertToInt(bot["UnsoldBuysCount"])
 				avgSellTime := convertToFloat64(bot["AvgSellTime"])
 				//successPercentage := convertToFloat64(bot["SuccessPercentage"])
 
@@ -46,6 +47,7 @@ func RunTest() {
 
 					rev,
 					totalBuysCount,
+					UnsoldBuysCount,
 					avgSellTime,
 
 					convertToFloat64(bot["ValidationTotalRevenue"]),
@@ -74,6 +76,7 @@ func RunTest() {
 
 				rev,
 				botRevenue.TotalBuysCount,
+				botRevenue.UnsoldBuysCount,
 				botRevenue.AvgSellTime,
 
 				fixRevenue(botRevenue.ValidationRevenue),

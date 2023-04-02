@@ -37,6 +37,7 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 
 		dataframe.NewSeriesFloat64("TotalRevenue", nil),
 		dataframe.NewSeriesInt64("TotalBuysCount", nil),
+		dataframe.NewSeriesInt64("UnsoldBuysCount", nil),
 		dataframe.NewSeriesFloat64("AvgSellTime", nil),
 
 		dataframe.NewSeriesFloat64("ValidationTotalRevenue", nil),
@@ -106,15 +107,16 @@ func ImportFromCsv(fileName string) []Config {
 			FuturesAvgSellTimeMinutes:           convertStringToInt(row[15]),
 			FuturesLeverageActivationPercentage: convertStringToFloat64(row[16]),
 
-			TotalRevenue:   convertStringToFloat64(row[17]),
-			TotalBuysCount: convertStringToInt(row[18]),
-			AvgSellTime:    convertStringToFloat64(row[19]),
+			TotalRevenue:    convertStringToFloat64(row[17]),
+			TotalBuysCount:  convertStringToInt(row[18]),
+			UnsoldBuysCount: convertStringToInt(row[19]),
+			AvgSellTime:     convertStringToFloat64(row[20]),
 
-			ValidationTotalRevenue:   convertStringToFloat64(row[20]),
-			ValidationTotalBuysCount: convertStringToInt(row[21]),
-			ValidationAvgSellTime:    convertStringToFloat64(row[22]),
+			ValidationTotalRevenue:   convertStringToFloat64(row[21]),
+			ValidationTotalBuysCount: convertStringToInt(row[22]),
+			ValidationAvgSellTime:    convertStringToFloat64(row[23]),
 
-			Selection: convertStringToFloat64(row[23]),
+			Selection: convertStringToFloat64(row[24]),
 		}
 
 		bots = append(bots, bot)
@@ -181,9 +183,10 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 		"FuturesAvgSellTimeMinutes":           botConfig.FuturesAvgSellTimeMinutes,
 		"FuturesLeverageActivationPercentage": botConfig.FuturesLeverageActivationPercentage,
 
-		"TotalRevenue":   botConfig.TotalRevenue,
-		"TotalBuysCount": botConfig.TotalBuysCount,
-		"AvgSellTime":    botConfig.AvgSellTime,
+		"TotalRevenue":    botConfig.TotalRevenue,
+		"TotalBuysCount":  botConfig.TotalBuysCount,
+		"UnsoldBuysCount": botConfig.UnsoldBuysCount,
+		"AvgSellTime":     botConfig.AvgSellTime,
 
 		"ValidationTotalRevenue":   botConfig.ValidationTotalRevenue,
 		"ValidationTotalBuysCount": botConfig.ValidationTotalBuysCount,
@@ -199,6 +202,7 @@ func SetBotTotalRevenue(
 
 	revenue float64,
 	totalBuysCount int,
+	UnsoldBuysCount int,
 	avgSellTime float64,
 
 	ValidationTotalRevenue float64,
@@ -219,9 +223,10 @@ func SetBotTotalRevenue(
 	}
 
 	bots.UpdateRow(botNumber, nil, map[string]interface{}{
-		"TotalRevenue":   revenue,
-		"TotalBuysCount": totalBuysCount,
-		"AvgSellTime":    avgSellTime,
+		"TotalRevenue":    revenue,
+		"TotalBuysCount":  totalBuysCount,
+		"UnsoldBuysCount": UnsoldBuysCount,
+		"AvgSellTime":     avgSellTime,
 
 		"ValidationTotalRevenue":   ValidationTotalRevenue,
 		"ValidationTotalBuysCount": ValidationTotalBuysCount,
@@ -307,9 +312,10 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 		"FuturesAvgSellTimeMinutes":           bot["FuturesAvgSellTimeMinutes"],
 		"FuturesLeverageActivationPercentage": bot["FuturesLeverageActivationPercentage"],
 
-		"TotalRevenue":   bot["TotalRevenue"],
-		"TotalBuysCount": bot["TotalBuysCount"],
-		"AvgSellTime":    bot["AvgSellTime"],
+		"TotalRevenue":    bot["TotalRevenue"],
+		"TotalBuysCount":  bot["TotalBuysCount"],
+		"UnsoldBuysCount": bot["UnsoldBuysCount"],
+		"AvgSellTime":     bot["AvgSellTime"],
 
 		"ValidationTotalRevenue":   bot["ValidationTotalRevenue"],
 		"ValidationTotalBuysCount": bot["ValidationTotalBuysCount"],
