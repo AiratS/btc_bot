@@ -41,7 +41,7 @@ func GetBotConfigRestrictions() ConfigRestriction {
 	return ConfigRestriction{
 		HighSellPercentage: MinMaxFloat64{
 			min: 0.2,
-			max: 2,
+			max: 1,
 		},
 
 		TrailingTopPercentage: MinMaxFloat64{
@@ -107,8 +107,8 @@ func GetBotConfigRestrictions() ConfigRestriction {
 			max: 10,
 		},
 		FuturesAvgSellTimeMinutes: MinMaxInt{
-			min: 60 * 1,      // 1 hour
-			max: 60 * 24 * 5, // 5 days
+			min: 60 * 1,       // 1 hour
+			max: 60 * 24 * 10, // 5 days
 		},
 		FuturesLeverageActivationPercentage: MinMaxFloat64{
 			min: 10,

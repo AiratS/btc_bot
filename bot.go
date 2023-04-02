@@ -280,8 +280,7 @@ func (bot *Bot) createRealMoneySellOrder(buy Buy) {
 	}
 
 	candle := bot.buffer.GetLastCandle()
-	exchangeRate := candle.GetPrice()
-	rev := bot.calcRevenue(buy.RealQuantity, exchangeRate, buy)
+	rev := bot.calcRevenue(buy.RealQuantity, bot.Config.HighSellPercentage, buy.ExchangeRate)
 
 	if ok, buyItem := bot.trailingSellIndicator.GetBuyItemByBuyId(buy.Id); ok {
 		orderId := bot.createAndUpdateSellOrder(buy.Id, buyItem.stopPrice, buy.RealQuantity)
@@ -294,10 +293,10 @@ func (bot *Bot) createRealMoneySellOrder(buy Buy) {
 func (bot *Bot) sell(buy Buy) float64 {
 	candle := bot.buffer.GetLastCandle()
 	exchangeRate := candle.GetPrice()
-	rev := bot.calcRevenue(buy.Coins, exchangeRate, buy)
+	rev := bot.calcRevenue(buy.Coins, bot.Config.HighSellPercentage, buy.ExchangeRate)
 
 	if IS_REAL_ENABLED {
-		rev = bot.calcRevenue(buy.RealQuantity, exchangeRate, buy)
+		rev = bot.calcRevenue(buy.RealQuantity, bot.Config.HighSellPercentage, buy.ExchangeRate)
 		//orderId := orderManager.CreateSellOrder(candle.Symbol, candle.ClosePrice, buy.RealQuantity)
 		//orderId := orderManager.CreateMarketSellOrder(candle.Symbol, candle.ClosePrice, buy.RealQuantity)
 		//bot.db.UpdateRealBuyOrderId(buy.Id, orderId)
@@ -309,7 +308,7 @@ func (bot *Bot) sell(buy Buy) float64 {
 		if buy.BuyType == Liquidation {
 			rev = 0
 		} else if buy.BuyType == TimeCancel {
-			// TODO: add revenue calculation
+			rev = bot.calcFuturesTimeCancelRevenue(buy.Coins, buy.ExchangeRate, exchangeRate)
 		}
 	}
 
@@ -331,6 +330,24 @@ func (bot *Bot) sell(buy Buy) float64 {
 	return rev
 }
 
+func (bot *Bot) calcFuturesTimeCancelRevenue(coinsCount, buyPrice, sellPrice float64) float64 {
+	percentage := CalcGrowth(buyPrice, sellPrice)
+
+	if percentage < 0 {
+		leverage := float64(bot.Config.Leverage)
+		totalMoney := bot.Config.TotalMoneyAmount * leverage
+
+		minus := CalcValuePercentage(
+			totalMoney,
+			-1*percentage*leverage,
+		)
+
+		return totalMoney - minus
+	}
+
+	return bot.calcRevenue(coinsCount, percentage, buyPrice)
+}
+
 func (bot *Bot) createAndUpdateSellOrder(buyId int64, sellPrice, quantity float64) int64 {
 	//orderId := orderManager.CreateMarketSellOrder(CANDLE_SYMBOL, sellPrice, quantity)
 	sellOrderId := bot.CreateSellOrder(CANDLE_SYMBOL, sellPrice, quantity)
@@ -349,9 +366,9 @@ func (bot *Bot) CreateSellOrder(symbol string, sellPrice, quantity float64) int6
 	return bot.orderManager.CreateSellOrder(symbol, sellPrice, quantity)
 }
 
-func (bot *Bot) calcRevenue(coinsCounts, exchangeRate float64, buy Buy) float64 {
-	additionalPrice := (buy.ExchangeRate * bot.Config.HighSellPercentage) / 100
-	sellPrice := buy.ExchangeRate + additionalPrice
+func (bot *Bot) calcRevenue(coinsCounts, upperPercentage, buyExchangeRate float64) float64 {
+	additionalPrice := (buyExchangeRate * upperPercentage) / 100
+	sellPrice := buyExchangeRate + additionalPrice
 
 	return coinsCounts * sellPrice
 }

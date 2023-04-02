@@ -225,13 +225,21 @@ func SetBotTotalRevenue(
 
 	if ENABLE_AVG_TIME {
 		selectionDivider = avgSellTime * SELL_TIME_PUNISHMENT
-		if avgSellTime == 0 {
+		if avgSellTime < 1.5 {
 			selectionDivider = 1
 		}
 	}
 
+	plusValidation := 0.0
 	if NO_VALIDATION {
 		ValidationTotalRevenue = 0
+	} else {
+		plusValidation = ValidationTotalRevenue
+		//if ValidationTotalRevenue < 0 {
+		//	plusValidation = -10 * ValidationTotalRevenue
+		//} else {
+		//	plusValidation = ValidationTotalRevenue
+		//}
 	}
 
 	bots.UpdateRow(botNumber, nil, map[string]interface{}{
@@ -247,7 +255,7 @@ func SetBotTotalRevenue(
 		"ValidationLiquidationCount": ValidationLiquidationCount,
 		"ValidationAvgSellTime":      ValidationAvgSellTime,
 
-		"Selection": (revenue + ValidationTotalRevenue) / selectionDivider,
+		"Selection": (revenue + plusValidation) / selectionDivider,
 	})
 }
 

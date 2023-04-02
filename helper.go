@@ -105,6 +105,10 @@ func CalcGrowth(startPrice, endPrice float64) float64 {
 	return ((endPrice * 100) / startPrice) - 100
 }
 
+func CalcValuePercentage(total, percentage float64) float64 {
+	return (total * percentage) / 100
+}
+
 func GetClosePrice(candles []Candle, count int) []float64 {
 	var prices []float64
 

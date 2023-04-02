@@ -64,7 +64,7 @@ func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, 
 	if ENABLE_FUTURES {
 		liquidationsCount = bot.db.CountLiquidationBuys()
 		rev = bot.db.GetFuturesTotalRevenue()
-		rev -= float64(liquidationsCount) * bot.Config.TotalMoneyAmount
+		//rev -= float64(liquidationsCount) * bot.Config.TotalMoneyAmount
 
 		if hasInvalidBuysCount(botConfig, liquidationsCount) {
 			panic("Invalid liquidations count")

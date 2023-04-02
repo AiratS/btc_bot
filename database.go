@@ -326,7 +326,7 @@ func (db *Database) GetTotalRevenue() float64 {
 		FROM sells 
 		GROUP BY symbol
 	`
-	row := (*db).connect.QueryRow(query, db.config.TotalMoneyAmount*float64(db.config.Leverage))
+	row := (*db).connect.QueryRow(query, db.config.TotalMoneyAmount)
 	row.Scan(&rev.value)
 
 	return rev.value
@@ -337,7 +337,6 @@ func (db *Database) GetFuturesTotalRevenue() float64 {
 	query := `
 		SELECT (SUM(revenue) - COUNT(id) * $1) AS rev 
 		FROM sells 
-		WHERE revenue != 0
 		GROUP BY symbol
 	`
 	row := (*db).connect.QueryRow(query, db.config.TotalMoneyAmount*float64(db.config.Leverage))
