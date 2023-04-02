@@ -32,6 +32,8 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 
 		dataframe.NewSeriesFloat64("TotalMoneyAmount", nil),
 		dataframe.NewSeriesInt64("Leverage", nil),
+		dataframe.NewSeriesInt64("FuturesAvgSellTimeMinutes", nil),
+		dataframe.NewSeriesFloat64("FuturesLeverageActivationPercentage", nil),
 
 		dataframe.NewSeriesFloat64("TotalRevenue", nil),
 		dataframe.NewSeriesInt64("TotalBuysCount", nil),
@@ -99,18 +101,20 @@ func ImportFromCsv(fileName string) []Config {
 			TrailingSellActivationAdditionPercentage: convertStringToFloat64(row[11]),
 			TrailingSellStopPercentage:               convertStringToFloat64(row[12]),
 
-			TotalMoneyAmount: convertStringToFloat64(row[13]),
-			Leverage:         convertStringToInt(row[14]),
+			TotalMoneyAmount:                    convertStringToFloat64(row[13]),
+			Leverage:                            convertStringToInt(row[14]),
+			FuturesAvgSellTimeMinutes:           convertStringToInt(row[15]),
+			FuturesLeverageActivationPercentage: convertStringToFloat64(row[16]),
 
-			TotalRevenue:   convertStringToFloat64(row[15]),
-			TotalBuysCount: convertStringToInt(row[16]),
-			AvgSellTime:    convertStringToFloat64(row[17]),
+			TotalRevenue:   convertStringToFloat64(row[17]),
+			TotalBuysCount: convertStringToInt(row[18]),
+			AvgSellTime:    convertStringToFloat64(row[19]),
 
-			ValidationTotalRevenue:   convertStringToFloat64(row[18]),
-			ValidationTotalBuysCount: convertStringToInt(row[19]),
-			ValidationAvgSellTime:    convertStringToFloat64(row[20]),
+			ValidationTotalRevenue:   convertStringToFloat64(row[20]),
+			ValidationTotalBuysCount: convertStringToInt(row[21]),
+			ValidationAvgSellTime:    convertStringToFloat64(row[22]),
 
-			Selection: convertStringToFloat64(row[21]),
+			Selection: convertStringToFloat64(row[23]),
 		}
 
 		bots = append(bots, bot)
@@ -143,8 +147,10 @@ func InitBotConfig() Config {
 		TrailingSellActivationAdditionPercentage: GetRandFloat64Config(restrict.TrailingSellActivationAdditionPercentage),
 		TrailingSellStopPercentage:               GetRandFloat64Config(restrict.TrailingSellStopPercentage),
 
-		TotalMoneyAmount: GetRandFloat64Config(restrict.TotalMoneyAmount),
-		Leverage:         GetRandIntConfig(restrict.Leverage),
+		TotalMoneyAmount:                    GetRandFloat64Config(restrict.TotalMoneyAmount),
+		Leverage:                            GetRandIntConfig(restrict.Leverage),
+		FuturesAvgSellTimeMinutes:           GetRandIntConfig(restrict.FuturesAvgSellTimeMinutes),
+		FuturesLeverageActivationPercentage: GetRandFloat64Config(restrict.FuturesLeverageActivationPercentage),
 	}
 }
 
@@ -170,8 +176,10 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 		"TrailingSellActivationAdditionPercentage": botConfig.TrailingSellActivationAdditionPercentage,
 		"TrailingSellStopPercentage":               botConfig.TrailingSellStopPercentage,
 
-		"TotalMoneyAmount": botConfig.TotalMoneyAmount,
-		"Leverage":         botConfig.Leverage,
+		"TotalMoneyAmount":                    botConfig.TotalMoneyAmount,
+		"Leverage":                            botConfig.Leverage,
+		"FuturesAvgSellTimeMinutes":           botConfig.FuturesAvgSellTimeMinutes,
+		"FuturesLeverageActivationPercentage": botConfig.FuturesLeverageActivationPercentage,
 
 		"TotalRevenue":   botConfig.TotalRevenue,
 		"TotalBuysCount": botConfig.TotalBuysCount,
@@ -294,8 +302,10 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 		"TrailingSellActivationAdditionPercentage": bot["TrailingSellActivationAdditionPercentage"],
 		"TrailingSellStopPercentage":               bot["TrailingSellStopPercentage"],
 
-		"TotalMoneyAmount": bot["TotalMoneyAmount"],
-		"Leverage":         bot["Leverage"],
+		"TotalMoneyAmount":                    bot["TotalMoneyAmount"],
+		"Leverage":                            bot["Leverage"],
+		"FuturesAvgSellTimeMinutes":           bot["FuturesAvgSellTimeMinutes"],
+		"FuturesLeverageActivationPercentage": bot["FuturesLeverageActivationPercentage"],
 
 		"TotalRevenue":   bot["TotalRevenue"],
 		"TotalBuysCount": bot["TotalBuysCount"],
@@ -388,8 +398,10 @@ func ConvertDataFrameToBotConfig(dataFrame map[interface{}]interface{}) Config {
 		TrailingSellActivationAdditionPercentage: convertToFloat64(dataFrame["TrailingSellActivationAdditionPercentage"]),
 		TrailingSellStopPercentage:               convertToFloat64(dataFrame["TrailingSellStopPercentage"]),
 
-		TotalMoneyAmount: convertToFloat64(dataFrame["TotalMoneyAmount"]),
-		Leverage:         convertToInt(dataFrame["Leverage"]),
+		TotalMoneyAmount:                    convertToFloat64(dataFrame["TotalMoneyAmount"]),
+		Leverage:                            convertToInt(dataFrame["Leverage"]),
+		FuturesAvgSellTimeMinutes:           convertToInt(dataFrame["FuturesAvgSellTimeMinutes"]),
+		FuturesLeverageActivationPercentage: convertToFloat64(dataFrame["FuturesLeverageActivationPercentage"]),
 	}
 }
 
@@ -418,12 +430,14 @@ func makeChild(
 		TrailingSellActivationAdditionPercentage: GetFloatFatherOrMomGen(maleBotConfig.TrailingSellActivationAdditionPercentage, femaleBotConfig.TrailingSellActivationAdditionPercentage),
 		TrailingSellStopPercentage:               GetFloatFatherOrMomGen(maleBotConfig.TrailingSellStopPercentage, femaleBotConfig.TrailingSellStopPercentage),
 
-		TotalMoneyAmount: GetFloatFatherOrMomGen(maleBotConfig.TotalMoneyAmount, femaleBotConfig.TotalMoneyAmount),
-		Leverage:         GetIntFatherOrMomGen(maleBotConfig.Leverage, femaleBotConfig.Leverage),
+		TotalMoneyAmount:                    GetFloatFatherOrMomGen(maleBotConfig.TotalMoneyAmount, femaleBotConfig.TotalMoneyAmount),
+		Leverage:                            GetIntFatherOrMomGen(maleBotConfig.Leverage, femaleBotConfig.Leverage),
+		FuturesAvgSellTimeMinutes:           GetIntFatherOrMomGen(maleBotConfig.FuturesAvgSellTimeMinutes, femaleBotConfig.FuturesAvgSellTimeMinutes),
+		FuturesLeverageActivationPercentage: GetFloatFatherOrMomGen(maleBotConfig.FuturesLeverageActivationPercentage, femaleBotConfig.FuturesLeverageActivationPercentage),
 	}
 
 	for i := 0; i < 10; i++ {
-		mutateGens(&childBotConfig, GetRandInt(0, 14))
+		mutateGens(&childBotConfig, GetRandInt(0, 16))
 	}
 
 	return GetBotConfigMapInterface(childBotConfig)
@@ -454,6 +468,8 @@ func mutateGens(botConfig *Config, randGenNumber int) {
 
 	mutateGenFloat64(randGenNumber, 13, &(botConfig.TotalMoneyAmount), restrict.TotalMoneyAmount)
 	mutateGenInt(randGenNumber, 14, &(botConfig.Leverage), restrict.Leverage)
+	mutateGenInt(randGenNumber, 15, &(botConfig.FuturesAvgSellTimeMinutes), restrict.FuturesAvgSellTimeMinutes)
+	mutateGenFloat64(randGenNumber, 16, &(botConfig.FuturesLeverageActivationPercentage), restrict.FuturesLeverageActivationPercentage)
 }
 
 func mutateGenFloat64(randGenNumber, genNumber int, genValue *float64, restrictMinMax MinMaxFloat64) {

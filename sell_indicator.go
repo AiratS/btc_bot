@@ -237,39 +237,58 @@ func NewLeverageSellIndicator(
 
 func (indicator *LeverageSellIndicator) HasSignal() (bool, []Buy) {
 	var resultingBuys []Buy
-
 	candle := indicator.buffer.GetLastCandle()
+
+	// Upper buys
 	upperBuys := indicator.db.FetchUnsoldBuysByUpperPercentage(
 		candle.GetPrice(),
 		indicator.config.HighSellPercentage,
 	)
+	indicator.appendBuyIfNotExists(&resultingBuys, upperBuys)
+
+	// Liquidation buys
 	liquidationBuys := indicator.db.FetchUnsoldBuysByLowerPercentage(
 		candle.LowPrice,
 		GetLeverageLiquidationPercentage(indicator.config.Leverage),
 	)
+	indicator.appendBuyIfNotExists(&resultingBuys, liquidationBuys)
 
-	for _, buy := range upperBuys {
-		if !indicator.hasSuchBuy(buy.Id, resultingBuys) {
-			resultingBuys = append(resultingBuys, buy)
-		}
-	}
+	// Time cancel buys
+	//timeCancelBuys := indicator.db.FetchTimeCancelBuys(
+	//	candle.CloseTime,
+	//	indicator.config.FuturesAvgSellTimeMinutes,
+	//)
+	//indicator.appendBuyIfNotExists(&resultingBuys, timeCancelBuys)
 
-	for _, buy := range liquidationBuys {
-		if !indicator.hasSuchBuy(buy.Id, resultingBuys) {
-			resultingBuys = append(resultingBuys, buy)
-		}
-	}
+	// Mark timeCancel
+	//indicator.markBuys(&resultingBuys, timeCancelBuys, TimeCancel)
 
 	// Mark liquidation buys
-	var newBuys []Buy
-	for _, resultingBuy := range resultingBuys {
-		if indicator.hasSuchBuy(resultingBuy.Id, liquidationBuys) {
-			resultingBuy.IsLiquidation = true
+	indicator.markBuys(&resultingBuys, liquidationBuys, Liquidation)
+
+	return len(resultingBuys) > 0, resultingBuys
+}
+
+func (indicator *LeverageSellIndicator) appendBuyIfNotExists(saveList *[]Buy, newList []Buy) {
+	for _, buy := range newList {
+		if !indicator.hasSuchBuy(buy.Id, *saveList) {
+			*saveList = append(*saveList, buy)
 		}
-		newBuys = append(newBuys, resultingBuy)
+	}
+}
+
+func (indicator *LeverageSellIndicator) markBuys(
+	targetList *[]Buy,
+	markList []Buy,
+	buyType BuyType,
+) {
+	for idx, targetBuy := range *targetList {
+		if indicator.hasSuchBuy(targetBuy.Id, markList) {
+			(*targetList)[idx].BuyType = buyType
+		}
 	}
 
-	return len(newBuys) > 0, newBuys
+	fmt.Println()
 }
 
 func (indicator *LeverageSellIndicator) hasSuchBuy(buyId int64, buys []Buy) bool {

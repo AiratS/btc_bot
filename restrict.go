@@ -21,8 +21,10 @@ type ConfigRestriction struct {
 	TrailingSellActivationAdditionPercentage MinMaxFloat64
 	TrailingSellStopPercentage               MinMaxFloat64
 
-	TotalMoneyAmount MinMaxFloat64
-	Leverage         MinMaxInt
+	TotalMoneyAmount                    MinMaxFloat64
+	Leverage                            MinMaxInt
+	FuturesAvgSellTimeMinutes           MinMaxInt
+	FuturesLeverageActivationPercentage MinMaxFloat64
 }
 
 type MinMaxInt struct {
@@ -103,6 +105,14 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		Leverage: MinMaxInt{
 			min: 1,
 			max: 10,
+		},
+		FuturesAvgSellTimeMinutes: MinMaxInt{
+			min: 60 * 1,      // 1 hour
+			max: 60 * 24 * 5, // 5 days
+		},
+		FuturesLeverageActivationPercentage: MinMaxFloat64{
+			min: 10,
+			max: 300,
 		},
 	}
 }

@@ -45,8 +45,10 @@ type Config struct {
 	TrailingSellActivationAdditionPercentage float64
 	TrailingSellStopPercentage               float64
 
-	TotalMoneyAmount float64
-	Leverage         int
+	TotalMoneyAmount                    float64
+	Leverage                            int
+	FuturesAvgSellTimeMinutes           int
+	FuturesLeverageActivationPercentage float64
 
 	TotalRevenue   float64
 	TotalBuysCount int

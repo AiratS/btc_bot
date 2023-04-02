@@ -12,17 +12,24 @@ type Database struct {
 	config  Config
 }
 
+type BuyType int
+
+const (
+	Liquidation BuyType = 1
+	TimeCancel  BuyType = 2
+)
+
 type Buy struct {
-	Id            int64
-	Symbol        string
-	Coins         float64
-	ExchangeRate  float64
-	DesiredPrice  float64
-	CreatedAt     string
-	RealOrderId   int64
-	RealQuantity  float64
-	HasSellOrder  int64
-	IsLiquidation bool
+	Id           int64
+	Symbol       string
+	Coins        float64
+	ExchangeRate float64
+	DesiredPrice float64
+	CreatedAt    string
+	RealOrderId  int64
+	RealQuantity float64
+	HasSellOrder int64
+	BuyType      BuyType
 }
 
 func NewDatabase(config Config) Database {
@@ -271,6 +278,32 @@ func (db *Database) FetchUnsoldBuysById(buyIds []int64) []Buy {
 	if err != nil {
 		panic(err)
 	}
+	defer rows.Close()
+
+	for rows.Next() {
+		buy := Buy{}
+		rows.Scan(&buy.Id, &buy.Symbol, &buy.Coins, &buy.ExchangeRate, &buy.DesiredPrice, &buy.CreatedAt, &buy.RealOrderId, &buy.RealQuantity, &buy.HasSellOrder)
+		unsoldBuys = append(unsoldBuys, buy)
+	}
+
+	return unsoldBuys
+}
+
+func (db *Database) FetchTimeCancelBuys(createdAt string, minutes int) []Buy {
+	unsoldBuys := []Buy{}
+	query := `
+		SELECT b.*
+		FROM buys AS b 
+        LEFT JOIN sells AS s 
+        	ON s.buy_id = b.id 
+        WHERE s.id IS NULL 
+            AND b.created_at < $1
+	`
+
+	candleTime := ConvertDateStringToTime(createdAt)
+	zombieDuration := GetCurrentMinusTime(candleTime, minutes)
+
+	rows, _ := db.connect.Query(query, zombieDuration.Format("2006-01-02 15:04:05"))
 	defer rows.Close()
 
 	for rows.Next() {

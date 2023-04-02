@@ -305,8 +305,12 @@ func (bot *Bot) sell(buy Buy) float64 {
 		Log(fmt.Sprintf("SELL\nPrice: %f - %f\nRevenue: %f", buy.ExchangeRate, candle.ClosePrice, rev))
 	}
 
-	if ENABLE_FUTURES && buy.IsLiquidation {
-		rev = 0
+	if ENABLE_FUTURES {
+		if buy.BuyType == Liquidation {
+			rev = 0
+		} else if buy.BuyType == TimeCancel {
+			// TODO: add revenue calculation
+		}
 	}
 
 	bot.db.AddSell(
