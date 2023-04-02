@@ -24,6 +24,8 @@ const DEFAULT_REVENUE = -1000000
 const ENABLE_AVG_TIME = true
 const SELL_TIME_PUNISHMENT = 1.0
 
+const ENABLE_TIME_CANCEL = true
+
 type Config struct {
 	HighSellPercentage float64
 

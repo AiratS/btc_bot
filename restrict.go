@@ -108,7 +108,7 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 		FuturesAvgSellTimeMinutes: MinMaxInt{
 			min: 60 * 1,       // 1 hour
-			max: 60 * 24 * 10, // 5 days
+			max: 60 * 24 * 14, // 5 days
 		},
 		FuturesLeverageActivationPercentage: MinMaxFloat64{
 			min: 10,

@@ -253,15 +253,17 @@ func (indicator *LeverageSellIndicator) HasSignal() (bool, []Buy) {
 	)
 	indicator.appendBuyIfNotExists(&resultingBuys, liquidationBuys)
 
-	// Time cancel buys
-	timeCancelBuys := indicator.db.FetchTimeCancelBuys(
-		candle.CloseTime,
-		indicator.config.FuturesAvgSellTimeMinutes,
-	)
-	indicator.appendBuyIfNotExists(&resultingBuys, timeCancelBuys)
+	if ENABLE_TIME_CANCEL {
+		// Time cancel buys
+		timeCancelBuys := indicator.db.FetchTimeCancelBuys(
+			candle.CloseTime,
+			indicator.config.FuturesAvgSellTimeMinutes,
+		)
+		indicator.appendBuyIfNotExists(&resultingBuys, timeCancelBuys)
 
-	// Mark timeCancel
-	indicator.markBuys(&resultingBuys, timeCancelBuys, TimeCancel)
+		// Mark timeCancel
+		indicator.markBuys(&resultingBuys, timeCancelBuys, TimeCancel)
+	}
 
 	// Mark liquidation buys
 	indicator.markBuys(&resultingBuys, liquidationBuys, Liquidation)
