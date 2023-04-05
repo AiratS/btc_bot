@@ -336,10 +336,23 @@ func (db *Database) GetFuturesTotalRevenue() float64 {
 	rev := revenue{}
 	query := `
 		SELECT (SUM(revenue) - COUNT(id) * $1) AS rev 
-		FROM sells 
-		GROUP BY symbol
+		FROM sells
+		WHERE revenue > 0
 	`
 	row := (*db).connect.QueryRow(query, db.config.TotalMoneyAmount*float64(db.config.Leverage))
+	row.Scan(&rev.value)
+
+	return rev.value
+}
+
+func (db *Database) GetTimeCancelTotalRevenue() float64 {
+	rev := revenue{}
+	query := `
+		SELECT SUM(revenue)
+		FROM sells 
+		WHERE revenue < 0
+	`
+	row := (*db).connect.QueryRow(query)
 	row.Scan(&rev.value)
 
 	return rev.value

@@ -26,7 +26,7 @@ func (balance *Balance) buy() {
 		balance.inBalanceMoney = 0
 	}
 
-	balance.buysCount++
+	//balance.buysCount++
 
 	Log(fmt.Sprintf(
 		"Balance__BUY\nBuysCount: %d\nInBalanceMoney:%f",
@@ -35,13 +35,17 @@ func (balance *Balance) buy() {
 	))
 }
 
-func (balance *Balance) sell() {
-	balance.buysCount--
-	if balance.buysCount < 0 {
-		balance.buysCount = 0
+func (balance *Balance) sell(returnMoney float64) {
+	//balance.buysCount--
+	//if balance.buysCount < 0 {
+	//	balance.buysCount = 0
+	//}
+
+	if returnMoney > balance.config.TotalMoneyAmount {
+		returnMoney = balance.config.TotalMoneyAmount
 	}
 
-	balance.inBalanceMoney += balance.config.TotalMoneyAmount
+	balance.inBalanceMoney += returnMoney
 	if balance.inBalanceMoney > BALANCE_MONEY {
 		balance.inBalanceMoney = BALANCE_MONEY
 	}

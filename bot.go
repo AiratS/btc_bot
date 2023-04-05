@@ -304,11 +304,20 @@ func (bot *Bot) sell(buy Buy) float64 {
 		Log(fmt.Sprintf("SELL\nPrice: %f - %f\nRevenue: %f", buy.ExchangeRate, candle.ClosePrice, rev))
 	}
 
+	returnMoney := bot.Config.TotalMoneyAmount
+
 	if ENABLE_FUTURES {
 		if buy.BuyType == Liquidation {
 			rev = 0
+			returnMoney = 0
 		} else if buy.BuyType == TimeCancel {
 			rev = bot.calcFuturesTimeCancelRevenue(buy.Coins, buy.ExchangeRate, exchangeRate)
+
+			if rev > bot.Config.TotalMoneyAmount {
+				returnMoney = bot.Config.TotalMoneyAmount
+			} else {
+				returnMoney = bot.Config.TotalMoneyAmount - rev
+			}
 		}
 	}
 
@@ -321,9 +330,7 @@ func (bot *Bot) sell(buy Buy) float64 {
 		candle.CloseTime,
 	)
 
-	if rev != 0 {
-		bot.balance.sell()
-	}
+	bot.balance.sell(returnMoney)
 
 	PlotAddSell(buy.Id, candle.CloseTime)
 
@@ -334,15 +341,15 @@ func (bot *Bot) calcFuturesTimeCancelRevenue(coinsCount, buyPrice, sellPrice flo
 	percentage := CalcGrowth(buyPrice, sellPrice)
 
 	if percentage < 0 {
-		leverage := float64(bot.Config.Leverage)
-		totalMoney := bot.Config.TotalMoneyAmount * leverage
+		//leverage := float64(bot.Config.Leverage)
+		totalMoney := bot.Config.TotalMoneyAmount // * leverage
 
 		minus := CalcValuePercentage(
 			totalMoney,
-			-1*percentage*leverage,
+			-1*percentage,
 		)
 
-		return totalMoney - minus
+		return -minus // -(totalMoney - minus)
 	}
 
 	return bot.calcRevenue(coinsCount, percentage, buyPrice)
@@ -412,11 +419,11 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	waitForPeriodIndicator := NewWaitForPeriodIndicator(
-		bot.Config,
-		bot.buffer,
-		bot.db,
-	)
+	//waitForPeriodIndicator := NewWaitForPeriodIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
 
 	bigFallIndicator := NewBigFallIndicator(
 		bot.Config,
@@ -433,7 +440,7 @@ func setupBuyIndicators(bot *Bot) {
 	bot.BuyIndicators = []BuyIndicator{
 		//&backTrailingBuyIndicator,
 		//&buysCountIndicator,
-		&waitForPeriodIndicator,
+		//&waitForPeriodIndicator,
 		&bigFallIndicator,
 		//&gradientDescentIndicator,
 	}
