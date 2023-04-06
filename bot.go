@@ -317,6 +317,9 @@ func (bot *Bot) sell(buy Buy) float64 {
 				returnMoney = bot.Config.TotalMoneyAmount
 			} else {
 				returnMoney = bot.Config.TotalMoneyAmount - rev
+
+				bot.futuresOrderManager.CancelOrder(CANDLE_SYMBOL, buy.RealOrderId)
+				bot.createAndUpdateSellOrder(buy.Id, exchangeRate, buy.RealQuantity)
 			}
 		}
 	}

@@ -202,6 +202,25 @@ func (manager *FuturesOrderManager) CreateSellOrder(symbol string, stopPrice, qu
 	return 0
 }
 
+func (manager *FuturesOrderManager) CancelOrder(symbol string, orderId int64) int64 {
+	if !manager.isEnabled {
+		return 0
+	}
+
+	order, err := manager.futuresClient.
+		NewCancelOrderService().
+		Symbol(symbol).
+		OrderID(orderId).
+		Do(context.Background())
+
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+
+	return order.OrderID
+}
+
 func (manager *FuturesOrderManager) getOrderMoney() float64 {
 	return ORDER_MONEY * LEVERAGE
 }
