@@ -318,8 +318,10 @@ func (bot *Bot) sell(buy Buy) float64 {
 			} else {
 				returnMoney = bot.Config.TotalMoneyAmount - rev
 
-				bot.futuresOrderManager.CancelOrder(CANDLE_SYMBOL, buy.RealOrderId)
-				bot.createAndUpdateSellOrder(buy.Id, exchangeRate, buy.RealQuantity)
+				if IS_REAL_ENABLED && USE_REAL_MONEY {
+					bot.futuresOrderManager.CancelOrder(CANDLE_SYMBOL, buy.RealOrderId)
+					bot.createAndUpdateSellOrder(buy.Id, exchangeRate, buy.RealQuantity)
+				}
 			}
 		}
 	}
