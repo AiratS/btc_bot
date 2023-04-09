@@ -310,6 +310,8 @@ func (bot *Bot) sell(buy Buy) float64 {
 		if buy.BuyType == Liquidation {
 			rev = 0
 			returnMoney = 0
+
+			Log(fmt.Sprintf("GOT_LIQUIDATION\nOrderId: %d\n", buy.RealOrderId))
 		} else if buy.BuyType == TimeCancel {
 			rev = bot.calcFuturesTimeCancelRevenue(buy.Coins, buy.ExchangeRate, exchangeRate)
 
