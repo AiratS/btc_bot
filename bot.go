@@ -331,6 +331,7 @@ func (bot *Bot) sell(buy Buy) float64 {
 		}
 	}
 
+	Log(fmt.Sprintf("JUST_ADD_SELL\nOrderId: %d\n", buy.RealOrderId))
 	bot.db.AddSell(
 		CANDLE_SYMBOL,
 		buy.Coins,
