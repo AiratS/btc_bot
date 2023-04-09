@@ -313,15 +313,18 @@ func (bot *Bot) sell(buy Buy) float64 {
 		} else if buy.BuyType == TimeCancel {
 			rev = bot.calcFuturesTimeCancelRevenue(buy.Coins, buy.ExchangeRate, exchangeRate)
 
+			Log(fmt.Sprintf("GOT_TIME_CANCEL\nOrderId: %d\n", buy.RealOrderId))
+
+			if IS_REAL_ENABLED && USE_REAL_MONEY {
+				Log(fmt.Sprintf("CANCEL_ORDER\nOrderId: %d\n", buy.RealOrderId))
+				bot.futuresOrderManager.CancelOrder(CANDLE_SYMBOL, buy.RealOrderId)
+				bot.createAndUpdateSellOrder(buy.Id, exchangeRate, buy.RealQuantity)
+			}
+
 			if rev > bot.Config.TotalMoneyAmount {
 				returnMoney = bot.Config.TotalMoneyAmount
 			} else {
 				returnMoney = bot.Config.TotalMoneyAmount - rev
-
-				if IS_REAL_ENABLED && USE_REAL_MONEY {
-					bot.futuresOrderManager.CancelOrder(CANDLE_SYMBOL, buy.RealOrderId)
-					bot.createAndUpdateSellOrder(buy.Id, exchangeRate, buy.RealQuantity)
-				}
 			}
 		}
 	}
