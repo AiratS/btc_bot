@@ -99,11 +99,11 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 
 		TotalMoneyAmount: MinMaxFloat64{
-			min: 10,
-			max: 300,
+			min: 1000,
+			max: 1000,
 		},
 		Leverage: MinMaxInt{
-			min: 1,
+			min: 10,
 			max: 10,
 		},
 		FuturesAvgSellTimeMinutes: MinMaxInt{
