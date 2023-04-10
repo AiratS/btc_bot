@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/adshao/go-binance/v2"
 	"github.com/adshao/go-binance/v2/futures"
+	"math"
 	"reflect"
 )
 
@@ -334,7 +335,7 @@ func (bot *Bot) sell(buy Buy) float64 {
 			if rev > bot.Config.TotalMoneyAmount {
 				returnMoney = bot.Config.TotalMoneyAmount
 			} else {
-				returnMoney = bot.Config.TotalMoneyAmount - rev
+				returnMoney = bot.Config.TotalMoneyAmount - math.Abs(rev)
 			}
 		}
 	}
@@ -356,16 +357,22 @@ func (bot *Bot) sell(buy Buy) float64 {
 	return rev
 }
 
-func (bot *Bot) calcFuturesTimeCancelRevenue(coinsCount, buyPrice, sellPrice float64) float64 {
-	percentage := CalcGrowth(buyPrice, sellPrice)
+func (bot *Bot) calcFuturesTimeCancelRevenue(coinsCount, buyPrice, currentPrice float64) float64 {
+	percentage := CalcGrowth(buyPrice, currentPrice)
 
 	if percentage < 0 {
 		//leverage := float64(bot.Config.Leverage)
 		totalMoney := bot.Config.TotalMoneyAmount // * leverage
 
+		liqPercentage := GetLeverageLiquidationPercentage(bot.Config.Leverage)
+		lose := buyPrice - currentPrice
+		lPrice := CalcBottomPrice(buyPrice, liqPercentage)
+		total := buyPrice - lPrice
+		minusPercentage := (lose * 100) / total
+
 		minus := CalcValuePercentage(
 			totalMoney,
-			-1*percentage,
+			minusPercentage,
 		)
 
 		return -minus // -(totalMoney - minus)
