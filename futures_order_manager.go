@@ -21,21 +21,22 @@ type PositionInfo struct {
 }
 
 func NewFuturesOrderManager(futuresClient *futures.Client) FuturesOrderManager {
-	res, err := futuresClient.NewExchangeInfoService().
-		Do(context.Background())
-
-	if err != nil {
-		panic(err)
-	}
-
-	info := NewFuturesExchangeInfo(res)
 	service := FuturesOrderManager{
 		futuresClient: futuresClient,
 		isEnabled:     USE_REAL_MONEY,
-		exchangeInfo:  &info,
 	}
 
 	if USE_REAL_MONEY {
+		res, err := futuresClient.NewExchangeInfoService().
+			Do(context.Background())
+
+		if err != nil {
+			panic(err)
+		}
+
+		info := NewFuturesExchangeInfo(res)
+		service.exchangeInfo = &info
+
 		service.adjustConfiguration()
 	}
 
@@ -186,6 +187,7 @@ func (manager *FuturesOrderManager) CreateSellOrder(symbol string, stopPrice, qu
 			Symbol(symbol).
 			Side(futures.SideTypeSell).
 			Type(futures.OrderTypeLimit).
+			PositionSide(futures.PositionSideTypeLong).
 			TimeInForce(futures.TimeInForceTypeGTC).
 			Quantity(floatToBinancePrice(quantity)).
 			Price(floatToBinancePrice(priceConverted)).

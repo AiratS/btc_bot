@@ -107,27 +107,35 @@ func (bot *Bot) runSellIndicators() {
 	// Sell
 	for _, buy := range getIntersectedBuys(eachIndicatorBuys) {
 		if IS_REAL_ENABLED {
-			if USE_REAL_MONEY && !bot.IsTrailingSellIndicatorEnabled && bot.IsBuySold(CANDLE_SYMBOL, buy.RealOrderId) {
-				bot.sell(buy)
-				bot.finishSellIndicators(buy)
-			}
-
-			// has sell order
-			if USE_REAL_MONEY && bot.IsTrailingSellIndicatorEnabled {
-				if buy.HasSellOrder == 0 {
-					bot.createRealMoneySellOrder(buy)
-					bot.finishSellIndicators(buy)
-				} else {
-					if bot.IsBuySold(CANDLE_SYMBOL, buy.RealOrderId) {
-						bot.sell(buy)
-					}
-				}
-			}
-
 			if !USE_REAL_MONEY {
 				bot.sell(buy)
 				bot.finishSellIndicators(buy)
+				return
 			}
+
+			if ENABLE_FUTURES && ENABLE_TIME_CANCEL && buy.BuyType == TimeCancel {
+				bot.sell(buy)
+				bot.finishSellIndicators(buy)
+				return
+			}
+
+			if bot.IsBuySold(CANDLE_SYMBOL, buy.RealOrderId) {
+				bot.sell(buy)
+				bot.finishSellIndicators(buy)
+				return
+			}
+
+			// has sell order
+			//if USE_REAL_MONEY && bot.IsTrailingSellIndicatorEnabled {
+			//	if buy.HasSellOrder == 0 {
+			//		bot.createRealMoneySellOrder(buy)
+			//		bot.finishSellIndicators(buy)
+			//	} else {
+			//		if bot.IsBuySold(CANDLE_SYMBOL, buy.RealOrderId) {
+			//			bot.sell(buy)
+			//		}
+			//	}
+			//}
 		} else {
 			rev := bot.sell(buy)
 			bot.finishSellIndicators(buy)
