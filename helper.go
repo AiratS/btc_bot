@@ -410,5 +410,29 @@ func GetLeverageLiquidationPercentage(leverage int) float64 {
 		return 7.1
 	}
 
+	if leverage == 15 {
+		return 6.6
+	}
+
+	if leverage == 16 {
+		return 6.25
+	}
+
+	if leverage == 17 {
+		return 5.8
+	}
+
+	if leverage == 18 {
+		return 5.5
+	}
+
+	if leverage == 19 {
+		return 5.2
+	}
+
+	if leverage == 20 {
+		return 5
+	}
+
 	return 100
 }

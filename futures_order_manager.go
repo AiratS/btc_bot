@@ -155,6 +155,7 @@ func (manager *FuturesOrderManager) CreateMarketBuyOrder(symbol string, price fl
 			Symbol(symbol).
 			Side(futures.SideTypeBuy).
 			Type(futures.OrderTypeMarket).
+			//PositionSide(futures.PositionSideTypeLong).
 			Quantity(floatToBinancePrice(quantityLotSize)).
 			Do(context.Background())
 
@@ -187,7 +188,7 @@ func (manager *FuturesOrderManager) CreateSellOrder(symbol string, stopPrice, qu
 			Symbol(symbol).
 			Side(futures.SideTypeSell).
 			Type(futures.OrderTypeLimit).
-			PositionSide(futures.PositionSideTypeLong).
+			//PositionSide(futures.PositionSideTypeLong).
 			TimeInForce(futures.TimeInForceTypeGTC).
 			Quantity(floatToBinancePrice(quantity)).
 			Price(floatToBinancePrice(priceConverted)).
