@@ -251,10 +251,23 @@ func (indicator *LeverageSellIndicator) HasSignal() (bool, []Buy) {
 	indicator.appendBuyIfNotExists(&resultingBuys, desiredPriceBuys)
 
 	// Liquidation buys
-	liquidationBuys := indicator.db.FetchUnsoldBuysByLowerPercentage(
-		candle.LowPrice,
+	//liquidationBuys := indicator.db.FetchUnsoldBuysByLowerPercentage(
+	//	candle.LowPrice,
+	//	GetLeverageLiquidationPercentage(indicator.config.Leverage),
+	//)
+	//
+	var liquidationBuys []Buy
+
+	futuresAvgPrice := indicator.getFuturesAvgPrice()
+	liquidationPrice := CalcBottomPrice(
+		futuresAvgPrice,
 		GetLeverageLiquidationPercentage(indicator.config.Leverage),
 	)
+
+	if candle.GetPrice() <= liquidationPrice {
+		liquidationBuys = indicator.db.FetchUnsoldBuys()
+	}
+
 	indicator.appendBuyIfNotExists(&resultingBuys, liquidationBuys)
 
 	// Time cancel buys
@@ -273,6 +286,12 @@ func (indicator *LeverageSellIndicator) HasSignal() (bool, []Buy) {
 	indicator.markBuys(&resultingBuys, liquidationBuys, Liquidation)
 
 	return len(resultingBuys) > 0, resultingBuys
+}
+
+func (indicator *LeverageSellIndicator) getFuturesAvgPrice() float64 {
+	unsoldBuys := indicator.db.FetchUnsoldBuys()
+
+	return CalcFuturesAvgPrice(unsoldBuys)
 }
 
 func (indicator *LeverageSellIndicator) appendBuyIfNotExists(saveList *[]Buy, newList []Buy) {

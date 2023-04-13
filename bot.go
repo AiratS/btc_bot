@@ -199,14 +199,13 @@ func (bot *Bot) buy() {
 		bot.balance.buy()
 
 		buyId, _ := buyInsertResult.LastInsertId()
+		Log(fmt.Sprintf("BUY\nPrice: %f\nQuantity: %f\nOrderId: %d", orderPrice, quantity, orderId))
 		bot.runAfterBuy(buyId)
 
-		Log(fmt.Sprintf("BUY\nPrice: %f\nQuantity: %f\nOrderId: %d", orderPrice, quantity, orderId))
-
-		if USE_REAL_MONEY && !bot.IsTrailingSellIndicatorEnabled {
-			upperPrice := CalcUpperPrice(orderPrice, bot.Config.HighSellPercentage)
-			bot.createAndUpdateSellOrder(buyId, upperPrice, quantity)
-		}
+		//if USE_REAL_MONEY && !bot.IsTrailingSellIndicatorEnabled {
+		//	upperPrice := CalcUpperPrice(orderPrice, bot.Config.HighSellPercentage)
+		//	bot.createAndUpdateSellOrder(buyId, upperPrice, quantity)
+		//}
 	} else {
 		coinsCount := bot.Config.TotalMoneyAmount / exchangeRate
 		if ENABLE_FUTURES {
@@ -262,6 +261,14 @@ func (bot *Bot) runAfterBuy(buyId int64) {
 	unsoldBuys := bot.db.FetchUnsoldBuys()
 	avgFuturesPrice := CalcFuturesAvgPrice(unsoldBuys)
 	desiredSellPrice := CalcUpperPrice(avgFuturesPrice, bot.Config.HighSellPercentage)
+
+	liquidationPrice := CalcBottomPrice(avgFuturesPrice, GetLeverageLiquidationPercentage(bot.Config.Leverage))
+	Log(fmt.Sprintf(
+		"AVG_PRICE\n: AvgPrice: %f\nDesirecSellPrice: %f\n:LiquidationPrice: %f",
+		avgFuturesPrice,
+		desiredSellPrice,
+		liquidationPrice,
+	))
 
 	lastIdx := len(unsoldBuys) - 1
 	for idx, buy := range unsoldBuys {
