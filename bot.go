@@ -263,8 +263,23 @@ func (bot *Bot) runAfterBuy(buyId int64) {
 	avgFuturesPrice := CalcFuturesAvgPrice(unsoldBuys)
 	desiredSellPrice := CalcUpperPrice(avgFuturesPrice, bot.Config.HighSellPercentage)
 
-	for _, buy := range unsoldBuys {
-		bot.db.UpdateDesiredPriceByBuyId(buy.Id, desiredSellPrice)
+	lastIdx := len(unsoldBuys) - 1
+	for idx, buy := range unsoldBuys {
+		if !USE_REAL_MONEY {
+			bot.db.UpdateDesiredPriceByBuyId(buy.Id, desiredSellPrice)
+			continue
+		}
+
+		if !IS_REAL_ENABLED {
+			panic("Disable real time!")
+		}
+
+		if idx != lastIdx {
+			Log(fmt.Sprintf("CANCEL_ORDER\nOrderId: %d\n", buy.RealOrderId))
+			bot.futuresOrderManager.CancelOrder(CANDLE_SYMBOL, buy.RealOrderId)
+		}
+
+		bot.createAndUpdateSellOrder(buyId, desiredSellPrice, buy.RealQuantity)
 	}
 }
 
