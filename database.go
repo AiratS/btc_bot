@@ -141,6 +141,19 @@ func (db *Database) UpdateRealBuyOrderId(buyId int64, orderId int64) {
 	}
 }
 
+func (db *Database) UpdateDesiredPriceByBuyId(buyId int64, desiredPrice float64) {
+	query := `
+		UPDATE buys
+		SET desired_price = $1
+		WHERE id = $2
+	`
+
+	_, err := db.connect.Exec(query, desiredPrice, buyId)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func (db *Database) AddSell(
 	symbol string,
 	coinsCount float64,

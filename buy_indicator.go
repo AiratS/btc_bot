@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/markcheno/go-talib"
+	"math"
 )
 
 type BuyIndicator interface {
@@ -393,7 +394,9 @@ func (indicator *LessThanPreviousBuyIndicator) HasSignal() bool {
 		return false
 	}
 
-	return indicator.buffer.GetLastCandleClosePrice() <= buy.ExchangeRate
+	perc := math.Abs(CalcGrowth(buy.ExchangeRate, indicator.buffer.GetLastCandleClosePrice()))
+
+	return perc <= indicator.config.LessThanPreviousBuyPercentage
 }
 
 func (indicator *LessThanPreviousBuyIndicator) IsStarted() bool {

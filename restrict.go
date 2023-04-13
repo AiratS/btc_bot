@@ -25,6 +25,8 @@ type ConfigRestriction struct {
 	Leverage                            MinMaxInt
 	FuturesAvgSellTimeMinutes           MinMaxInt
 	FuturesLeverageActivationPercentage MinMaxFloat64
+
+	LessThanPreviousBuyPercentage MinMaxFloat64
 }
 
 type MinMaxInt struct {
@@ -99,11 +101,11 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 
 		TotalMoneyAmount: MinMaxFloat64{
-			min: 1000,
-			max: 1000,
+			min: 10,
+			max: 100,
 		},
 		Leverage: MinMaxInt{
-			min: 10,
+			min: 2,
 			max: 10,
 		},
 		FuturesAvgSellTimeMinutes: MinMaxInt{
@@ -113,6 +115,11 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		FuturesLeverageActivationPercentage: MinMaxFloat64{
 			min: 10,
 			max: 300,
+		},
+
+		LessThanPreviousBuyPercentage: MinMaxFloat64{
+			min: 0.05,
+			max: 0.5,
 		},
 	}
 }

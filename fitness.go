@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 )
 
 type BotRevenue struct {
@@ -67,8 +66,8 @@ func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, 
 		rev = bot.db.GetFuturesTotalRevenue()
 		rev -= float64(liquidationsCount) * bot.Config.TotalMoneyAmount
 
-		timeCancelRevenue := math.Abs(bot.db.GetTimeCancelTotalRevenue())
-		rev -= timeCancelRevenue
+		//timeCancelRevenue := math.Abs(bot.db.GetTimeCancelTotalRevenue())
+		//rev -= timeCancelRevenue
 
 		if hasInvalidBuysCount(botConfig, liquidationsCount) {
 			panic("Invalid liquidations count")

@@ -240,11 +240,15 @@ func (indicator *LeverageSellIndicator) HasSignal() (bool, []Buy) {
 	candle := indicator.buffer.GetLastCandle()
 
 	// Upper buys
-	upperBuys := indicator.db.FetchUnsoldBuysByUpperPercentage(
-		candle.GetPrice(),
-		indicator.config.HighSellPercentage,
-	)
-	indicator.appendBuyIfNotExists(&resultingBuys, upperBuys)
+	//upperBuys := indicator.db.FetchUnsoldBuysByUpperPercentage(
+	//	candle.GetPrice(),
+	//	indicator.config.HighSellPercentage,
+	//)
+	//indicator.appendBuyIfNotExists(&resultingBuys, upperBuys)
+
+	// Desired price buys
+	desiredPriceBuys := indicator.db.FetchUnsoldBuysByDesiredPrice(candle.GetPrice())
+	indicator.appendBuyIfNotExists(&resultingBuys, desiredPriceBuys)
 
 	// Liquidation buys
 	liquidationBuys := indicator.db.FetchUnsoldBuysByLowerPercentage(
@@ -253,8 +257,8 @@ func (indicator *LeverageSellIndicator) HasSignal() (bool, []Buy) {
 	)
 	indicator.appendBuyIfNotExists(&resultingBuys, liquidationBuys)
 
+	// Time cancel buys
 	if ENABLE_TIME_CANCEL {
-		// Time cancel buys
 		timeCancelBuys := indicator.db.FetchTimeCancelBuys(
 			candle.CloseTime,
 			indicator.config.FuturesAvgSellTimeMinutes,

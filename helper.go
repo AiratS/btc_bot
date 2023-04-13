@@ -436,3 +436,22 @@ func GetLeverageLiquidationPercentage(leverage int) float64 {
 
 	return 100
 }
+
+func CalcFuturesAvgPrice(buys []Buy) float64 {
+	numerator := 0.0
+	denominator := 0.0
+
+	if IS_REAL_ENABLED {
+		for _, buy := range buys {
+			numerator += buy.ExchangeRate * buy.RealQuantity
+			denominator += buy.RealQuantity
+		}
+	} else {
+		for _, buy := range buys {
+			numerator += buy.ExchangeRate * buy.Coins
+			denominator += buy.Coins
+		}
+	}
+
+	return numerator / denominator
+}

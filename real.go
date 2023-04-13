@@ -48,6 +48,8 @@ func GetRealBotConfig() Config {
 
 		TotalMoneyAmount: 1000,
 		Leverage:         10,
+
+		LessThanPreviousBuyPercentage: 1,
 	}
 }
 

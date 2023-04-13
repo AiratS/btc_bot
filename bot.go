@@ -129,18 +129,6 @@ func (bot *Bot) runSellIndicators() {
 				bot.finishSellIndicators(buy)
 				return
 			}
-
-			// has sell order
-			//if USE_REAL_MONEY && bot.IsTrailingSellIndicatorEnabled {
-			//	if buy.HasSellOrder == 0 {
-			//		bot.createRealMoneySellOrder(buy)
-			//		bot.finishSellIndicators(buy)
-			//	} else {
-			//		if bot.IsBuySold(CANDLE_SYMBOL, buy.RealOrderId) {
-			//			bot.sell(buy)
-			//		}
-			//	}
-			//}
 		} else {
 			rev := bot.sell(buy)
 			bot.finishSellIndicators(buy)
@@ -189,8 +177,7 @@ func (bot *Bot) buy() {
 		Log(fmt.Sprintf("GOT_BUY_SIGNAL\nPrice: %f", rawPrice))
 
 		if USE_REAL_MONEY &&
-			(!bot.HasEnoughMoneyForBuy() ||
-				!bot.CanBuyForPrice(CANDLE_SYMBOL, rawPrice)) {
+			(!bot.HasEnoughMoneyForBuy() || !bot.CanBuyForPrice(CANDLE_SYMBOL, rawPrice)) {
 			return
 		}
 
@@ -212,7 +199,7 @@ func (bot *Bot) buy() {
 		bot.balance.buy()
 
 		buyId, _ := buyInsertResult.LastInsertId()
-		bot.runAfterBuySellIndicators(buyId)
+		bot.runAfterBuy(buyId)
 
 		Log(fmt.Sprintf("BUY\nPrice: %f\nQuantity: %f\nOrderId: %d", orderPrice, quantity, orderId))
 
@@ -236,7 +223,7 @@ func (bot *Bot) buy() {
 		bot.balance.buy()
 
 		buyId, _ := buyInsertResult.LastInsertId()
-		bot.runAfterBuySellIndicators(buyId)
+		bot.runAfterBuy(buyId)
 		PlotAddBuy(buyId, candle.CloseTime)
 	}
 }
@@ -265,9 +252,19 @@ func (bot *Bot) CreateMarketBuyOrder(symbol string, rawPrice float64) (int64, fl
 	return bot.orderManager.CreateMarketBuyOrder(symbol, rawPrice)
 }
 
-func (bot *Bot) runAfterBuySellIndicators(buyId int64) {
+func (bot *Bot) runAfterBuy(buyId int64) {
+	// Run sell indicators hooks
 	for _, indicator := range bot.SellIndicators {
 		indicator.RunAfterBuy(buyId)
+	}
+
+	// Recalculate AVG futures prices
+	unsoldBuys := bot.db.FetchUnsoldBuys()
+	avgFuturesPrice := CalcFuturesAvgPrice(unsoldBuys)
+	desiredSellPrice := CalcUpperPrice(avgFuturesPrice, bot.Config.HighSellPercentage)
+
+	for _, buy := range unsoldBuys {
+		bot.db.UpdateDesiredPriceByBuyId(buy.Id, desiredSellPrice)
 	}
 }
 
@@ -306,10 +303,11 @@ func (bot *Bot) createRealMoneySellOrder(buy Buy) {
 func (bot *Bot) sell(buy Buy) float64 {
 	candle := bot.buffer.GetLastCandle()
 	exchangeRate := candle.GetPrice()
-	rev := bot.calcRevenue(buy.Coins, bot.Config.HighSellPercentage, buy.ExchangeRate)
+	//rev := bot.calcRevenue(buy.Coins, bot.Config.HighSellPercentage, buy.ExchangeRate)
+	rev := bot.calcFuturesRevenue(buy)
 
 	if IS_REAL_ENABLED {
-		rev = bot.calcRevenue(buy.RealQuantity, bot.Config.HighSellPercentage, buy.ExchangeRate)
+		//rev = bot.calcRevenue(buy.RealQuantity, bot.Config.HighSellPercentage, buy.ExchangeRate)
 		//orderId := orderManager.CreateSellOrder(candle.Symbol, candle.ClosePrice, buy.RealQuantity)
 		//orderId := orderManager.CreateMarketSellOrder(candle.Symbol, candle.ClosePrice, buy.RealQuantity)
 		//bot.db.UpdateRealBuyOrderId(buy.Id, orderId)
@@ -408,6 +406,14 @@ func (bot *Bot) calcRevenue(coinsCounts, upperPercentage, buyExchangeRate float6
 	sellPrice := buyExchangeRate + additionalPrice
 
 	return coinsCounts * sellPrice
+}
+
+func (bot *Bot) calcFuturesRevenue(buy Buy) float64 {
+	if IS_REAL_ENABLED {
+		return buy.RealQuantity * buy.DesiredPrice
+	}
+
+	return buy.Coins * buy.DesiredPrice
 }
 
 func getIntersectedBuys(eachIndicatorBuys [][]Buy) []Buy {
