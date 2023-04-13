@@ -362,3 +362,49 @@ func (indicator *GradientDescentIndicator) Update() {
 
 func (indicator *GradientDescentIndicator) Finish() {
 }
+
+// ---------------------------------------
+
+type LessThanPreviousBuyIndicator struct {
+	config *Config
+	buffer *Buffer
+	db     *Database
+}
+
+func NewLessThanPreviousBuyIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) LessThanPreviousBuyIndicator {
+	return LessThanPreviousBuyIndicator{
+		config: config,
+		buffer: buffer,
+		db:     db,
+	}
+}
+
+func (indicator *LessThanPreviousBuyIndicator) HasSignal() bool {
+	if indicator.db.GetBuysCount() == 0 {
+		return true
+	}
+
+	hasValue, buy := indicator.db.GetLastUnsoldBuy()
+	if !hasValue {
+		return false
+	}
+
+	return indicator.buffer.GetLastCandleClosePrice() <= buy.ExchangeRate
+}
+
+func (indicator *LessThanPreviousBuyIndicator) IsStarted() bool {
+	return true
+}
+
+func (indicator *LessThanPreviousBuyIndicator) Start() {
+}
+
+func (indicator *LessThanPreviousBuyIndicator) Update() {
+}
+
+func (indicator *LessThanPreviousBuyIndicator) Finish() {
+}

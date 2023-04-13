@@ -332,6 +332,33 @@ func (db *Database) GetTotalRevenue() float64 {
 	return rev.value
 }
 
+func (db *Database) GetLastUnsoldBuy() (bool, Buy) {
+	query := `
+		SELECT b.*
+		FROM buys AS b 
+		LEFT JOIN sells AS s 
+		    ON s.buy_id = b.id
+		WHERE s.id IS NULL 
+		ORDER BY id DESC
+		LIMIT 1
+	`
+	row := (*db).connect.QueryRow(query)
+	buy := Buy{}
+	row.Scan(
+		&buy.Id,
+		&buy.Symbol,
+		&buy.Coins,
+		&buy.ExchangeRate,
+		&buy.DesiredPrice,
+		&buy.CreatedAt,
+		&buy.RealOrderId,
+		&buy.RealQuantity,
+		&buy.HasSellOrder,
+	)
+
+	return buy.CreatedAt != "", buy
+}
+
 func (db *Database) GetFuturesTotalRevenue() float64 {
 	rev := revenue{}
 	query := `

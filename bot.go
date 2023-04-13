@@ -461,6 +461,12 @@ func setupBuyIndicators(bot *Bot) {
 		bot.db,
 	)
 
+	lessThanPreviousBuyIndicator := NewLessThanPreviousBuyIndicator(
+		bot.Config,
+		bot.buffer,
+		bot.db,
+	)
+
 	//gradientDescentIndicator := NewGradientDescentIndicator(
 	//	bot.Config,
 	//	bot.buffer,
@@ -472,6 +478,7 @@ func setupBuyIndicators(bot *Bot) {
 		//&buysCountIndicator,
 		//&waitForPeriodIndicator,
 		&bigFallIndicator,
+		&lessThanPreviousBuyIndicator,
 		//&gradientDescentIndicator,
 	}
 }
