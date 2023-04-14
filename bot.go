@@ -264,7 +264,7 @@ func (bot *Bot) runAfterBuy(buyId int64) {
 
 	liquidationPrice := CalcBottomPrice(avgFuturesPrice, GetLeverageLiquidationPercentage(bot.Config.Leverage))
 	Log(fmt.Sprintf(
-		"AVG_PRICE\n: AvgPrice: %f\nDesirecSellPrice: %f\n:LiquidationPrice: %f",
+		"AVG_PRICE\nAvgPrice: %f\nDesirecSellPrice: %f\nLiquidationPrice: %f",
 		avgFuturesPrice,
 		desiredSellPrice,
 		liquidationPrice,
@@ -286,7 +286,7 @@ func (bot *Bot) runAfterBuy(buyId int64) {
 			bot.futuresOrderManager.CancelOrder(CANDLE_SYMBOL, buy.RealOrderId)
 		}
 
-		bot.createAndUpdateSellOrder(buyId, desiredSellPrice, buy.RealQuantity)
+		bot.createAndUpdateSellOrder(buy.Id, desiredSellPrice, buy.RealQuantity)
 	}
 }
 
