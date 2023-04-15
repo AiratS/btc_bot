@@ -505,6 +505,12 @@ func setupBuyIndicators(bot *Bot) {
 		bot.db,
 	)
 
+	stopAfterUnsuccessfullySellIndicator := NewStopAfterUnsuccessfullySellIndicator(
+		bot.Config,
+		bot.buffer,
+		bot.db,
+	)
+
 	//gradientDescentIndicator := NewGradientDescentIndicator(
 	//	bot.Config,
 	//	bot.buffer,
@@ -517,6 +523,7 @@ func setupBuyIndicators(bot *Bot) {
 		//&waitForPeriodIndicator,
 		&bigFallIndicator,
 		&lessThanPreviousBuyIndicator,
+		&stopAfterUnsuccessfullySellIndicator,
 		//&gradientDescentIndicator,
 	}
 }

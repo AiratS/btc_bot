@@ -424,3 +424,50 @@ func (indicator *LessThanPreviousBuyIndicator) Update() {
 
 func (indicator *LessThanPreviousBuyIndicator) Finish() {
 }
+
+// ---------------------------------------
+
+type StopAfterUnsuccessfullySellIndicator struct {
+	config *Config
+	buffer *Buffer
+	db     *Database
+}
+
+func NewStopAfterUnsuccessfullySellIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) StopAfterUnsuccessfullySellIndicator {
+	return StopAfterUnsuccessfullySellIndicator{
+		config: config,
+		buffer: buffer,
+		db:     db,
+	}
+}
+
+func (indicator *StopAfterUnsuccessfullySellIndicator) HasSignal() bool {
+	hasSell, sell := indicator.db.FindLastLiquidationSell()
+	if !hasSell {
+		return true
+	}
+
+	currentCandle := indicator.buffer.GetLastCandle()
+	currentTime := ConvertDateStringToTime(currentCandle.CloseTime)
+	sellTime := ConvertDatabaseDateStringToTime(sell.CreatedAt)
+	diff := currentTime.Sub(sellTime)
+
+	return float64(indicator.config.StopAfterUnsuccessfullySellMinutes) <= diff.Minutes()
+}
+
+func (indicator *StopAfterUnsuccessfullySellIndicator) IsStarted() bool {
+	return true
+}
+
+func (indicator *StopAfterUnsuccessfullySellIndicator) Start() {
+}
+
+func (indicator *StopAfterUnsuccessfullySellIndicator) Update() {
+}
+
+func (indicator *StopAfterUnsuccessfullySellIndicator) Finish() {
+}

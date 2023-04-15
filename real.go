@@ -50,6 +50,8 @@ func GetRealBotConfig() Config {
 		Leverage:         10,
 
 		LessThanPreviousBuyPercentage: 1,
+
+		StopAfterUnsuccessfullySellMinutes: 1,
 	}
 }
 

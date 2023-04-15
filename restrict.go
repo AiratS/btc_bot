@@ -27,6 +27,8 @@ type ConfigRestriction struct {
 	FuturesLeverageActivationPercentage MinMaxFloat64
 
 	LessThanPreviousBuyPercentage MinMaxFloat64
+
+	StopAfterUnsuccessfullySellMinutes MinMaxInt
 }
 
 type MinMaxInt struct {
@@ -120,6 +122,12 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		LessThanPreviousBuyPercentage: MinMaxFloat64{
 			min: 0.05,
 			max: 0.5,
+		},
+
+		// ------------------------------------------------
+		StopAfterUnsuccessfullySellMinutes: MinMaxInt{
+			min: 60 * 1,       // 1 hour
+			max: 60 * 24 * 14, // 5 days
 		},
 	}
 }

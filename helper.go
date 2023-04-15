@@ -231,6 +231,17 @@ func ConvertDateStringToTime(dateString string) time.Time {
 	return parsedTime
 }
 
+func ConvertDatabaseDateStringToTime(dateString string) time.Time {
+	layout := "2006-01-02T15:04:05Z"
+	parsedTime, err := time.Parse(layout, dateString)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return parsedTime
+}
+
 func GetCurrentMinusTime(candleTime time.Time, durationRaw int) time.Time {
 	duration := time.Minute
 	if CANDLE_INTERVAL == "1s" {

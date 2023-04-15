@@ -56,6 +56,8 @@ type Config struct {
 
 	LessThanPreviousBuyPercentage float64
 
+	StopAfterUnsuccessfullySellMinutes int
+
 	TotalRevenue     float64
 	FinalBalance     float64
 	FinalRevenue     float64

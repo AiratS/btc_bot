@@ -33,6 +33,16 @@ type Buy struct {
 	BuyType      BuyType
 }
 
+type Sell struct {
+	Id           int64
+	Symbol       string
+	Coins        float64
+	ExchangeRate float64
+	Revenue      float64
+	BuyId        int64
+	CreatedAt    string
+}
+
 func NewDatabase(config Config) Database {
 	//name := time.Now().Format("db/testdb_2006_01_02__15_04_05.db")
 	name := ":memory:"
@@ -371,6 +381,29 @@ func (db *Database) GetLastUnsoldBuy() (bool, Buy) {
 	)
 
 	return buy.CreatedAt != "", buy
+}
+
+func (db *Database) FindLastLiquidationSell() (bool, Sell) {
+	query := `
+		SELECT *
+		FROM sells
+		WHERE revenue = 0
+		ORDER BY id DESC
+		LIMIT 1
+	`
+	row := (*db).connect.QueryRow(query)
+	sell := Sell{}
+	row.Scan(
+		&sell.Id,
+		&sell.Symbol,
+		&sell.Coins,
+		&sell.ExchangeRate,
+		&sell.Revenue,
+		&sell.BuyId,
+		&sell.CreatedAt,
+	)
+
+	return sell.CreatedAt != "", sell
 }
 
 func (db *Database) GetFuturesTotalRevenue() float64 {
