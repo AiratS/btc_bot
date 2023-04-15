@@ -240,7 +240,7 @@ func (indicator *BigFallIndicator) HasSignal() bool {
 
 	// ----------------------
 	closePrices := GetClosePrices(indicator.buffer.GetCandles())
-	smoothedPrices := FilterZeroPrices(talib.Sma(closePrices, indicator.config.BigFallSmoothPeriod))
+	smoothedPrices := FilterZeroPrices(talib.Sma(closePrices, indicator.getPeriod()))
 	smoothedLen := len(smoothedPrices)
 	if 4 > smoothedLen {
 		return false
@@ -252,6 +252,15 @@ func (indicator *BigFallIndicator) HasSignal() bool {
 	// ----------------------
 
 	return fallPercentage >= indicator.config.BigFallPercentage
+}
+
+func (indicator *BigFallIndicator) getPeriod() int {
+	period := indicator.config.BigFallCandlesCount - indicator.config.BigFallSmoothPeriod
+	if period <= 0 {
+		period = 1
+	}
+
+	return period
 }
 
 func (indicator *BigFallIndicator) IsStarted() bool {
@@ -294,7 +303,7 @@ func (indicator *GradientDescentIndicator) HasSignal() bool {
 	}
 
 	closePrices := GetClosePrices(indicator.buffer.GetCandles())
-	smoothedPrices := FilterZeroPrices(talib.Sma(closePrices, indicator.config.GradientDescentPeriod))
+	smoothedPrices := FilterZeroPrices(talib.Sma(closePrices, indicator.getPeriod()))
 	smoothedLen := len(smoothedPrices)
 	if 4 > smoothedLen {
 		return false
@@ -320,6 +329,15 @@ func (indicator *GradientDescentIndicator) HasSignal() bool {
 
 	return -indicator.config.GradientDescentGradient <= gradient &&
 		gradient <= indicator.config.GradientDescentGradient
+}
+
+func (indicator *GradientDescentIndicator) getPeriod() int {
+	period := indicator.config.GradientDescentCandles - indicator.config.GradientDescentPeriod
+	if period <= 0 {
+		period = 1
+	}
+
+	return period
 }
 
 func (indicator *GradientDescentIndicator) mapGradients(smoothedPrices []float64) []float64 {

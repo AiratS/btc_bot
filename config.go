@@ -56,6 +56,7 @@ type Config struct {
 
 	TotalRevenue     float64
 	FinalBalance     float64
+	FinalRevenue     float64
 	TotalBuysCount   int
 	UnsoldBuysCount  int
 	LiquidationCount int
