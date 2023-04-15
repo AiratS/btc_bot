@@ -15,6 +15,7 @@ type Database struct {
 type BuyType int
 
 const (
+	Default     BuyType = 0
 	Liquidation BuyType = 1
 	TimeCancel  BuyType = 2
 )

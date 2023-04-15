@@ -6,6 +6,8 @@ const ENABLE_FUTURES = true
 const USE_REAL_MONEY = false
 const REAL_MONEY_DB_NAME = "amazing_real"
 
+//const ADD_REVENUE_TO_BALANCE = false
+
 // Candle
 const CANDLE_SYMBOL = "BTCUSDT"
 const CANDLE_INTERVAL = "30m"

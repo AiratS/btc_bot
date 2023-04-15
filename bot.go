@@ -366,6 +366,11 @@ func (bot *Bot) sell(buy Buy) float64 {
 			} else {
 				returnMoney = bot.Config.TotalMoneyAmount - math.Abs(rev)
 			}
+		} else if buy.BuyType == Default {
+			//if ADD_REVENUE_TO_BALANCE {
+			//	returnMoney = bot.Config.TotalMoneyAmount +
+			//		(rev - (bot.Config.TotalMoneyAmount * float64(bot.Config.Leverage)))
+			//}
 		}
 	}
 
