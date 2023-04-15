@@ -38,6 +38,7 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 		dataframe.NewSeriesFloat64("LessThanPreviousBuyPercentage", nil),
 
 		dataframe.NewSeriesFloat64("TotalRevenue", nil),
+		dataframe.NewSeriesFloat64("FinalBalance", nil),
 		dataframe.NewSeriesInt64("TotalBuysCount", nil),
 		dataframe.NewSeriesInt64("UnsoldBuysCount", nil),
 		dataframe.NewSeriesInt64("LiquidationCount", nil),
@@ -115,18 +116,19 @@ func ImportFromCsv(fileName string) []Config {
 			LessThanPreviousBuyPercentage: convertStringToFloat64(row[17]),
 
 			TotalRevenue:     convertStringToFloat64(row[18]),
-			TotalBuysCount:   convertStringToInt(row[19]),
-			UnsoldBuysCount:  convertStringToInt(row[20]),
-			LiquidationCount: convertStringToInt(row[21]),
-			AvgSellTime:      convertStringToFloat64(row[22]),
+			FinalBalance:     convertStringToFloat64(row[19]),
+			TotalBuysCount:   convertStringToInt(row[20]),
+			UnsoldBuysCount:  convertStringToInt(row[21]),
+			LiquidationCount: convertStringToInt(row[22]),
+			AvgSellTime:      convertStringToFloat64(row[23]),
 
-			ValidationTotalRevenue:     convertStringToFloat64(row[23]),
-			ValidationTotalBuysCount:   convertStringToInt(row[24]),
-			ValidationUnsoldBuysCount:  convertStringToInt(row[25]),
-			ValidationLiquidationCount: convertStringToInt(row[26]),
-			ValidationAvgSellTime:      convertStringToFloat64(row[27]),
+			ValidationTotalRevenue:     convertStringToFloat64(row[24]),
+			ValidationTotalBuysCount:   convertStringToInt(row[25]),
+			ValidationUnsoldBuysCount:  convertStringToInt(row[26]),
+			ValidationLiquidationCount: convertStringToInt(row[27]),
+			ValidationAvgSellTime:      convertStringToFloat64(row[28]),
 
-			Selection: convertStringToFloat64(row[28]),
+			Selection: convertStringToFloat64(row[29]),
 		}
 
 		bots = append(bots, bot)
@@ -198,6 +200,7 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 		"LessThanPreviousBuyPercentage": botConfig.LessThanPreviousBuyPercentage,
 
 		"TotalRevenue":     botConfig.TotalRevenue,
+		"FinalBalance":     botConfig.FinalBalance,
 		"TotalBuysCount":   botConfig.TotalBuysCount,
 		"UnsoldBuysCount":  botConfig.UnsoldBuysCount,
 		"LiquidationCount": botConfig.LiquidationCount,
@@ -218,6 +221,7 @@ func SetBotTotalRevenue(
 	botNumber int,
 
 	revenue float64,
+	FinalBalance float64,
 	totalBuysCount int,
 	UnsoldBuysCount int,
 	LiquidationCount int,
@@ -250,8 +254,12 @@ func SetBotTotalRevenue(
 		//}
 	}
 
+	minusFromBalance := BALANCE_MONEY - FinalBalance
+	finalRevenue := revenue - minusFromBalance
+
 	bots.UpdateRow(botNumber, nil, map[string]interface{}{
 		"TotalRevenue":     revenue,
+		"FinalBalance":     FinalBalance,
 		"TotalBuysCount":   totalBuysCount,
 		"UnsoldBuysCount":  UnsoldBuysCount,
 		"LiquidationCount": LiquidationCount,
@@ -263,7 +271,7 @@ func SetBotTotalRevenue(
 		"ValidationLiquidationCount": ValidationLiquidationCount,
 		"ValidationAvgSellTime":      ValidationAvgSellTime,
 
-		"Selection": (revenue + plusValidation) / selectionDivider,
+		"Selection": (finalRevenue + plusValidation) / selectionDivider,
 	})
 }
 
@@ -346,6 +354,7 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 		"LessThanPreviousBuyPercentage": bot["LessThanPreviousBuyPercentage"],
 
 		"TotalRevenue":     bot["TotalRevenue"],
+		"FinalBalance":     bot["FinalBalance"],
 		"TotalBuysCount":   bot["TotalBuysCount"],
 		"UnsoldBuysCount":  bot["UnsoldBuysCount"],
 		"LiquidationCount": bot["LiquidationCount"],

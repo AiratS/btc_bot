@@ -46,6 +46,7 @@ func RunTest() {
 					*botNumber,
 
 					rev,
+					convertToFloat64(bot["FinalBalance"]),
 					totalBuysCount,
 					UnsoldBuysCount,
 					convertToInt(bot["LiquidationCount"]),
@@ -78,6 +79,7 @@ func RunTest() {
 				botRevenue.BotNumber,
 
 				rev,
+				botRevenue.FinalBalance,
 				botRevenue.TotalBuysCount,
 				botRevenue.UnsoldBuysCount,
 				botRevenue.LiquidationCount,

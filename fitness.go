@@ -7,6 +7,7 @@ import (
 type BotRevenue struct {
 	BotNumber        int
 	Revenue          float64
+	FinalBalance     float64
 	TotalBuysCount   int
 	UnsoldBuysCount  int
 	LiquidationCount int
@@ -26,19 +27,20 @@ func Fitness(
 	fitnessDatasets *[]Candle,
 	validationDatasets *[]Candle,
 ) {
-	totalRevenue, totalBuysCount, unsoldBuysCount, LiquidationCount, avgSellTime := doBuysAndSells(fitnessDatasets, botConfig)
+	totalRevenue, totalBuysCount, unsoldBuysCount, LiquidationCount, avgSellTime, FinalBalance := doBuysAndSells(fitnessDatasets, botConfig)
 
 	// Validate bot
 	Log(fmt.Sprintf("Validate bot: %d\n", botNumber))
 	validationTotalRevenue, validationTotalBuysCount, ValidationUnsoldBuysCount, ValidationLiquidationCount, validationAvgSellTime := 0.0, 0, 0, 0, 0.0
 	if !NO_VALIDATION {
-		validationTotalRevenue, validationTotalBuysCount, ValidationUnsoldBuysCount, ValidationLiquidationCount, validationAvgSellTime = doBuysAndSells(validationDatasets, botConfig)
+		validationTotalRevenue, validationTotalBuysCount, ValidationUnsoldBuysCount, ValidationLiquidationCount, validationAvgSellTime, _ = doBuysAndSells(validationDatasets, botConfig)
 	}
 
 	botRevenue <- BotRevenue{
 		BotNumber: botNumber,
 
 		Revenue:          totalRevenue,
+		FinalBalance:     FinalBalance,
 		TotalBuysCount:   totalBuysCount,
 		UnsoldBuysCount:  unsoldBuysCount,
 		LiquidationCount: LiquidationCount,
@@ -52,7 +54,7 @@ func Fitness(
 	}
 }
 
-func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, int, int, float64) {
+func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, int, int, float64, float64) {
 	bot := NewBot(&botConfig)
 
 	for _, candle := range *fitnessDatasets {
@@ -64,7 +66,7 @@ func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, 
 	if ENABLE_FUTURES {
 		liquidationsCount = bot.db.CountLiquidationBuys()
 		rev = bot.db.GetFuturesTotalRevenue()
-		rev -= float64(liquidationsCount) * bot.Config.TotalMoneyAmount
+		//rev -= float64(liquidationsCount) * bot.Config.TotalMoneyAmount
 
 		//timeCancelRevenue := math.Abs(bot.db.GetTimeCancelTotalRevenue())
 		//rev -= timeCancelRevenue
@@ -83,13 +85,14 @@ func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, 
 	unsold := bot.db.CountUnsoldBuys()
 	//avgSellTime := bot.db.GetMedianSellTime()
 	avgSellTime := bot.db.GetAvgSellTime()
+	FinalBalance := bot.balance.inBalanceMoney
 
 	fmt.Println(unsold)
 	bot.Kill()
 
 	fmt.Println(fmt.Sprintf(" DatasetRevenue: %f, TotalBuys: %d, UnsoldBuys: %d", datasetRevenue, buyCount, unsold))
 
-	return datasetRevenue, buyCount, unsold, liquidationsCount, avgSellTime
+	return datasetRevenue, buyCount, unsold, liquidationsCount, avgSellTime, FinalBalance
 }
 
 func hasInvalidBuysCount(botConfig Config, liquidationsCount int) bool {

@@ -21,7 +21,7 @@ const BEST_BOTS_COUNT = 7
 const BEST_BOTS_FROM_PREV_GEN = 3
 const GENERATION_COUNT = 20
 const DEFAULT_REVENUE = -1000000
-const ENABLE_AVG_TIME = true
+const ENABLE_AVG_TIME = false
 const SELL_TIME_PUNISHMENT = 1.0
 
 const ENABLE_TIME_CANCEL = false
@@ -55,6 +55,7 @@ type Config struct {
 	LessThanPreviousBuyPercentage float64
 
 	TotalRevenue     float64
+	FinalBalance     float64
 	TotalBuysCount   int
 	UnsoldBuysCount  int
 	LiquidationCount int
