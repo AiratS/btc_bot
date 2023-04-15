@@ -115,19 +115,24 @@ func (bot *Bot) runSellIndicators() {
 			if !USE_REAL_MONEY {
 				bot.sell(buy)
 				bot.finishSellIndicators(buy)
-				return
+				continue
 			}
 
 			if ENABLE_FUTURES && ENABLE_TIME_CANCEL && buy.BuyType == TimeCancel {
 				bot.sell(buy)
 				bot.finishSellIndicators(buy)
-				return
+				continue
 			}
 
 			if bot.IsBuySold(CANDLE_SYMBOL, buy.RealOrderId) {
+				Log(fmt.Sprintf("IS_BUY_SOLD: YES\nOrderId: %d", buy.RealOrderId))
+
 				bot.sell(buy)
 				bot.finishSellIndicators(buy)
-				return
+				continue
+			} else {
+				Log(fmt.Sprintf("IS_BUY_SOLD: NO\nOrderId: %d", buy.RealOrderId))
+				continue
 			}
 		} else {
 			rev := bot.sell(buy)
