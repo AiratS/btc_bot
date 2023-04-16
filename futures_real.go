@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+const TickerIntervalMinutes = 1
+
+var ticker *Ticker
+
 func RunFuturesRealTime() {
 	client := futures.NewClient(BINANCE_API_KEY, BINANCE_SECRET_KEY)
 	tgBot, _ = tgbotapi.NewBotAPI(TG_API_KEY)
@@ -14,6 +18,7 @@ func RunFuturesRealTime() {
 	candleConverter = NewSecToMinCandleConverter()
 	config := GetRealBotConfig()
 	realBot = NewFuturesRealBot(&config, client)
+	ticker = NewTicker(TickerIntervalMinutes)
 
 	errHandler := func(err error) {
 		fmt.Println(err)
@@ -40,5 +45,10 @@ func KlineEventHandlerFutures(event *futures.WsKlineEvent) {
 
 	if convertedCandle, ok := candleConverter.Convert(secCandle); ok {
 		realBot.DoStuff(convertedCandle)
+	}
+
+	if ticker.tick() {
+		fmt.Println("__TICKER__")
+		realBot.CheckBuyOrders()
 	}
 }

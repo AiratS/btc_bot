@@ -99,9 +99,9 @@ func (bot *Bot) runBuyIndicators() {
 		}
 	}
 
-	if USE_REAL_MONEY && BUY_ORDER_REDUCTION_ENABLED {
-		bot.checkBuyOrders()
-	}
+	//if USE_REAL_MONEY && BUY_ORDER_REDUCTION_ENABLED {
+	//	bot.CheckBuyOrders()
+	//}
 }
 
 func (bot *Bot) createLimitBuyOrder(candle Candle) {
@@ -134,7 +134,7 @@ func (bot *Bot) createLimitBuyOrder(candle Candle) {
 	)
 }
 
-func (bot *Bot) checkBuyOrders() {
+func (bot *Bot) CheckBuyOrders() {
 	currentCandle := bot.buffer.GetLastCandle()
 
 	newBuyOrders := bot.db.FetchNewBuyOrders(CANDLE_SYMBOL)
