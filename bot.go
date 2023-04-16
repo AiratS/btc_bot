@@ -152,6 +152,7 @@ func (bot *Bot) checkBuyOrders() {
 		if bot.isRejectionBuyOrder(buyOrder.Id, &rejectBuyOrders) {
 			bot.futuresOrderManager.CancelOrder(CANDLE_SYMBOL, buyOrder.RealOrderId)
 			bot.db.UpdateBuyOrderStatus(buyOrder.Id, BuyOrderStatusRejected)
+			Log(fmt.Sprintf("REJECT_BUY_ORDER\nOrderId: %d", buyOrder.RealOrderId))
 		}
 	}
 }
