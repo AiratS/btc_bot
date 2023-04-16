@@ -4,6 +4,13 @@ package main
 const IS_REAL_ENABLED = false
 const ENABLE_FUTURES = true
 const USE_REAL_MONEY = false
+
+const (
+	BUY_ORDER_REDUCTION_ENABLED      = true
+	BUY_ORDER_REDUCTION_PERCENTAGE   = 0.1
+	BUY_ORDER_REJECTION_TIME_MINUTES = 15
+)
+
 const REAL_MONEY_DB_NAME = "amazing_real"
 
 //const ADD_REVENUE_TO_BALANCE = false

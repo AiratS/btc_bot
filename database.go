@@ -20,6 +20,25 @@ const (
 	TimeCancel  BuyType = 2
 )
 
+type BuyOrderStatus int
+
+const (
+	BuyOrderStatusNew      BuyOrderStatus = 0
+	BuyOrderStatusFilled   BuyOrderStatus = 1
+	BuyOrderStatusRejected BuyOrderStatus = 2
+)
+
+type BuyOrder struct {
+	Id           int64
+	Symbol       string
+	Coins        float64
+	ExchangeRate float64
+	BuyPrice     float64
+	RealOrderId  int64
+	CreatedAt    string
+	Status       BuyOrderStatus
+}
+
 type Buy struct {
 	Id           int64
 	Symbol       string
@@ -56,6 +75,7 @@ func NewDatabase(config Config) Database {
 	}
 	connect, _ := sql.Open("sqlite3", name)
 
+	createBuyOrdersTable(connect)
 	createBuysTable(connect)
 	createSellsTable(connect)
 
@@ -67,6 +87,27 @@ func NewDatabase(config Config) Database {
 
 func (db *Database) Close() {
 	db.connect.Close()
+}
+
+func createBuyOrdersTable(connect *sql.DB) sql.Result {
+	query := `
+		CREATE TABLE IF NOT EXISTS buy_orders (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			symbol VARCHAR(255),
+			coins FLOAT,
+			exchange_rate FLOAT,
+		    buy_price FLOAT,
+		    real_order_id INTEGER,
+			created_at DATETIME,
+		    status INTEGER
+		);
+	`
+	result, err := connect.Exec(query)
+	if err != nil {
+		panic(err)
+	}
+
+	return result
 }
 
 func createBuysTable(connect *sql.DB) sql.Result {
@@ -112,6 +153,131 @@ func createSellsTable(connect *sql.DB) sql.Result {
 }
 
 // User functions
+func (db *Database) AddNewBuyOrder(
+	symbol string,
+	coinsCount,
+	exchangeRate,
+	buyPrice float64,
+	realOrderId int64,
+	createdAt string,
+) sql.Result {
+	query := `
+		INSERT INTO buy_orders (
+		  	symbol, 
+		    coins, 
+		    exchange_rate, 
+		    buy_price, 
+		    real_order_id,
+		    created_at, 
+		    status
+		) VALUES ($1, $2, $3, $4, $5, $6, $7);
+	`
+	result, err := db.connect.Exec(
+		query,
+		symbol,
+		coinsCount,
+		exchangeRate,
+		buyPrice,
+		realOrderId,
+		createdAt,
+		BuyOrderStatusNew,
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return result
+}
+
+func (db *Database) UpdateBuyOrderStatus(buyOrderId int64, status BuyOrderStatus) {
+	query := `
+		UPDATE buy_orders
+		SET status = $1
+		WHERE id = $2
+	`
+
+	_, err := db.connect.Exec(query, status, buyOrderId)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (db *Database) FetchNewBuyOrders(symbol string) []BuyOrder {
+	newBuyOrders := []BuyOrder{}
+	query := `
+		SELECT *
+		FROM buy_orders
+		WHERE symbol = $1 
+		  AND status = $2
+	`
+
+	rows, err := db.connect.Query(query, symbol, BuyOrderStatusNew)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		buyOrder := BuyOrder{}
+		rows.Scan(
+			&buyOrder.Id,
+			&buyOrder.Symbol,
+			&buyOrder.Coins,
+			&buyOrder.ExchangeRate,
+			&buyOrder.BuyPrice,
+			&buyOrder.RealOrderId,
+			&buyOrder.CreatedAt,
+			&buyOrder.Status,
+		)
+		newBuyOrders = append(newBuyOrders, buyOrder)
+	}
+
+	return newBuyOrders
+}
+
+func (db *Database) FetchRejectBuyOrders(symbol, createdAt string) []BuyOrder {
+	var newBuyOrders []BuyOrder
+
+	query := `
+		SELECT *
+		FROM buy_orders
+		WHERE symbol = $1 
+		  AND status = $2
+		  AND created_at < $3
+	`
+
+	candleTime := ConvertDateStringToTime(createdAt)
+	rejectionPeriod := GetCurrentMinusTime(candleTime, BUY_ORDER_REJECTION_TIME_MINUTES)
+	rows, err := db.connect.Query(
+		query,
+		symbol,
+		BuyOrderStatusNew,
+		rejectionPeriod.Format("2006-01-02 15:04:05"),
+	)
+
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		buyOrder := BuyOrder{}
+		rows.Scan(
+			&buyOrder.Id,
+			&buyOrder.Symbol,
+			&buyOrder.Coins,
+			&buyOrder.ExchangeRate,
+			&buyOrder.BuyPrice,
+			&buyOrder.RealOrderId,
+			&buyOrder.CreatedAt,
+			&buyOrder.Status,
+		)
+		newBuyOrders = append(newBuyOrders, buyOrder)
+	}
+
+	return newBuyOrders
+}
 
 func (db *Database) AddBuy(symbol string, coinsCount, exchangeRate, desiredPrice float64, createdAt string) sql.Result {
 	query := `
