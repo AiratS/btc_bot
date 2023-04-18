@@ -91,9 +91,9 @@ func (manager *FuturesOrderManager) getPositionInfo() PositionInfo {
 	panic("No futures position info.")
 }
 
-func (manager *FuturesOrderManager) CanBuyForPrice(symbol string, price float64) bool {
+func (manager *FuturesOrderManager) CanBuyForPrice(symbol string, price, usedMoney float64) bool {
 	if info, hasLotSize := manager.exchangeInfo.GetInfoForSymbol(symbol); hasLotSize {
-		quantityLotSize := valueToLotSize(calcQuantity(price, manager.getOrderMoney()), info.LotSize.stepSize)
+		quantityLotSize := valueToLotSize(calcQuantity(price, manager.getOrderMoney(usedMoney)), info.LotSize.stepSize)
 		priceConverted := valueToPriceSize(price, info.PriceFilter.tickSize)
 
 		return info.LotSize.minQty <= quantityLotSize && quantityLotSize <= info.LotSize.maxQty &&
@@ -103,7 +103,7 @@ func (manager *FuturesOrderManager) CanBuyForPrice(symbol string, price float64)
 	return false
 }
 
-func (manager *FuturesOrderManager) HasEnoughMoneyForBuy() bool {
+func (manager *FuturesOrderManager) HasEnoughMoneyForBuy(usedMoney float64) bool {
 	res, err := manager.futuresClient.NewGetBalanceService().
 		Do(context.Background())
 
@@ -116,7 +116,7 @@ func (manager *FuturesOrderManager) HasEnoughMoneyForBuy() bool {
 		if balance.Asset == "BUSD" {
 			freeMoney := convertBinanceToFloat64(balance.Balance)
 
-			return freeMoney >= ORDER_MONEY
+			return freeMoney >= usedMoney
 		}
 	}
 
@@ -139,13 +139,13 @@ func (manager *FuturesOrderManager) IsBuySold(symbol string, orderId int64) bool
 	return res.Status == "FILLED"
 }
 
-func (manager *FuturesOrderManager) CreateBuyOrder(symbol string, price float64) (int64, float64, float64) {
+func (manager *FuturesOrderManager) CreateBuyOrder(symbol string, price, usedMoney float64) (int64, float64, float64) {
 	if !manager.isEnabled {
 		return 0, 0.0, price
 	}
 
 	if info, hasLotSize := manager.exchangeInfo.GetInfoForSymbol(symbol); hasLotSize {
-		quantityLotSize := valueToLotSize(calcQuantity(price, manager.getOrderMoney()), info.LotSize.stepSize)
+		quantityLotSize := valueToLotSize(calcQuantity(price, manager.getOrderMoney(usedMoney)), info.LotSize.stepSize)
 		priceConverted := valueToPriceSize(price, info.PriceFilter.tickSize)
 
 		fmt.Println(fmt.Sprintf("CreateLimitBuyOrder: %f, %f", priceConverted, quantityLotSize))
@@ -175,13 +175,13 @@ func (manager *FuturesOrderManager) CreateBuyOrder(symbol string, price float64)
 	return 0, 0.0, 0.0
 }
 
-func (manager *FuturesOrderManager) CreateMarketBuyOrder(symbol string, price float64) (int64, float64, float64) {
+func (manager *FuturesOrderManager) CreateMarketBuyOrder(symbol string, price, usedMoney float64) (int64, float64, float64) {
 	if !manager.isEnabled {
 		return 0, 0.0, price
 	}
 
 	if info, hasLotSize := manager.exchangeInfo.GetInfoForSymbol(symbol); hasLotSize {
-		quantityLotSize := valueToLotSize(calcQuantity(price, manager.getOrderMoney()), info.LotSize.stepSize)
+		quantityLotSize := valueToLotSize(calcQuantity(price, manager.getOrderMoney(usedMoney)), info.LotSize.stepSize)
 		priceConverted := valueToPriceSize(price, info.PriceFilter.tickSize)
 
 		fmt.Println(fmt.Sprintf("CreateBuyOrder: %f, %f", priceConverted, quantityLotSize))
@@ -260,8 +260,8 @@ func (manager *FuturesOrderManager) CancelOrder(symbol string, orderId int64) in
 	return order.OrderID
 }
 
-func (manager *FuturesOrderManager) getOrderMoney() float64 {
-	return ORDER_MONEY * LEVERAGE
+func (manager *FuturesOrderManager) getOrderMoney(usedMoney float64) float64 {
+	return usedMoney * LEVERAGE
 }
 
 func (manager *FuturesOrderManager) getRealBuyPrice(rawPrice float64, order *futures.CreateOrderResponse) float64 {

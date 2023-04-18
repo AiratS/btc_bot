@@ -84,12 +84,18 @@ func (bot *Bot) runBuyIndicators() {
 		candle := bot.buffer.GetLastCandle()
 		price := bot.buffer.GetLastCandleClosePrice()
 
-		if !USE_REAL_MONEY && !bot.balance.HasEnoughMoneyForBuy() {
+		moneyAmount := bot.getIncreasingTotalMoneyAmount()
+		if !USE_REAL_MONEY && !bot.balance.HasEnoughMoneyForBuy(moneyAmount) {
 			return
 		}
 
 		if !IS_REAL_ENABLED {
-			Log(fmt.Sprintf("BUY: %s\nExchangeRate: %f", candle.CloseTime, price))
+			Log(fmt.Sprintf(
+				"BUY: %s\nExchangeRate: %f\nMoneyAmount: %f",
+				candle.CloseTime,
+				price,
+				moneyAmount,
+			))
 		}
 
 		if USE_REAL_MONEY && BUY_ORDER_REDUCTION_ENABLED {
@@ -108,17 +114,20 @@ func (bot *Bot) createLimitBuyOrder(candle Candle) {
 	Log(fmt.Sprintf("GOT_BUY_SIGNAL\nPrice: %f", candle.ClosePrice))
 
 	buyPrice := CalcBottomPrice(candle.ClosePrice, BUY_ORDER_REDUCTION_PERCENTAGE)
+	usedMoney := bot.getIncreasingTotalMoneyAmount()
+
 	if USE_REAL_MONEY &&
-		(!bot.HasEnoughMoneyForBuy() || !bot.CanBuyForPrice(CANDLE_SYMBOL, buyPrice)) {
+		(!bot.HasEnoughMoneyForBuy(usedMoney) || !bot.CanBuyForPrice(CANDLE_SYMBOL, buyPrice, usedMoney)) {
 		return
 	}
 
 	orderId, quantity, realBuyPrice :=
-		bot.futuresOrderManager.CreateBuyOrder(CANDLE_SYMBOL, buyPrice)
+		bot.futuresOrderManager.CreateBuyOrder(CANDLE_SYMBOL, buyPrice, usedMoney)
 
 	Log(fmt.Sprintf(
-		"CREATE_LIMIT_BUY_ORDER\nOrderId: %d\nQuantity: %f\nBuyPrice: %f\nExchangeRate: %f",
+		"CREATE_LIMIT_BUY_ORDER\nOrderId: %d\nUsedMoney: %f\nQuantity: %f\nBuyPrice: %f\nExchangeRate: %f",
 		orderId,
+		usedMoney,
 		quantity,
 		realBuyPrice,
 		candle.ClosePrice,
@@ -126,6 +135,7 @@ func (bot *Bot) createLimitBuyOrder(candle Candle) {
 
 	bot.db.AddNewBuyOrder(
 		CANDLE_SYMBOL,
+		usedMoney,
 		quantity,
 		candle.ClosePrice,
 		realBuyPrice,
@@ -238,15 +248,16 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder) 
 	//exchangeRate := candle.GetPrice()
 
 	desiredPrice := bot.calcDesiredPrice(exchangeRate)
+	usedMoney := bot.getIncreasingTotalMoneyAmount()
 
-	if !USE_REAL_MONEY && !bot.balance.HasEnoughMoneyForBuy() {
+	if !USE_REAL_MONEY && !bot.balance.HasEnoughMoneyForBuy(usedMoney) {
 		return
 	}
 
 	if IS_REAL_ENABLED {
-		coinsCount := bot.Config.TotalMoneyAmount / exchangeRate
+		coinsCount := usedMoney / exchangeRate
 		if ENABLE_FUTURES {
-			coinsCount = (bot.Config.TotalMoneyAmount * LEVERAGE) / exchangeRate
+			coinsCount = (usedMoney * LEVERAGE) / exchangeRate
 		}
 		rawPrice := exchangeRate
 
@@ -256,6 +267,7 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder) 
 		if USE_REAL_MONEY && BUY_ORDER_REDUCTION_ENABLED {
 			buyInsertResult := bot.db.AddRealBuy(
 				CANDLE_SYMBOL,
+				usedMoney,
 				buyOrder.Coins,
 				buyOrder.BuyPrice,
 				desiredPrice,
@@ -263,14 +275,15 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder) 
 				buyOrder.RealOrderId,
 				buyOrder.Coins,
 			)
-			bot.balance.buy()
+			bot.balance.buy(usedMoney)
 
 			buyId, _ := buyInsertResult.LastInsertId()
 			Log(fmt.Sprintf(
-				"BUY_FILLED\nPrice: %f\nQuantity: %f\nOrderId: %d",
+				"BUY_FILLED\nPrice: %f\nQuantity: %f\nOrderId: %d\nUsedMoney: %f",
 				buyOrder.BuyPrice,
 				buyOrder.Coins,
 				buyOrder.RealOrderId,
+				buyOrder.UsedMoney,
 			))
 			bot.runAfterBuy(buyId)
 			return
@@ -278,11 +291,11 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder) 
 
 		// Buy order reduction DISABLED
 		if USE_REAL_MONEY &&
-			(!bot.HasEnoughMoneyForBuy() || !bot.CanBuyForPrice(CANDLE_SYMBOL, rawPrice)) {
+			(!bot.HasEnoughMoneyForBuy(usedMoney) || !bot.CanBuyForPrice(CANDLE_SYMBOL, rawPrice, usedMoney)) {
 			return
 		}
 
-		orderId, quantity, orderPrice := bot.CreateMarketBuyOrder(CANDLE_SYMBOL, rawPrice)
+		orderId, quantity, orderPrice := bot.CreateMarketBuyOrder(CANDLE_SYMBOL, rawPrice, usedMoney)
 
 		if !USE_REAL_MONEY {
 			quantity = coinsCount
@@ -290,6 +303,7 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder) 
 
 		buyInsertResult := bot.db.AddRealBuy(
 			CANDLE_SYMBOL,
+			usedMoney,
 			coinsCount,
 			orderPrice,
 			desiredPrice,
@@ -297,10 +311,15 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder) 
 			orderId,
 			quantity,
 		)
-		bot.balance.buy()
+		bot.balance.buy(usedMoney)
 
 		buyId, _ := buyInsertResult.LastInsertId()
-		Log(fmt.Sprintf("BUY\nPrice: %f\nQuantity: %f\nOrderId: %d", orderPrice, quantity, orderId))
+		Log(fmt.Sprintf(
+			"BUY\nPrice: %f\nQuantity: %f\nOrderId: %d",
+			orderPrice,
+			quantity,
+			orderId,
+		))
 		bot.runAfterBuy(buyId)
 
 		//if USE_REAL_MONEY && !bot.IsTrailingSellIndicatorEnabled {
@@ -308,19 +327,20 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder) 
 		//	bot.createAndUpdateSellOrder(buyId, upperPrice, quantity)
 		//}
 	} else {
-		coinsCount := bot.Config.TotalMoneyAmount / exchangeRate
+		coinsCount := usedMoney / exchangeRate
 		if ENABLE_FUTURES {
-			coinsCount = (bot.Config.TotalMoneyAmount * float64(bot.Config.Leverage)) / exchangeRate
+			coinsCount = (usedMoney * float64(bot.Config.Leverage)) / exchangeRate
 		}
 
 		buyInsertResult := bot.db.AddBuy(
 			CANDLE_SYMBOL,
+			usedMoney,
 			coinsCount,
 			exchangeRate,
 			desiredPrice,
 			closeTime,
 		)
-		bot.balance.buy()
+		bot.balance.buy(usedMoney)
 
 		buyId, _ := buyInsertResult.LastInsertId()
 		bot.runAfterBuy(buyId)
@@ -328,25 +348,34 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder) 
 	}
 }
 
-func (bot *Bot) HasEnoughMoneyForBuy() bool {
+func (bot *Bot) getIncreasingTotalMoneyAmount() float64 {
+	hasLastBuy, lastBuy := bot.db.GetLastUnsoldBuy()
+	if !hasLastBuy {
+		return bot.Config.TotalMoneyAmount
+	}
+
+	return CalcUpperPrice(lastBuy.UsedMoney, bot.Config.TotalMoneyIncreasePercentage)
+}
+
+func (bot *Bot) HasEnoughMoneyForBuy(usedMoney float64) bool {
 	if ENABLE_FUTURES {
-		return bot.futuresOrderManager.HasEnoughMoneyForBuy()
+		return bot.futuresOrderManager.HasEnoughMoneyForBuy(usedMoney)
 	}
 
 	return bot.orderManager.HasEnoughMoneyForBuy()
 }
 
-func (bot *Bot) CanBuyForPrice(symbol string, rawPrice float64) bool {
+func (bot *Bot) CanBuyForPrice(symbol string, rawPrice, usedMoney float64) bool {
 	if ENABLE_FUTURES {
-		return bot.futuresOrderManager.CanBuyForPrice(symbol, rawPrice)
+		return bot.futuresOrderManager.CanBuyForPrice(symbol, rawPrice, usedMoney)
 	}
 
 	return bot.orderManager.CanBuyForPrice(symbol, rawPrice)
 }
 
-func (bot *Bot) CreateMarketBuyOrder(symbol string, rawPrice float64) (int64, float64, float64) {
+func (bot *Bot) CreateMarketBuyOrder(symbol string, rawPrice, usedMoney float64) (int64, float64, float64) {
 	if ENABLE_FUTURES {
-		return bot.futuresOrderManager.CreateMarketBuyOrder(symbol, rawPrice)
+		return bot.futuresOrderManager.CreateMarketBuyOrder(symbol, rawPrice, usedMoney)
 	}
 
 	return bot.orderManager.CreateMarketBuyOrder(symbol, rawPrice)
@@ -392,19 +421,7 @@ func (bot *Bot) runAfterBuy(buyId int64) {
 }
 
 func (bot *Bot) calcDesiredPrice(currentPrice float64) float64 {
-	upperPrice := CalcUpperPrice(currentPrice, bot.Config.HighSellPercentage)
-	return upperPrice
-
-	if bot.Config.DesiredPriceCandles > len(bot.buffer.GetCandles()) {
-		return upperPrice
-	}
-
-	medPrice := Median(GetClosePrices(bot.buffer.GetCandles()))
-	if upperPrice < medPrice {
-		return medPrice
-	}
-
-	return upperPrice
+	return CalcUpperPrice(currentPrice, bot.Config.HighSellPercentage)
 }
 
 func (bot *Bot) createRealMoneySellOrder(buy Buy) {
@@ -438,7 +455,8 @@ func (bot *Bot) sell(buy Buy) float64 {
 		Log(fmt.Sprintf("SELL\nPrice: %f - %f\nRevenue: %f", buy.ExchangeRate, candle.ClosePrice, rev))
 	}
 
-	returnMoney := bot.Config.TotalMoneyAmount
+	usedMoney := buy.UsedMoney
+	returnMoney := usedMoney
 
 	if ENABLE_FUTURES {
 		if buy.BuyType == Liquidation {
@@ -457,10 +475,10 @@ func (bot *Bot) sell(buy Buy) float64 {
 				bot.createAndUpdateSellOrder(buy.Id, exchangeRate, buy.RealQuantity)
 			}
 
-			if rev > bot.Config.TotalMoneyAmount {
-				returnMoney = bot.Config.TotalMoneyAmount
+			if rev > usedMoney {
+				returnMoney = usedMoney
 			} else {
-				returnMoney = bot.Config.TotalMoneyAmount - math.Abs(rev)
+				returnMoney = usedMoney - math.Abs(rev)
 			}
 		} else if buy.BuyType == Default {
 			//if ADD_REVENUE_TO_BALANCE {

@@ -16,22 +16,24 @@ func NewBalance(config Config) Balance {
 	}
 }
 
-func (balance *Balance) HasEnoughMoneyForBuy() bool {
-	return balance.inBalanceMoney >= balance.config.TotalMoneyAmount
+func (balance *Balance) HasEnoughMoneyForBuy(requiredMoney float64) bool {
+	return balance.inBalanceMoney >= requiredMoney
 }
 
-func (balance *Balance) buy() {
-	balance.inBalanceMoney -= balance.config.TotalMoneyAmount
+func (balance *Balance) buy(usedMoney float64) {
+	balance.inBalanceMoney -= usedMoney
 	if balance.inBalanceMoney < 0 {
+		panic("Balance is minus")
 		balance.inBalanceMoney = 0
 	}
 
 	//balance.buysCount++
 
 	Log(fmt.Sprintf(
-		"Balance__BUY\nBuysCount: %d\nInBalanceMoney:%f",
+		"Balance__BUY\nBuysCount: %d\nInBalanceMoney:%f\nUsedMoney: %f",
 		balance.buysCount,
 		balance.inBalanceMoney,
+		usedMoney,
 	))
 }
 
@@ -51,8 +53,9 @@ func (balance *Balance) sell(returnMoney float64) {
 	}
 
 	Log(fmt.Sprintf(
-		"Balance__SELL\nBuysCount: %d\nInBalanceMoney:%f",
+		"Balance__SELL\nBuysCount: %d\nInBalanceMoney:%f\nReturnedMoney: %f",
 		balance.buysCount,
 		balance.inBalanceMoney,
+		returnMoney,
 	))
 }
