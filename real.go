@@ -46,8 +46,9 @@ func GetRealBotConfig() Config {
 		TrailingSellActivationAdditionPercentage: 1,
 		TrailingSellStopPercentage:               1,
 
-		TotalMoneyAmount: 1000,
-		Leverage:         10,
+		TotalMoneyAmount:             1000,
+		TotalMoneyIncreasePercentage: 10,
+		Leverage:                     10,
 
 		LessThanPreviousBuyPercentage: 1,
 
