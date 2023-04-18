@@ -43,12 +43,13 @@ func (balance *Balance) sell(returnMoney float64) {
 	//	balance.buysCount = 0
 	//}
 
-	if returnMoney > balance.config.TotalMoneyAmount {
-		returnMoney = balance.config.TotalMoneyAmount
-	}
+	//if returnMoney > balance.config.TotalMoneyAmount {
+	//	returnMoney = balance.config.TotalMoneyAmount
+	//}
 
 	balance.inBalanceMoney += returnMoney
-	if balance.inBalanceMoney > BALANCE_MONEY {
+	if balance.inBalanceMoney > BALANCE_MONEY+1 {
+		panic(fmt.Sprintf("Sell: balance is higher, %f", balance.inBalanceMoney))
 		balance.inBalanceMoney = BALANCE_MONEY
 	}
 

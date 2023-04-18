@@ -110,7 +110,7 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 		TotalMoneyIncreasePercentage: MinMaxFloat64{
 			min: 1,
-			max: 100,
+			max: 30,
 		},
 		Leverage: MinMaxInt{
 			min: 2,

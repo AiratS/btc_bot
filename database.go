@@ -708,11 +708,12 @@ func (db *Database) FindLastLiquidationSell() (bool, Sell) {
 func (db *Database) GetFuturesTotalRevenue() float64 {
 	rev := revenue{}
 	query := `
-		SELECT (SUM(revenue) - COUNT(id) * $1) AS rev 
-		FROM sells
+		SELECT SUM((b.coins * b.desired_price) - (b.used_money * $1)) AS rev
+		FROM sells AS s
+		INNER JOIN buys AS b on s.buy_id = b.id
 		WHERE revenue > 0
 	`
-	row := (*db).connect.QueryRow(query, db.config.TotalMoneyAmount*float64(db.config.Leverage))
+	row := (*db).connect.QueryRow(query, float64(db.config.Leverage))
 	row.Scan(&rev.value)
 
 	return rev.value
