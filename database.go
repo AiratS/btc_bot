@@ -348,7 +348,7 @@ func (db *Database) AddRealBuy(
 		  created_at, 
 		  real_order_id, 
 		  real_quantity,
-		  has_sell_order,
+		  has_sell_order
 	  ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
 	`
 
