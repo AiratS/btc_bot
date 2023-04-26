@@ -96,6 +96,7 @@ func createBuyOrdersTable(connect *sql.DB) sql.Result {
 		CREATE TABLE IF NOT EXISTS buy_orders (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			symbol VARCHAR(255),
+		    used_money FLOAT,
 			coins FLOAT,
 			exchange_rate FLOAT,
 		    buy_price FLOAT,
