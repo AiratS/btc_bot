@@ -122,6 +122,16 @@ func GetClosePrice(candles []Candle, count int) []float64 {
 	return prices
 }
 
+func GetValuesFromSlice(values []float64, count int) []float64 {
+	if len(values) < count {
+		panic("GetValuesFromSlice: Invalid values count")
+	}
+
+	length := len(values)
+
+	return values[length-count : length]
+}
+
 func getKlineCandleListLastIdx(candles *[]Candle) int {
 	return len(*candles) - 1
 }
