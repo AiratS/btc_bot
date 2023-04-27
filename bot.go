@@ -252,7 +252,11 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder) 
 	//exchangeRate := candle.GetPrice()
 
 	desiredPrice := bot.calcDesiredPrice(exchangeRate)
+
 	usedMoney := bot.getIncreasingTotalMoneyAmount()
+	if USE_REAL_MONEY && BUY_ORDER_REDUCTION_ENABLED {
+		usedMoney = buyOrder.UsedMoney
+	}
 
 	if !USE_REAL_MONEY && !bot.balance.HasEnoughMoneyForBuy(usedMoney) {
 		return
@@ -355,6 +359,13 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder) 
 func (bot *Bot) getIncreasingTotalMoneyAmount() float64 {
 	hasLastBuy, lastBuy := bot.db.GetLastUnsoldBuy()
 	if !hasLastBuy {
+		if USE_REAL_MONEY && BUY_ORDER_REDUCTION_ENABLED {
+			hasBuyOrder, buyOrder := bot.db.GetLastNewBuyOrder()
+			if hasBuyOrder {
+				return CalcUpperPrice(buyOrder.UsedMoney, bot.Config.TotalMoneyIncreasePercentage)
+			}
+		}
+
 		return bot.Config.TotalMoneyAmount
 	}
 
