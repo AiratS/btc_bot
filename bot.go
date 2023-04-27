@@ -145,6 +145,10 @@ func (bot *Bot) createLimitBuyOrder(candle Candle) {
 }
 
 func (bot *Bot) CheckBuyOrders() {
+	if 0 == len(bot.buffer.GetCandles()) {
+		return
+	}
+
 	currentCandle := bot.buffer.GetLastCandle()
 
 	newBuyOrders := bot.db.FetchNewBuyOrders(CANDLE_SYMBOL)
