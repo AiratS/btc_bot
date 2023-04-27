@@ -246,10 +246,12 @@ func (indicator *BigFallIndicator) HasSignal() bool {
 	smoothedPrices := FilterZeroPrices(talib.Sma(closePrices, indicator.getPeriod()))
 	smoothedLen := len(smoothedPrices)
 
-	//Log(fmt.Sprintf(
-	//	"BigFallIndicator__smoothedPricesCount: %d",
-	//	len(smoothedPrices),
-	//))
+	if IS_REAL_ENABLED {
+		Log(fmt.Sprintf(
+			"BigFallIndicator__smoothedPricesCount: %d",
+			len(smoothedPrices),
+		))
+	}
 
 	if 4 > smoothedLen {
 		return false
@@ -259,10 +261,12 @@ func (indicator *BigFallIndicator) HasSignal() bool {
 	lastPrice := smoothedPrices[smoothedLen-1]
 	fallPercentage := -1 * CalcGrowth(firstPrice, lastPrice)
 
-	//Log(fmt.Sprintf(
-	//	"BigFallIndicator__fallPercentage: %f",
-	//	CalcGrowth(firstPrice, lastPrice),
-	//))
+	if IS_REAL_ENABLED {
+		Log(fmt.Sprintf(
+			"BigFallIndicator__fallPercentage: %f",
+			CalcGrowth(firstPrice, lastPrice),
+		))
+	}
 	// ----------------------
 
 	return fallPercentage >= indicator.config.BigFallPercentage
