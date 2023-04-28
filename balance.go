@@ -29,12 +29,12 @@ func (balance *Balance) buy(usedMoney float64) {
 
 	//balance.buysCount++
 
-	Log(fmt.Sprintf(
-		"Balance__BUY\nBuysCount: %d\nInBalanceMoney:%f\nUsedMoney: %f",
-		balance.buysCount,
-		balance.inBalanceMoney,
-		usedMoney,
-	))
+	//Log(fmt.Sprintf(
+	//	"Balance__BUY\nBuysCount: %d\nInBalanceMoney:%f\nUsedMoney: %f",
+	//	balance.buysCount,
+	//	balance.inBalanceMoney,
+	//	usedMoney,
+	//))
 }
 
 func (balance *Balance) sell(returnMoney float64) {
@@ -53,10 +53,10 @@ func (balance *Balance) sell(returnMoney float64) {
 		balance.inBalanceMoney = BALANCE_MONEY
 	}
 
-	Log(fmt.Sprintf(
-		"Balance__SELL\nBuysCount: %d\nInBalanceMoney:%f\nReturnedMoney: %f",
-		balance.buysCount,
-		balance.inBalanceMoney,
-		returnMoney,
-	))
+	//Log(fmt.Sprintf(
+	//	"Balance__SELL\nBuysCount: %d\nInBalanceMoney:%f\nReturnedMoney: %f",
+	//	balance.buysCount,
+	//	balance.inBalanceMoney,
+	//	returnMoney,
+	//))
 }
