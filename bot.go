@@ -427,6 +427,13 @@ func (bot *Bot) runAfterBuy(buyId int64) {
 		}
 
 		isSellOrderFilled := bot.IsOrderFilled(CANDLE_SYMBOL, buy.RealOrderId)
+
+		Log(fmt.Sprintf(
+			"IS_SELL_ORDER_FILLED: orderId: %d, status: %t",
+			buy.RealOrderId,
+			isSellOrderFilled,
+		))
+
 		if idx != lastIdx {
 			Log(fmt.Sprintf("CANCEL_ORDER\nOrderId: %d\n", buy.RealOrderId))
 
