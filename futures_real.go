@@ -47,8 +47,8 @@ func KlineEventHandlerFutures(event *futures.WsKlineEvent) {
 		realBot.DoStuff(convertedCandle)
 	}
 
-	if ticker.tick() {
-		fmt.Println("__TICKER__")
-		realBot.CheckBuyOrders()
-	}
+	//if ticker.tick() {
+	//	fmt.Println("__TICKER__")
+	//	realBot.CheckBuyOrders()
+	//}
 }
