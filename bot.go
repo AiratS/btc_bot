@@ -426,12 +426,18 @@ func (bot *Bot) runAfterBuy(buyId int64) {
 			panic("Disable real time!")
 		}
 
+		isSellOrderFilled := bot.IsOrderFilled(CANDLE_SYMBOL, buy.RealOrderId)
 		if idx != lastIdx {
 			Log(fmt.Sprintf("CANCEL_ORDER\nOrderId: %d\n", buy.RealOrderId))
-			bot.futuresOrderManager.CancelOrder(CANDLE_SYMBOL, buy.RealOrderId)
+
+			if !isSellOrderFilled {
+				bot.futuresOrderManager.CancelOrder(CANDLE_SYMBOL, buy.RealOrderId)
+			}
 		}
 
-		bot.createAndUpdateSellOrder(buy.Id, desiredSellPrice, buy.RealQuantity)
+		if !isSellOrderFilled {
+			bot.createAndUpdateSellOrder(buy.Id, desiredSellPrice, buy.RealQuantity)
+		}
 	}
 }
 
