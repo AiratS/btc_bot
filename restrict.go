@@ -111,12 +111,12 @@ func GetBotConfigRestrictions() ConfigRestriction {
 			max: 100,
 		},
 		TotalMoneyIncreasePercentage: MinMaxFloat64{
-			min: 1,
-			max: 30,
+			min: 30,
+			max: 100,
 		},
 		FirstBuyMoneyIncreasePercentage: MinMaxFloat64{
-			min: 0,
-			max: 20,
+			min: 10,
+			max: 100,
 		},
 		StopIncreaseMoneyAfterBuysCount: MinMaxInt{
 			min: 1,
@@ -139,7 +139,7 @@ func GetBotConfigRestrictions() ConfigRestriction {
 
 		// ------------------------------------------------
 		LessThanPreviousBuyPercentage: MinMaxFloat64{
-			min: 0,
+			min: -0.5,
 			max: 0,
 		},
 
