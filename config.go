@@ -58,6 +58,8 @@ type Config struct {
 
 	TotalMoneyAmount                    float64
 	TotalMoneyIncreasePercentage        float64
+	FirstBuyMoneyIncreasePercentage     float64
+	StopIncreaseMoneyAfterBuysCount     int
 	Leverage                            int
 	FuturesAvgSellTimeMinutes           int
 	FuturesLeverageActivationPercentage float64

@@ -23,6 +23,8 @@ type ConfigRestriction struct {
 
 	TotalMoneyAmount                    MinMaxFloat64
 	TotalMoneyIncreasePercentage        MinMaxFloat64
+	FirstBuyMoneyIncreasePercentage     MinMaxFloat64
+	StopIncreaseMoneyAfterBuysCount     MinMaxInt
 	Leverage                            MinMaxInt
 	FuturesAvgSellTimeMinutes           MinMaxInt
 	FuturesLeverageActivationPercentage MinMaxFloat64
@@ -112,8 +114,16 @@ func GetBotConfigRestrictions() ConfigRestriction {
 			min: 1,
 			max: 30,
 		},
+		FirstBuyMoneyIncreasePercentage: MinMaxFloat64{
+			min: 0,
+			max: 20,
+		},
+		StopIncreaseMoneyAfterBuysCount: MinMaxInt{
+			min: 1,
+			max: 20,
+		},
 		Leverage: MinMaxInt{
-			min: 2,
+			min: 1,
 			max: 20,
 		},
 
@@ -129,8 +139,8 @@ func GetBotConfigRestrictions() ConfigRestriction {
 
 		// ------------------------------------------------
 		LessThanPreviousBuyPercentage: MinMaxFloat64{
-			min: 0.05,
-			max: 0.5,
+			min: 0,
+			max: 0,
 		},
 
 		// ------------------------------------------------
