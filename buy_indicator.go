@@ -234,6 +234,10 @@ func (indicator *BigFallIndicator) HasSignal() bool {
 		return false
 	}
 
+	if indicator.db.CountUnsoldBuys() > 0 {
+		return true
+	}
+
 	//firstCandle := indicator.buffer.GetBackCandle(indicator.config.BigFallCandlesCount).ClosePrice
 	//lastCandle := indicator.buffer.GetLastCandle().ClosePrice
 	//fallPercentage := -1 * CalcGrowth(firstCandle, lastCandle)
@@ -318,6 +322,10 @@ func (indicator *GradientDescentIndicator) HasSignal() bool {
 	count := len(indicator.buffer.GetCandles())
 	if (indicator.config.GradientDescentCandles + 1) > count {
 		return false
+	}
+
+	if indicator.db.CountUnsoldBuys() > 0 {
+		return true
 	}
 
 	closePrices := GetValuesFromSlice(
