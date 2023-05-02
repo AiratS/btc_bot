@@ -22,6 +22,7 @@ const BALANCE_MONEY = 3000.0
 const COMMISSION = 0.06
 const DATASETS_DIRECTORY = "datasets"
 const UNSOLD_BUYS_COUNT = 20
+const ENABLE_STOP_INCREASE_AFTER_BUYS_COUNT = false
 
 // Genetic
 const NO_VALIDATION = true

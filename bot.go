@@ -297,6 +297,10 @@ func (bot *Bot) getIncreasingTotalMoneyAmount() float64 {
 	}
 
 	_, lastBuy := bot.db.GetLastUnsoldBuy()
+	if ENABLE_STOP_INCREASE_AFTER_BUYS_COUNT &&
+		bot.Config.StopIncreaseMoneyAfterBuysCount <= count {
+		return lastBuy.UsedMoney
+	}
 
 	return CalcUpperPrice(lastBuy.UsedMoney, bot.Config.TotalMoneyIncreasePercentage)
 }
