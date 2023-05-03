@@ -4,10 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/adshao/go-binance/v2/futures"
+	"time"
 )
 
 const LEVERAGE = 10
 const MARGIN_TYPE = "isolated"
+const RETRIES_COUNT = 5
+const RETRY_DELAY = 300
 
 type FuturesOrderManager struct {
 	futuresClient *futures.Client
@@ -104,39 +107,55 @@ func (manager *FuturesOrderManager) CanBuyForPrice(symbol string, price, usedMon
 }
 
 func (manager *FuturesOrderManager) HasEnoughMoneyForBuy(usedMoney float64) bool {
-	res, err := manager.futuresClient.NewGetBalanceService().
-		Do(context.Background())
+	var errorMessage string
 
-	if err != nil {
-		fmt.Println(err)
+	for i := 0; i < RETRIES_COUNT; i++ {
+		res, err := manager.futuresClient.NewGetBalanceService().
+			Do(context.Background())
+
+		if err != nil {
+			errorMessage = err.Error()
+			Log(errorMessage)
+			time.Sleep(RETRY_DELAY * time.Millisecond)
+			continue
+		}
+
+		for _, balance := range res {
+			if balance.Asset == "BUSD" {
+				freeMoney := convertBinanceToFloat64(balance.Balance)
+
+				return freeMoney >= usedMoney
+			}
+		}
+
 		return false
 	}
 
-	for _, balance := range res {
-		if balance.Asset == "BUSD" {
-			freeMoney := convertBinanceToFloat64(balance.Balance)
-
-			return freeMoney >= usedMoney
-		}
-	}
-
-	return false
+	panic(errorMessage)
 }
 
 func (manager *FuturesOrderManager) IsBuySold(symbol string, orderId int64) bool {
-	res, err := manager.futuresClient.NewGetOrderService().
-		OrderID(orderId).
-		Symbol(symbol).
-		Do(context.Background())
+	var errorMessage string
 
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
+	for i := 0; i < RETRIES_COUNT; i++ {
+		res, err := manager.futuresClient.NewGetOrderService().
+			OrderID(orderId).
+			Symbol(symbol).
+			Do(context.Background())
+
+		if err != nil {
+			errorMessage = err.Error()
+			Log(errorMessage)
+			time.Sleep(RETRY_DELAY * time.Millisecond)
+			continue
+		}
+
+		fmt.Println(res.Status)
+
+		return res.Status == "FILLED"
 	}
 
-	fmt.Println(res.Status)
-
-	return res.Status == "FILLED"
+	panic(errorMessage)
 }
 
 func (manager *FuturesOrderManager) CreateBuyOrder(symbol string, price, usedMoney float64) (int64, float64, float64) {
@@ -150,26 +169,33 @@ func (manager *FuturesOrderManager) CreateBuyOrder(symbol string, price, usedMon
 
 		fmt.Println(fmt.Sprintf("CreateLimitBuyOrder: %f, %f", priceConverted, quantityLotSize))
 
-		order, err := manager.futuresClient.
-			NewCreateOrderService().
-			Symbol(symbol).
-			Side(futures.SideTypeBuy).
-			Type(futures.OrderTypeLimit).
-			//PositionSide(futures.PositionSideTypeLong).
-			TimeInForce(futures.TimeInForceTypeGTC).
-			Quantity(floatToBinancePrice(quantityLotSize)).
-			Price(floatToBinancePrice(priceConverted)).
-			Do(context.Background())
+		var errorMessage string
+		for i := 0; i < RETRIES_COUNT; i++ {
+			order, err := manager.futuresClient.
+				NewCreateOrderService().
+				Symbol(symbol).
+				Side(futures.SideTypeBuy).
+				Type(futures.OrderTypeLimit).
+				//PositionSide(futures.PositionSideTypeLong).
+				TimeInForce(futures.TimeInForceTypeGTC).
+				Quantity(floatToBinancePrice(quantityLotSize)).
+				Price(floatToBinancePrice(priceConverted)).
+				Do(context.Background())
 
-		if err != nil {
-			fmt.Println(err)
-			panic(err)
+			if err != nil {
+				errorMessage = err.Error()
+				Log(errorMessage)
+				time.Sleep(RETRY_DELAY * time.Millisecond)
+				continue
+			}
+
+			realBuyPrice := manager.getRealBuyPrice(priceConverted, order)
+			realQuantity := manager.getRealBuyQuantity(quantityLotSize, order)
+
+			return order.OrderID, realQuantity, realBuyPrice
 		}
 
-		realBuyPrice := manager.getRealBuyPrice(priceConverted, order)
-		realQuantity := manager.getRealBuyQuantity(quantityLotSize, order)
-
-		return order.OrderID, realQuantity, realBuyPrice
+		panic(errorMessage)
 	}
 
 	return 0, 0.0, 0.0
@@ -186,24 +212,31 @@ func (manager *FuturesOrderManager) CreateMarketBuyOrder(symbol string, price, u
 
 		fmt.Println(fmt.Sprintf("CreateBuyOrder: %f, %f", priceConverted, quantityLotSize))
 
-		order, err := manager.futuresClient.
-			NewCreateOrderService().
-			Symbol(symbol).
-			Side(futures.SideTypeBuy).
-			Type(futures.OrderTypeMarket).
-			//PositionSide(futures.PositionSideTypeLong).
-			Quantity(floatToBinancePrice(quantityLotSize)).
-			Do(context.Background())
+		var errorMessage string
+		for i := 0; i < RETRIES_COUNT; i++ {
+			order, err := manager.futuresClient.
+				NewCreateOrderService().
+				Symbol(symbol).
+				Side(futures.SideTypeBuy).
+				Type(futures.OrderTypeMarket).
+				//PositionSide(futures.PositionSideTypeLong).
+				Quantity(floatToBinancePrice(quantityLotSize)).
+				Do(context.Background())
 
-		if err != nil {
-			fmt.Println(err)
-			panic(err)
+			if err != nil {
+				errorMessage = err.Error()
+				Log(errorMessage)
+				time.Sleep(RETRY_DELAY * time.Millisecond)
+				continue
+			}
+
+			realBuyPrice := manager.getRealBuyPrice(priceConverted, order)
+			realQuantity := manager.getRealBuyQuantity(quantityLotSize, order)
+
+			return order.OrderID, realQuantity, realBuyPrice
 		}
 
-		realBuyPrice := manager.getRealBuyPrice(priceConverted, order)
-		realQuantity := manager.getRealBuyQuantity(quantityLotSize, order)
-
-		return order.OrderID, realQuantity, realBuyPrice
+		panic(errorMessage)
 	}
 
 	return 0, 0.0, 0.0
@@ -219,23 +252,30 @@ func (manager *FuturesOrderManager) CreateSellOrder(symbol string, stopPrice, qu
 
 		fmt.Println(fmt.Sprintf("CreateSellOrder: %f, %f, %f", priceConverted, stopPrice, quantity))
 
-		order, err := manager.futuresClient.
-			NewCreateOrderService().
-			Symbol(symbol).
-			Side(futures.SideTypeSell).
-			Type(futures.OrderTypeLimit).
-			//PositionSide(futures.PositionSideTypeLong).
-			TimeInForce(futures.TimeInForceTypeGTC).
-			Quantity(floatToBinancePrice(quantity)).
-			Price(floatToBinancePrice(priceConverted)).
-			Do(context.Background())
+		var errorMessage string
+		for i := 0; i < RETRIES_COUNT; i++ {
+			order, err := manager.futuresClient.
+				NewCreateOrderService().
+				Symbol(symbol).
+				Side(futures.SideTypeSell).
+				Type(futures.OrderTypeLimit).
+				//PositionSide(futures.PositionSideTypeLong).
+				TimeInForce(futures.TimeInForceTypeGTC).
+				Quantity(floatToBinancePrice(quantity)).
+				Price(floatToBinancePrice(priceConverted)).
+				Do(context.Background())
 
-		if err != nil {
-			fmt.Println(err)
-			panic(err)
+			if err != nil {
+				errorMessage = err.Error()
+				Log(errorMessage)
+				time.Sleep(RETRY_DELAY * time.Millisecond)
+				continue
+			}
+
+			return order.OrderID
 		}
 
-		return order.OrderID
+		panic(errorMessage)
 	}
 
 	return 0
@@ -246,18 +286,25 @@ func (manager *FuturesOrderManager) CancelOrder(symbol string, orderId int64) in
 		return 0
 	}
 
-	order, err := manager.futuresClient.
-		NewCancelOrderService().
-		Symbol(symbol).
-		OrderID(orderId).
-		Do(context.Background())
+	var errorMessage string
+	for i := 0; i < RETRIES_COUNT; i++ {
+		order, err := manager.futuresClient.
+			NewCancelOrderService().
+			Symbol(symbol).
+			OrderID(orderId).
+			Do(context.Background())
 
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
+		if err != nil {
+			errorMessage = err.Error()
+			Log(errorMessage)
+			time.Sleep(RETRY_DELAY * time.Millisecond)
+			continue
+		}
+
+		return order.OrderID
 	}
 
-	return order.OrderID
+	panic(errorMessage)
 }
 
 func (manager *FuturesOrderManager) getOrderMoney(usedMoney float64) float64 {
