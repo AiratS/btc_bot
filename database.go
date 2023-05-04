@@ -15,9 +15,10 @@ type Database struct {
 type BuyType int
 
 const (
-	Default     BuyType = 0
-	Liquidation BuyType = 1
-	TimeCancel  BuyType = 2
+	Default      BuyType = 0
+	Liquidation  BuyType = 1
+	TimeCancel   BuyType = 2
+	BuyTypeBoost BuyType = 3
 )
 
 type BuyOrderStatus int
@@ -125,7 +126,8 @@ func createBuysTable(connect *sql.DB) sql.Result {
 			created_at DATETIME,
 		    real_order_id INTEGER,
 			real_quantity FLOAT,
-		    has_sell_order INTEGER
+		    has_sell_order INTEGER,
+		    buy_type INTEGER
 		);
 	`
 	result, err := connect.Exec(query)
@@ -332,8 +334,9 @@ func (db *Database) AddBuy(
 		  created_at, 
 		  real_order_id, 
 		  real_quantity,
-		  has_sell_order
-	  ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+		  has_sell_order,
+		  buy_type
+	  ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
 	`
 	result, err := db.connect.Exec(
 		query,
@@ -346,6 +349,7 @@ func (db *Database) AddBuy(
 		0,
 		0.0,
 		0,
+		Default,
 	)
 	if err != nil {
 		panic(err)
@@ -363,6 +367,7 @@ func (db *Database) AddRealBuy(
 	createdAt string,
 	orderId int64,
 	quantity float64,
+	buyType BuyType,
 ) sql.Result {
 	//createdAt := time.Now().Format("2006-01-02 15:04:05")
 	query := `
@@ -375,8 +380,9 @@ func (db *Database) AddRealBuy(
 		  created_at, 
 		  real_order_id, 
 		  real_quantity,
-		  has_sell_order
-	  ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+		  has_sell_order,
+		  buy_type
+	  ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
 	`
 
 	result, err := db.connect.Exec(
@@ -390,6 +396,7 @@ func (db *Database) AddRealBuy(
 		orderId,
 		quantity,
 		0,
+		buyType,
 	)
 	if err != nil {
 		panic(err)
@@ -474,6 +481,7 @@ func (db *Database) FetchUnsoldBuysByUpperPercentage(exchangeRate, upperPercenta
 			&buy.RealOrderId,
 			&buy.RealQuantity,
 			&buy.HasSellOrder,
+			&buy.BuyType,
 		)
 		unsoldBuys = append(unsoldBuys, buy)
 	}
@@ -511,6 +519,7 @@ func (db *Database) FetchUnsoldBuysByLowerPercentage(exchangeRate, lowerPercenta
 			&buy.RealOrderId,
 			&buy.RealQuantity,
 			&buy.HasSellOrder,
+			&buy.BuyType,
 		)
 		unsoldBuys = append(unsoldBuys, buy)
 	}
@@ -548,6 +557,7 @@ func (db *Database) FetchUnsoldBuysByDesiredPrice(exchangeRate float64) []Buy {
 			&buy.RealOrderId,
 			&buy.RealQuantity,
 			&buy.HasSellOrder,
+			&buy.BuyType,
 		)
 		unsoldBuys = append(unsoldBuys, buy)
 	}
@@ -584,6 +594,7 @@ func (db *Database) FetchUnsoldBuys() []Buy {
 			&buy.RealOrderId,
 			&buy.RealQuantity,
 			&buy.HasSellOrder,
+			&buy.BuyType,
 		)
 		unsoldBuys = append(unsoldBuys, buy)
 	}
@@ -620,6 +631,7 @@ func (db *Database) FetchUnsoldBuysById(buyIds []int64) []Buy {
 			&buy.RealOrderId,
 			&buy.RealQuantity,
 			&buy.HasSellOrder,
+			&buy.BuyType,
 		)
 		unsoldBuys = append(unsoldBuys, buy)
 	}
@@ -657,6 +669,7 @@ func (db *Database) FetchTimeCancelBuys(createdAt string, minutes int) []Buy {
 			&buy.RealOrderId,
 			&buy.RealQuantity,
 			&buy.HasSellOrder,
+			&buy.BuyType,
 		)
 		unsoldBuys = append(unsoldBuys, buy)
 	}
@@ -704,7 +717,53 @@ func (db *Database) GetLastUnsoldBuy() (bool, Buy) {
 		&buy.RealOrderId,
 		&buy.RealQuantity,
 		&buy.HasSellOrder,
+		&buy.BuyType,
 	)
+
+	return buy.CreatedAt != "", buy
+}
+
+func (db *Database) GetLastUnsoldNotBoostBuy() (bool, Buy) {
+	query := `
+		SELECT b.*
+		FROM buys AS b 
+		LEFT JOIN sells AS s 
+		    ON s.buy_id = b.id
+		WHERE s.id IS NULL AND b.buy_type != $1
+		ORDER BY id DESC
+		LIMIT 1
+	`
+	row := (*db).connect.QueryRow(query, BuyTypeBoost)
+	buy := Buy{}
+	row.Scan(
+		&buy.Id,
+		&buy.Symbol,
+		&buy.UsedMoney,
+		&buy.Coins,
+		&buy.ExchangeRate,
+		&buy.DesiredPrice,
+		&buy.CreatedAt,
+		&buy.RealOrderId,
+		&buy.RealQuantity,
+		&buy.HasSellOrder,
+		&buy.BuyType,
+	)
+
+	return buy.CreatedAt != "", buy
+}
+
+func (db *Database) FindFirstUnsoldBuy() (bool, Buy) {
+	query := `
+		SELECT b.*
+		FROM buys AS b 
+		LEFT JOIN sells AS s 
+		    ON s.buy_id = b.id
+		WHERE s.id IS NULL 
+		ORDER BY id ASC
+		LIMIT 1
+	`
+	row := (*db).connect.QueryRow(query)
+	buy := db.scanBuy(row)
 
 	return buy.CreatedAt != "", buy
 }
@@ -769,6 +828,25 @@ func (db *Database) CountLiquidationBuys() int {
 	(*db).connect.QueryRow(query).Scan(&count)
 
 	return count
+}
+
+func (db *Database) scanBuy(row *sql.Row) Buy {
+	buy := Buy{}
+	row.Scan(
+		&buy.Id,
+		&buy.Symbol,
+		&buy.UsedMoney,
+		&buy.Coins,
+		&buy.ExchangeRate,
+		&buy.DesiredPrice,
+		&buy.CreatedAt,
+		&buy.RealOrderId,
+		&buy.RealQuantity,
+		&buy.HasSellOrder,
+		&buy.BuyType,
+	)
+
+	return buy
 }
 
 type buysCount struct {

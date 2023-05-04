@@ -10,6 +10,7 @@ import (
 type Bot struct {
 	Config                         *Config
 	BuyIndicators                  []BuyIndicator
+	BoostBuyIndicator              *BoostBuyIndicator
 	SellIndicators                 []SellIndicator
 	buffer                         *Buffer
 	db                             *Database
@@ -66,8 +67,16 @@ func (bot *Bot) DoStuff(candle Candle) {
 }
 
 func (bot *Bot) runBuyIndicators() {
-	signalsCount := 0
+	candle := bot.buffer.GetLastCandle()
 
+	// Run BoostBuyIndicator
+	if ENABLE_BOOST_BUY_INDICATOR && bot.BoostBuyIndicator.HasSignal() {
+		bot.checkForMoneyAndBuy(candle, BuyTypeBoost)
+		return
+	}
+
+	// Run Usual indicators
+	signalsCount := 0
 	for _, indicator := range bot.BuyIndicators {
 		indicator.Update()
 		if indicator.HasSignal() {
@@ -79,23 +88,17 @@ func (bot *Bot) runBuyIndicators() {
 		for _, indicator := range bot.BuyIndicators {
 			indicator.Finish()
 		}
+		bot.checkForMoneyAndBuy(candle, Default)
+	}
+}
 
-		candle := bot.buffer.GetLastCandle()
-		moneyAmount := bot.getIncreasingTotalMoneyAmount()
-		if !bot.HasEnoughMoneyForBuy(moneyAmount) {
-			return
-		}
-
-		//if USE_REAL_MONEY && BUY_ORDER_REDUCTION_ENABLED {
-		//	bot.createLimitBuyOrder(candle)
-		//} else {
-		bot.buy(candle.GetPrice(), candle.CloseTime, &BuyOrder{})
-		//}
+func (bot *Bot) checkForMoneyAndBuy(candle Candle, buyType BuyType) {
+	moneyAmount := bot.getIncreasingTotalMoneyAmount(buyType)
+	if !bot.HasEnoughMoneyForBuy(moneyAmount) {
+		return
 	}
 
-	//if USE_REAL_MONEY && BUY_ORDER_REDUCTION_ENABLED {
-	//	bot.CheckBuyOrders()
-	//}
+	bot.buy(candle.GetPrice(), candle.CloseTime, &BuyOrder{}, buyType)
 }
 
 // NOT USED
@@ -103,7 +106,7 @@ func (bot *Bot) createLimitBuyOrder(candle Candle) {
 	Log(fmt.Sprintf("GOT_BUY_SIGNAL\nPrice: %f", candle.ClosePrice))
 
 	buyPrice := CalcBottomPrice(candle.ClosePrice, BUY_ORDER_REDUCTION_PERCENTAGE)
-	usedMoney := bot.getIncreasingTotalMoneyAmount()
+	usedMoney := bot.getIncreasingTotalMoneyAmount(Default) // TODO; fix buy type
 
 	if USE_REAL_MONEY &&
 		(!bot.HasEnoughMoneyForBuy(usedMoney) || !bot.CanBuyForPrice(buyPrice, usedMoney)) {
@@ -147,7 +150,7 @@ func (bot *Bot) CheckBuyOrders() {
 		// Save buy
 		if bot.IsOrderFilled(CANDLE_SYMBOL, buyOrder.RealOrderId) {
 			bot.db.UpdateBuyOrderStatus(buyOrder.Id, BuyOrderStatusFilled)
-			bot.buy(buyOrder.BuyPrice, currentCandle.CloseTime, &buyOrder)
+			bot.buy(buyOrder.BuyPrice, currentCandle.CloseTime, &buyOrder, Default)
 			continue
 		}
 
@@ -237,11 +240,11 @@ func (bot *Bot) finishSellIndicators(buy Buy) {
 	}
 }
 
-func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder) {
+func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder, buyType BuyType) {
 	Log(fmt.Sprintf("GOT_BUY_SIGNAL\nExchangeRate: %f", exchangeRate))
 
 	// Check for balance
-	usedMoney := bot.getIncreasingTotalMoneyAmount()
+	usedMoney := bot.getIncreasingTotalMoneyAmount(buyType)
 	if !bot.CanBuyForPrice(exchangeRate, usedMoney) || !bot.HasEnoughMoneyForBuy(usedMoney) {
 		return
 	}
@@ -265,6 +268,7 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder) 
 		closeTime,
 		orderId,
 		coinsCount,
+		buyType,
 	).LastInsertId()
 
 	if err != nil {
@@ -273,7 +277,8 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder) 
 
 	bot.balance.buy(usedMoney)
 	Log(fmt.Sprintf(
-		"BUY\nBuyId: %d\nExchangeRate: %f\nUsedMoney: %f\nCoinsCount: %f\nBalance: %f\nOrderId: %d",
+		"%sBUY\nBuyId: %d\nExchangeRate: %f\nUsedMoney: %f\nCoinsCount: %f\nBalance: %f\nOrderId: %d",
+		bot.getBuyMessagePrefix(buyType),
 		buyId,
 		exchangeRate,
 		usedMoney,
@@ -286,7 +291,23 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder) 
 	bot.runAfterBuy(buyId)
 }
 
-func (bot *Bot) getIncreasingTotalMoneyAmount() float64 {
+func (bot *Bot) getBuyMessagePrefix(buyType BuyType) string {
+	prefix := ""
+
+	if BuyTypeBoost == buyType {
+		prefix = "BOOST_"
+	}
+
+	return prefix
+}
+
+func (bot *Bot) getIncreasingTotalMoneyAmount(buyType BuyType) float64 {
+	// Boost money amount
+	if BuyTypeBoost == buyType {
+		return CalcUpperPrice(bot.Config.TotalMoneyAmount, bot.Config.BoostBuyMoneyIncreasePercentage)
+	}
+
+	// Increasing money amount
 	count := bot.db.CountUnsoldBuys()
 	if 0 == count {
 		return CalcUpperPrice(bot.Config.TotalMoneyAmount, bot.Config.FirstBuyMoneyIncreasePercentage)
@@ -296,7 +317,7 @@ func (bot *Bot) getIncreasingTotalMoneyAmount() float64 {
 		return CalcUpperPrice(bot.Config.TotalMoneyAmount, bot.Config.TotalMoneyIncreasePercentage)
 	}
 
-	_, lastBuy := bot.db.GetLastUnsoldBuy()
+	_, lastBuy := bot.db.GetLastUnsoldNotBoostBuy()
 	if ENABLE_STOP_INCREASE_AFTER_BUYS_COUNT &&
 		bot.Config.StopIncreaseMoneyAfterBuysCount <= count {
 		return lastBuy.UsedMoney
@@ -589,11 +610,11 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	bigFallIndicator := NewBigFallIndicator(
-		bot.Config,
-		bot.buffer,
-		bot.db,
-	)
+	//bigFallIndicator := NewBigFallIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
 
 	lessThanPreviousBuyIndicator := NewLessThanPreviousBuyIndicator(
 		bot.Config,
@@ -601,27 +622,35 @@ func setupBuyIndicators(bot *Bot) {
 		bot.db,
 	)
 
-	stopAfterUnsuccessfullySellIndicator := NewStopAfterUnsuccessfullySellIndicator(
-		bot.Config,
-		bot.buffer,
-		bot.db,
-	)
-
-	//gradientDescentIndicator := NewGradientDescentIndicator(
+	//stopAfterUnsuccessfullySellIndicator := NewStopAfterUnsuccessfullySellIndicator(
 	//	bot.Config,
 	//	bot.buffer,
 	//	bot.db,
 	//)
 
+	gradientDescentIndicator := NewGradientDescentIndicator(
+		bot.Config,
+		bot.buffer,
+		bot.db,
+	)
+
 	bot.BuyIndicators = []BuyIndicator{
 		//&backTrailingBuyIndicator,
 		//&buysCountIndicator,
 		//&waitForPeriodIndicator,
-		&bigFallIndicator,
+		//&bigFallIndicator,
 		&lessThanPreviousBuyIndicator,
-		&stopAfterUnsuccessfullySellIndicator,
-		//&gradientDescentIndicator,
+		//&stopAfterUnsuccessfullySellIndicator,
+		&gradientDescentIndicator,
 	}
+
+	// Boost buy indicator
+	boostBuyIndicator := NewBoostBuyIndicator(
+		bot.Config,
+		bot.buffer,
+		bot.db,
+	)
+	bot.BoostBuyIndicator = &boostBuyIndicator
 }
 
 func setupSellIndicators(bot *Bot) {

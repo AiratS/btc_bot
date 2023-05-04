@@ -317,8 +317,6 @@ func (indicator *LeverageSellIndicator) markBuys(
 			(*targetList)[idx].BuyType = buyType
 		}
 	}
-
-	fmt.Println()
 }
 
 func (indicator *LeverageSellIndicator) hasSuchBuy(buyId int64, buys []Buy) bool {

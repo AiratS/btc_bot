@@ -456,6 +456,61 @@ func (indicator *LessThanPreviousBuyIndicator) Finish() {
 
 // ---------------------------------------
 
+type BoostBuyIndicator struct {
+	config *Config
+	buffer *Buffer
+	db     *Database
+}
+
+func NewBoostBuyIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) BoostBuyIndicator {
+	return BoostBuyIndicator{
+		config: config,
+		buffer: buffer,
+		db:     db,
+	}
+}
+
+func (indicator *BoostBuyIndicator) HasSignal() bool {
+	hasBuy, buy := indicator.db.FindFirstUnsoldBuy()
+	if !hasBuy {
+		return false
+	}
+
+	currentCandle := indicator.buffer.GetLastCandle()
+
+	// Check for percentage
+	fallPercentage := -1 * CalcGrowth(buy.ExchangeRate, currentCandle.GetPrice())
+	if indicator.config.BoostBuyFallPercentage <= fallPercentage {
+		return true
+	}
+
+	// Check for period
+	currentTime := ConvertDateStringToTime(currentCandle.CloseTime)
+	buyTime := ConvertDatabaseDateStringToTime(buy.CreatedAt)
+	diff := currentTime.Sub(buyTime)
+
+	return float64(indicator.config.BoostBuyPeriodMinutes) <= diff.Minutes()
+}
+
+func (indicator *BoostBuyIndicator) IsStarted() bool {
+	return true
+}
+
+func (indicator *BoostBuyIndicator) Start() {
+}
+
+func (indicator *BoostBuyIndicator) Update() {
+}
+
+func (indicator *BoostBuyIndicator) Finish() {
+}
+
+// ---------------------------------------
+
 type StopAfterUnsuccessfullySellIndicator struct {
 	config *Config
 	buffer *Buffer
