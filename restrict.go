@@ -31,6 +31,10 @@ type ConfigRestriction struct {
 
 	LessThanPreviousBuyPercentage MinMaxFloat64
 
+	BoostBuyFallPercentage          MinMaxFloat64
+	BoostBuyPeriodMinutes           MinMaxInt
+	BoostBuyMoneyIncreasePercentage MinMaxFloat64
+
 	StopAfterUnsuccessfullySellMinutes MinMaxInt
 }
 
@@ -48,7 +52,7 @@ func GetBotConfigRestrictions() ConfigRestriction {
 	return ConfigRestriction{
 		HighSellPercentage: MinMaxFloat64{
 			min: 0.2,
-			max: 1,
+			max: 0.4,
 		},
 
 		TrailingTopPercentage: MinMaxFloat64{
@@ -116,11 +120,11 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 		FirstBuyMoneyIncreasePercentage: MinMaxFloat64{
 			min: 10,
-			max: 100,
+			max: 200,
 		},
 		StopIncreaseMoneyAfterBuysCount: MinMaxInt{
-			min: 1,
-			max: 20,
+			min: 3,
+			max: 10,
 		},
 		Leverage: MinMaxInt{
 			min: 1,
@@ -137,8 +141,20 @@ func GetBotConfigRestrictions() ConfigRestriction {
 			max: 300,
 		},
 
-		// ------------------------------------------------
 		LessThanPreviousBuyPercentage: MinMaxFloat64{
+			min: -0.5,
+			max: 0,
+		},
+
+		BoostBuyFallPercentage: MinMaxFloat64{
+			min: -0.5,
+			max: 0,
+		},
+		BoostBuyPeriodMinutes: MinMaxInt{
+			min: 60 * 1,       // 1 hour
+			max: 60 * 24 * 14, // 5 days
+		},
+		BoostBuyMoneyIncreasePercentage: MinMaxFloat64{
 			min: -0.5,
 			max: 0,
 		},

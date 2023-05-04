@@ -67,6 +67,10 @@ type Config struct {
 
 	LessThanPreviousBuyPercentage float64
 
+	BoostBuyFallPercentage          float64
+	BoostBuyPeriodMinutes           int
+	BoostBuyMoneyIncreasePercentage float64
+
 	StopAfterUnsuccessfullySellMinutes int
 
 	TotalRevenue     float64

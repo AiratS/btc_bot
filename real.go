@@ -54,6 +54,10 @@ func GetRealBotConfig() Config {
 
 		LessThanPreviousBuyPercentage: 1,
 
+		BoostBuyFallPercentage:          1,
+		BoostBuyPeriodMinutes:           1,
+		BoostBuyMoneyIncreasePercentage: 1,
+
 		StopAfterUnsuccessfullySellMinutes: 1,
 	}
 }
