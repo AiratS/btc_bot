@@ -475,22 +475,27 @@ func NewBoostBuyIndicator(
 }
 
 func (indicator *BoostBuyIndicator) HasSignal() bool {
-	hasBuy, buy := indicator.db.FindFirstUnsoldBuy()
-	if !hasBuy {
+	hasFirstBuy, firstBuy := indicator.db.FindFirstUnsoldBuy()
+	if !hasFirstBuy {
 		return false
 	}
 
 	currentCandle := indicator.buffer.GetLastCandle()
 
 	// Check for percentage
-	fallPercentage := -1 * CalcGrowth(buy.ExchangeRate, currentCandle.GetPrice())
-	if indicator.config.BoostBuyFallPercentage <= fallPercentage {
-		return true
+	fallPercentage := -1 * CalcGrowth(firstBuy.ExchangeRate, currentCandle.GetPrice())
+	if indicator.config.BoostBuyFallPercentage > fallPercentage {
+		return false
 	}
 
 	// Check for period
+	hasLastBuy, lastBuy := indicator.db.GetLastUnsoldBuy()
+	if !hasLastBuy {
+		return false
+	}
+
 	currentTime := ConvertDateStringToTime(currentCandle.CloseTime)
-	buyTime := ConvertDatabaseDateStringToTime(buy.CreatedAt)
+	buyTime := ConvertDatabaseDateStringToTime(lastBuy.CreatedAt)
 	diff := currentTime.Sub(buyTime)
 
 	return float64(indicator.config.BoostBuyPeriodMinutes) <= diff.Minutes()
