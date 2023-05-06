@@ -21,6 +21,11 @@ type ConfigRestriction struct {
 	TrailingSellActivationAdditionPercentage MinMaxFloat64
 	TrailingSellStopPercentage               MinMaxFloat64
 
+	LinearRegressionCandles MinMaxInt
+	LinearRegressionPeriod  MinMaxInt
+	LinearRegressionMse     MinMaxFloat64
+	LinearRegressionK       MinMaxFloat64
+
 	TotalMoneyAmount                    MinMaxFloat64
 	TotalMoneyIncreasePercentage        MinMaxFloat64
 	FirstBuyMoneyIncreasePercentage     MinMaxFloat64
@@ -110,17 +115,35 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 
 		// ------------------------------------------------
+		LinearRegressionCandles: MinMaxInt{
+			min: 1,
+			max: 6,
+		},
+		LinearRegressionPeriod: MinMaxInt{
+			min: 1,
+			max: 6,
+		},
+		LinearRegressionMse: MinMaxFloat64{
+			min: 0.4,
+			max: 2,
+		},
+		LinearRegressionK: MinMaxFloat64{
+			min: 0.4,
+			max: 2,
+		},
+
+		// ------------------------------------------------
 		TotalMoneyAmount: MinMaxFloat64{
-			min: 10,
-			max: 100,
+			min: 3,
+			max: 10,
 		},
 		TotalMoneyIncreasePercentage: MinMaxFloat64{
 			min: 30,
 			max: 100,
 		},
 		FirstBuyMoneyIncreasePercentage: MinMaxFloat64{
-			min: 10,
-			max: 200,
+			min: 1,
+			max: 1,
 		},
 		StopIncreaseMoneyAfterBuysCount: MinMaxInt{
 			min: 3,
@@ -128,7 +151,7 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 		Leverage: MinMaxInt{
 			min: 1,
-			max: 20,
+			max: 1,
 		},
 
 		// ------------------------------------------------
@@ -147,16 +170,16 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 
 		BoostBuyFallPercentage: MinMaxFloat64{
-			min: -0.5,
-			max: 0,
+			min: 0.5,
+			max: 2,
 		},
 		BoostBuyPeriodMinutes: MinMaxInt{
-			min: 60 * 1,       // 1 hour
-			max: 60 * 24 * 14, // 5 days
+			min: 20,
+			max: 100,
 		},
 		BoostBuyMoneyIncreasePercentage: MinMaxFloat64{
-			min: -0.5,
-			max: 0,
+			min: 100,
+			max: 2000,
 		},
 
 		// ------------------------------------------------

@@ -58,6 +58,11 @@ type Config struct {
 	TrailingSellActivationAdditionPercentage float64
 	TrailingSellStopPercentage               float64
 
+	LinearRegressionCandles int
+	LinearRegressionPeriod  int
+	LinearRegressionMse     float64
+	LinearRegressionK       float64
+
 	TotalMoneyAmount                    float64
 	TotalMoneyIncreasePercentage        float64
 	FirstBuyMoneyIncreasePercentage     float64
