@@ -628,7 +628,13 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	gradientDescentIndicator := NewGradientDescentIndicator(
+	//gradientDescentIndicator := NewGradientDescentIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
+
+	linearRegressionIndicator := NewLinearRegressionIndicator(
 		bot.Config,
 		bot.buffer,
 		bot.db,
@@ -639,9 +645,10 @@ func setupBuyIndicators(bot *Bot) {
 		//&buysCountIndicator,
 		//&waitForPeriodIndicator,
 		//&bigFallIndicator,
+		&linearRegressionIndicator,
 		&lessThanPreviousBuyIndicator,
 		//&stopAfterUnsuccessfullySellIndicator,
-		&gradientDescentIndicator,
+		//&gradientDescentIndicator,
 	}
 
 	// Boost buy indicator

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/markcheno/go-talib"
+	"math"
 )
 
 type BuyIndicator interface {
@@ -559,4 +560,134 @@ func (indicator *StopAfterUnsuccessfullySellIndicator) Update() {
 }
 
 func (indicator *StopAfterUnsuccessfullySellIndicator) Finish() {
+}
+
+// -----------------------------------------------------
+
+const (
+	LinearRegressionLimit = 30
+	LinearRegressionKStep = 0.1
+)
+
+type LinearRegressionIndicator struct {
+	config *Config
+	buffer *Buffer
+	db     *Database
+}
+
+func NewLinearRegressionIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) LinearRegressionIndicator {
+	return LinearRegressionIndicator{
+		config: config,
+		buffer: buffer,
+		db:     db,
+	}
+}
+
+func (indicator *LinearRegressionIndicator) HasSignal() bool {
+	count := len(indicator.buffer.GetCandles())
+	if (indicator.config.LinearRegressionCandles + 1) > count {
+		return false
+	}
+
+	if indicator.db.CountUnsoldBuys() > 0 {
+		return true
+	}
+
+	closePrices := GetValuesFromSlice(
+		GetClosePrices(indicator.buffer.GetCandles()),
+		indicator.config.LinearRegressionCandles,
+	)
+
+	lastIdx := len(closePrices) - 1
+	if closePrices[lastIdx-1] >= closePrices[lastIdx] {
+		return false
+	}
+
+	smoothedPrices := FilterZeroPrices(talib.Sma(closePrices, indicator.getPeriod()))
+	smoothedLen := len(smoothedPrices)
+	if 4 > smoothedLen {
+		return false
+	}
+
+	// Calc K coefficient
+	mse, k := findBestLineCoefficient(smoothedPrices)
+	if mse > indicator.config.LinearRegressionMse {
+		return false
+	}
+
+	return indicator.config.LinearRegressionK >= k
+}
+
+func findBestLineCoefficient(priceValues []float64) (mse, kResulting float64) {
+	mse = calcLineMse(
+		getLinePoints(-LinearRegressionLimit, priceValues[0], len(priceValues)),
+		priceValues,
+	)
+
+	k := -LinearRegressionLimit + LinearRegressionKStep
+	kResulting = k
+
+	for k < LinearRegressionLimit {
+		newMse := calcLineMse(
+			getLinePoints(k, priceValues[0], len(priceValues)),
+			priceValues,
+		)
+
+		if mse > newMse {
+			mse = newMse
+			kResulting = k
+		}
+
+		k += LinearRegressionKStep
+	}
+
+	return mse, kResulting
+}
+
+func calcLineMse(lineValues, priceValues []float64) float64 {
+	var errors []float64
+
+	for i := range lineValues {
+		diff := priceValues[i] - lineValues[i]
+		errors = append(errors, math.Pow(diff, 2))
+	}
+
+	return Sum(errors) / float64(len(lineValues))
+}
+
+func getLinePoints(k, b float64, n int) []float64 {
+	var points []float64
+
+	for x := 0; x < n; x++ {
+		fx := k*float64(x) + b
+		points = append(points, fx)
+	}
+
+	return points
+}
+
+func (indicator *LinearRegressionIndicator) IsStarted() bool {
+	return true
+}
+
+func (indicator *LinearRegressionIndicator) Start() {
+}
+
+func (indicator *LinearRegressionIndicator) Update() {
+}
+
+func (indicator *LinearRegressionIndicator) Finish() {
+}
+
+func (indicator *LinearRegressionIndicator) getPeriod() int {
+	period := indicator.config.LinearRegressionCandles - indicator.config.LinearRegressionPeriod
+	if period <= 0 {
+		period = 1
+	}
+
+	return period
 }

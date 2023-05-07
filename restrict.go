@@ -116,20 +116,20 @@ func GetBotConfigRestrictions() ConfigRestriction {
 
 		// ------------------------------------------------
 		LinearRegressionCandles: MinMaxInt{
-			min: 1,
-			max: 6,
+			min: 5,
+			max: 25,
 		},
 		LinearRegressionPeriod: MinMaxInt{
 			min: 1,
-			max: 6,
+			max: 25,
 		},
 		LinearRegressionMse: MinMaxFloat64{
-			min: 0.4,
-			max: 2,
+			min: 100,
+			max: 2000,
 		},
 		LinearRegressionK: MinMaxFloat64{
-			min: 0.4,
-			max: 2,
+			min: -20,
+			max: 0,
 		},
 
 		// ------------------------------------------------
@@ -142,8 +142,8 @@ func GetBotConfigRestrictions() ConfigRestriction {
 			max: 100,
 		},
 		FirstBuyMoneyIncreasePercentage: MinMaxFloat64{
-			min: 1,
-			max: 1,
+			min: 100,
+			max: 2000,
 		},
 		StopIncreaseMoneyAfterBuysCount: MinMaxInt{
 			min: 3,
@@ -151,7 +151,7 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 		Leverage: MinMaxInt{
 			min: 1,
-			max: 1,
+			max: 13,
 		},
 
 		// ------------------------------------------------
