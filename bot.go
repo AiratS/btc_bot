@@ -355,6 +355,9 @@ func (bot *Bot) runAfterBuy(buyId int64) {
 	unsoldBuys := bot.db.FetchUnsoldBuys()
 	avgFuturesPrice := CalcFuturesAvgPrice(unsoldBuys)
 	desiredSellPrice := CalcUpperPrice(avgFuturesPrice, bot.Config.HighSellPercentage)
+	if 1 == len(unsoldBuys) {
+		desiredSellPrice = unsoldBuys[0].DesiredPrice
+	}
 
 	liquidationPrice := CalcBottomPrice(avgFuturesPrice, GetLeverageLiquidationPercentage(bot.Config.Leverage))
 	Log(fmt.Sprintf(
@@ -409,10 +412,21 @@ func (bot *Bot) runAfterBuy(buyId int64) {
 	}
 }
 
-func (bot *Bot) calcDesiredPrice(currentPrice float64) float64 {
-	return CalcUpperPrice(currentPrice, bot.Config.HighSellPercentage)
+func (bot *Bot) isFirstBuy() bool {
+	return 0 == bot.db.CountUnsoldBuys()
 }
 
+func (bot *Bot) calcDesiredPrice(currentPrice float64) float64 {
+	desiredSellPrice := CalcUpperPrice(currentPrice, bot.Config.HighSellPercentage)
+
+	if ENABLE_FIRST_BUY_HIGER_SELL_PERCENTAGE && bot.isFirstBuy() {
+		desiredSellPrice = CalcUpperPrice(currentPrice, bot.Config.FirstBuyHighSellPercentage)
+	}
+
+	return desiredSellPrice
+}
+
+// Not used
 func (bot *Bot) createRealMoneySellOrder(buy Buy) {
 	if !IS_REAL_ENABLED || !USE_REAL_MONEY || !bot.IsTrailingSellIndicatorEnabled {
 		return
@@ -628,27 +642,27 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	//gradientDescentIndicator := NewGradientDescentIndicator(
-	//	bot.Config,
-	//	bot.buffer,
-	//	bot.db,
-	//)
-
-	linearRegressionIndicator := NewLinearRegressionIndicator(
+	gradientDescentIndicator := NewGradientDescentIndicator(
 		bot.Config,
 		bot.buffer,
 		bot.db,
 	)
+
+	//linearRegressionIndicator := NewLinearRegressionIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
 
 	bot.BuyIndicators = []BuyIndicator{
 		//&backTrailingBuyIndicator,
 		//&buysCountIndicator,
 		//&waitForPeriodIndicator,
 		//&bigFallIndicator,
-		&linearRegressionIndicator,
+		//&linearRegressionIndicator,
 		&lessThanPreviousBuyIndicator,
 		//&stopAfterUnsuccessfullySellIndicator,
-		//&gradientDescentIndicator,
+		&gradientDescentIndicator,
 	}
 
 	// Boost buy indicator

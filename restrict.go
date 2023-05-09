@@ -62,7 +62,7 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 		FirstBuyHighSellPercentage: MinMaxFloat64{
 			min: 0.2,
-			max: 0.4,
+			max: 1,
 		},
 
 		TrailingTopPercentage: MinMaxFloat64{
@@ -148,7 +148,7 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 		FirstBuyMoneyIncreasePercentage: MinMaxFloat64{
 			min: 0,
-			max: 100,
+			max: 0,
 		},
 		StopIncreaseMoneyAfterBuysCount: MinMaxInt{
 			min: 3,
