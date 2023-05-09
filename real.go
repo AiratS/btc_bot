@@ -26,7 +26,8 @@ var realBot Bot
 
 func GetRealBotConfig() Config {
 	return Config{
-		HighSellPercentage: 0.1,
+		HighSellPercentage:         0.1,
+		FirstBuyHighSellPercentage: 0.1,
 
 		TrailingTopPercentage:           0.1,
 		TrailingUpdateTimesBeforeFinish: 1,
@@ -45,6 +46,11 @@ func GetRealBotConfig() Config {
 
 		TrailingSellActivationAdditionPercentage: 1,
 		TrailingSellStopPercentage:               1,
+
+		LinearRegressionCandles: 1,
+		LinearRegressionPeriod:  1,
+		LinearRegressionMse:     1,
+		LinearRegressionK:       1,
 
 		TotalMoneyAmount:                1000,
 		TotalMoneyIncreasePercentage:    10,
