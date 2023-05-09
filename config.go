@@ -38,7 +38,8 @@ const SELL_TIME_PUNISHMENT = 1.0
 const ENABLE_TIME_CANCEL = false
 
 type Config struct {
-	HighSellPercentage float64
+	HighSellPercentage         float64
+	FirstBuyHighSellPercentage float64
 
 	TrailingTopPercentage           float64
 	TrailingUpdateTimesBeforeFinish int

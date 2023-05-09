@@ -1,7 +1,8 @@
 package main
 
 type ConfigRestriction struct {
-	HighSellPercentage MinMaxFloat64
+	HighSellPercentage         MinMaxFloat64
+	FirstBuyHighSellPercentage MinMaxFloat64
 
 	TrailingTopPercentage           MinMaxFloat64
 	TrailingUpdateTimesBeforeFinish MinMaxInt
@@ -56,6 +57,10 @@ type MinMaxFloat64 struct {
 func GetBotConfigRestrictions() ConfigRestriction {
 	return ConfigRestriction{
 		HighSellPercentage: MinMaxFloat64{
+			min: 0.2,
+			max: 0.4,
+		},
+		FirstBuyHighSellPercentage: MinMaxFloat64{
 			min: 0.2,
 			max: 0.4,
 		},
@@ -142,8 +147,8 @@ func GetBotConfigRestrictions() ConfigRestriction {
 			max: 100,
 		},
 		FirstBuyMoneyIncreasePercentage: MinMaxFloat64{
-			min: 100,
-			max: 2000,
+			min: 0,
+			max: 100,
 		},
 		StopIncreaseMoneyAfterBuysCount: MinMaxInt{
 			min: 3,
