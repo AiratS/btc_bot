@@ -565,6 +565,44 @@ func (db *Database) FetchUnsoldBuysByDesiredPrice(exchangeRate float64) []Buy {
 	return unsoldBuys
 }
 
+func (db *Database) FetchShortUnsoldBuysByDesiredPrice(exchangeRate float64) []Buy {
+	unsoldBuys := []Buy{}
+	query := `
+		SELECT b.*
+		FROM buys AS b 
+        LEFT JOIN sells AS s 
+        	ON s.buy_id = b.id 
+        WHERE s.id IS NULL 
+            AND b.desired_price >= $1  
+	`
+
+	rows, err := db.connect.Query(query, exchangeRate)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		buy := Buy{}
+		rows.Scan(
+			&buy.Id,
+			&buy.Symbol,
+			&buy.UsedMoney,
+			&buy.Coins,
+			&buy.ExchangeRate,
+			&buy.DesiredPrice,
+			&buy.CreatedAt,
+			&buy.RealOrderId,
+			&buy.RealQuantity,
+			&buy.HasSellOrder,
+			&buy.BuyType,
+		)
+		unsoldBuys = append(unsoldBuys, buy)
+	}
+
+	return unsoldBuys
+}
+
 func (db *Database) FetchUnsoldBuys() []Buy {
 	unsoldBuys := []Buy{}
 	query := `
@@ -795,6 +833,20 @@ func (db *Database) GetFuturesTotalRevenue() float64 {
 	rev := revenue{}
 	query := `
 		SELECT SUM((b.coins * b.desired_price) - (b.used_money * $1)) AS rev
+		FROM sells AS s
+		INNER JOIN buys AS b on s.buy_id = b.id
+		WHERE revenue > 0
+	`
+	row := (*db).connect.QueryRow(query, float64(db.config.Leverage))
+	row.Scan(&rev.value)
+
+	return rev.value
+}
+
+func (db *Database) GetShortFuturesTotalRevenue() float64 {
+	rev := revenue{}
+	query := `
+		SELECT SUM(revenue) AS rev
 		FROM sells AS s
 		INNER JOIN buys AS b on s.buy_id = b.id
 		WHERE revenue > 0

@@ -337,3 +337,99 @@ func (indicator *LeverageSellIndicator) Update() {
 
 func (indicator *LeverageSellIndicator) Finish(buyId int64) {
 }
+
+// ------------------------------------
+
+type ShortLeverageSellIndicator struct {
+	config *Config
+	buffer *Buffer
+	db     *Database
+}
+
+func NewShortLeverageSellIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) ShortLeverageSellIndicator {
+	return ShortLeverageSellIndicator{
+		config: config,
+		buffer: buffer,
+		db:     db,
+	}
+}
+
+func (indicator *ShortLeverageSellIndicator) HasSignal() (bool, []Buy) {
+	var resultingBuys []Buy
+	candle := indicator.buffer.GetLastCandle()
+
+	// Desired price buys
+	currentPrice := candle.GetPrice()
+	if USE_REAL_MONEY {
+		currentPrice = candle.LowPrice
+	}
+
+	desiredPriceBuys := indicator.db.FetchShortUnsoldBuysByDesiredPrice(currentPrice)
+	indicator.appendBuyIfNotExists(&resultingBuys, desiredPriceBuys)
+
+	var liquidationBuys []Buy
+	futuresAvgPrice := indicator.getFuturesAvgPrice()
+	liquidationPrice := CalcUpperPrice(
+		futuresAvgPrice,
+		GetLeverageLiquidationPercentage(indicator.config.Leverage),
+	)
+
+	if candle.GetPrice() >= liquidationPrice {
+		liquidationBuys = indicator.db.FetchUnsoldBuys()
+	}
+
+	indicator.appendBuyIfNotExists(&resultingBuys, liquidationBuys)
+	// Mark liquidation buys
+	indicator.markBuys(&resultingBuys, liquidationBuys, Liquidation)
+
+	return len(resultingBuys) > 0, resultingBuys
+}
+
+func (indicator *ShortLeverageSellIndicator) getFuturesAvgPrice() float64 {
+	unsoldBuys := indicator.db.FetchUnsoldBuys()
+
+	return CalcFuturesAvgPrice(unsoldBuys)
+}
+
+func (indicator *ShortLeverageSellIndicator) appendBuyIfNotExists(saveList *[]Buy, newList []Buy) {
+	for _, buy := range newList {
+		if !indicator.hasSuchBuy(buy.Id, *saveList) {
+			*saveList = append(*saveList, buy)
+		}
+	}
+}
+
+func (indicator *ShortLeverageSellIndicator) markBuys(
+	targetList *[]Buy,
+	markList []Buy,
+	buyType BuyType,
+) {
+	for idx, targetBuy := range *targetList {
+		if indicator.hasSuchBuy(targetBuy.Id, markList) {
+			(*targetList)[idx].BuyType = buyType
+		}
+	}
+}
+
+func (indicator *ShortLeverageSellIndicator) hasSuchBuy(buyId int64, buys []Buy) bool {
+	for _, buy := range buys {
+		if buy.Id == buyId {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (indicator *ShortLeverageSellIndicator) RunAfterBuy(buyId int64) {
+}
+
+func (indicator *ShortLeverageSellIndicator) Update() {
+}
+
+func (indicator *ShortLeverageSellIndicator) Finish(buyId int64) {
+}

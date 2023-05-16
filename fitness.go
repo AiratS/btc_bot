@@ -66,6 +66,9 @@ func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, 
 	if ENABLE_FUTURES {
 		liquidationsCount = bot.db.CountLiquidationBuys()
 		rev = bot.db.GetFuturesTotalRevenue()
+		if ENABLE_SHORT {
+			rev = bot.db.GetShortFuturesTotalRevenue()
+		}
 		//rev -= float64(liquidationsCount) * bot.Config.TotalMoneyAmount
 
 		//timeCancelRevenue := math.Abs(bot.db.GetTimeCancelTotalRevenue())

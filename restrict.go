@@ -36,6 +36,7 @@ type ConfigRestriction struct {
 	FuturesLeverageActivationPercentage MinMaxFloat64
 
 	LessThanPreviousBuyPercentage MinMaxFloat64
+	MoreThanPreviousBuyPercentage MinMaxFloat64
 
 	BoostBuyFallPercentage          MinMaxFloat64
 	BoostBuyPeriodMinutes           MinMaxInt
@@ -155,7 +156,7 @@ func GetBotConfigRestrictions() ConfigRestriction {
 			max: 10,
 		},
 		Leverage: MinMaxInt{
-			min: 1,
+			min: 2,
 			max: 13,
 		},
 
@@ -172,6 +173,10 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		LessThanPreviousBuyPercentage: MinMaxFloat64{
 			min: -0.5,
 			max: 0,
+		},
+		MoreThanPreviousBuyPercentage: MinMaxFloat64{
+			min: 0,
+			max: 1,
 		},
 
 		BoostBuyFallPercentage: MinMaxFloat64{

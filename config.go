@@ -13,6 +13,8 @@ const (
 
 const REAL_MONEY_DB_NAME = "amazing_real"
 
+const ENABLE_SHORT = true
+
 //const ADD_REVENUE_TO_BALANCE = false
 
 // Candle
@@ -74,6 +76,7 @@ type Config struct {
 	FuturesLeverageActivationPercentage float64
 
 	LessThanPreviousBuyPercentage float64
+	MoreThanPreviousBuyPercentage float64
 
 	BoostBuyFallPercentage          float64
 	BoostBuyPeriodMinutes           int

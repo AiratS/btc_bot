@@ -457,6 +457,52 @@ func (indicator *LessThanPreviousBuyIndicator) Finish() {
 
 // ---------------------------------------
 
+type MoreThanPreviousBuyIndicator struct {
+	config *Config
+	buffer *Buffer
+	db     *Database
+}
+
+func NewMoreThanPreviousBuyIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) MoreThanPreviousBuyIndicator {
+	return MoreThanPreviousBuyIndicator{
+		config: config,
+		buffer: buffer,
+		db:     db,
+	}
+}
+
+func (indicator *MoreThanPreviousBuyIndicator) HasSignal() bool {
+	hasValue, buy := indicator.db.GetLastUnsoldBuy()
+	if !hasValue {
+		return true
+	}
+
+	percentage := CalcGrowth(buy.ExchangeRate, indicator.buffer.GetLastCandleClosePrice())
+
+	return percentage >= indicator.config.MoreThanPreviousBuyPercentage
+}
+
+func (indicator *MoreThanPreviousBuyIndicator) IsStarted() bool {
+	return true
+}
+
+func (indicator *MoreThanPreviousBuyIndicator) Start() {
+}
+
+func (indicator *MoreThanPreviousBuyIndicator) Update() {
+}
+
+func (indicator *MoreThanPreviousBuyIndicator) Finish() {
+}
+
+// ---------------------------------------
+
+// ---------------------------------------
+
 type BoostBuyIndicator struct {
 	config *Config
 	buffer *Buffer

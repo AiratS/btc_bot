@@ -343,23 +343,26 @@ func (bot *Bot) CanBuyForPrice(exchangeRate, usedMoney float64) bool {
 }
 
 func (bot *Bot) CreateMarketBuyOrder(rawPrice, usedMoney float64) (int64, float64, float64) {
-	if ENABLE_FUTURES {
-		return bot.futuresOrderManager.CreateMarketBuyOrder(CANDLE_SYMBOL, rawPrice, usedMoney)
+	if ENABLE_SHORT {
+		return bot.futuresOrderManager.CreateShortMarketBuyOrder(CANDLE_SYMBOL, rawPrice, usedMoney)
 	}
 
-	return bot.orderManager.CreateMarketBuyOrder(CANDLE_SYMBOL, rawPrice)
+	return bot.futuresOrderManager.CreateMarketBuyOrder(CANDLE_SYMBOL, rawPrice, usedMoney)
 }
 
 func (bot *Bot) runAfterBuy(buyId int64) {
 	// Recalculate AVG futures prices
 	unsoldBuys := bot.db.FetchUnsoldBuys()
 	avgFuturesPrice := CalcFuturesAvgPrice(unsoldBuys)
-	desiredSellPrice := CalcUpperPrice(avgFuturesPrice, bot.Config.HighSellPercentage)
+	desiredSellPrice := bot.calcAfterBuyDesiredPrice(avgFuturesPrice, bot.Config.HighSellPercentage)
 	if 1 == len(unsoldBuys) {
 		desiredSellPrice = unsoldBuys[0].DesiredPrice
 	}
 
-	liquidationPrice := CalcBottomPrice(avgFuturesPrice, GetLeverageLiquidationPercentage(bot.Config.Leverage))
+	liquidationPrice := bot.calcAfterBuyLiquidationPrice(
+		avgFuturesPrice,
+		GetLeverageLiquidationPercentage(bot.Config.Leverage),
+	)
 	Log(fmt.Sprintf(
 		"RUN_AFTER_BUY\nNewBuyId: %d\nAvgPrice: %f\nDesiredSellPrice: %f\nLiquidationPrice: %f",
 		buyId,
@@ -412,11 +415,32 @@ func (bot *Bot) runAfterBuy(buyId int64) {
 	}
 }
 
+func (bot *Bot) calcAfterBuyDesiredPrice(price, percentage float64) float64 {
+	if ENABLE_SHORT {
+		return CalcBottomPrice(price, percentage)
+	}
+
+	return CalcUpperPrice(price, percentage)
+}
+
+func (bot *Bot) calcAfterBuyLiquidationPrice(price, percentage float64) float64 {
+	if ENABLE_SHORT {
+		return CalcUpperPrice(price, percentage)
+	}
+
+	return CalcBottomPrice(price, percentage)
+}
+
 func (bot *Bot) isFirstBuy() bool {
 	return 0 == bot.db.CountUnsoldBuys()
 }
 
 func (bot *Bot) calcDesiredPrice(currentPrice float64) float64 {
+	if ENABLE_SHORT {
+		return bot.calcShortDesiredPrice(currentPrice)
+	}
+
+	// Long orders only
 	desiredSellPrice := CalcUpperPrice(currentPrice, bot.Config.HighSellPercentage)
 
 	if ENABLE_FIRST_BUY_HIGER_SELL_PERCENTAGE && bot.isFirstBuy() {
@@ -424,6 +448,10 @@ func (bot *Bot) calcDesiredPrice(currentPrice float64) float64 {
 	}
 
 	return desiredSellPrice
+}
+
+func (bot *Bot) calcShortDesiredPrice(currentPrice float64) float64 {
+	return CalcBottomPrice(currentPrice, bot.Config.HighSellPercentage)
 }
 
 // Not used
@@ -557,11 +585,11 @@ func (bot *Bot) createAndUpdateSellOrder(buyId int64, sellPrice, quantity float6
 }
 
 func (bot *Bot) CreateSellOrder(symbol string, sellPrice, quantity float64) int64 {
-	if ENABLE_FUTURES {
-		return bot.futuresOrderManager.CreateSellOrder(symbol, sellPrice, quantity)
+	if ENABLE_SHORT {
+		return bot.futuresOrderManager.CreateShortSellOrder(symbol, sellPrice, quantity)
 	}
 
-	return bot.orderManager.CreateSellOrder(symbol, sellPrice, quantity)
+	return bot.futuresOrderManager.CreateSellOrder(symbol, sellPrice, quantity)
 }
 
 func (bot *Bot) calcRevenue(coinsCounts, upperPercentage, buyExchangeRate float64) float64 {
@@ -572,11 +600,19 @@ func (bot *Bot) calcRevenue(coinsCounts, upperPercentage, buyExchangeRate float6
 }
 
 func (bot *Bot) calcFuturesRevenue(buy Buy) float64 {
+	if ENABLE_SHORT {
+		return bot.calcShortFuturesRevenue(buy)
+	}
+
 	if IS_REAL_ENABLED {
 		return buy.RealQuantity * buy.DesiredPrice
 	}
 
 	return buy.Coins * buy.DesiredPrice
+}
+
+func (bot *Bot) calcShortFuturesRevenue(buy Buy) float64 {
+	return (buy.UsedMoney * float64(bot.Config.Leverage)) - (buy.Coins * buy.DesiredPrice)
 }
 
 func getIntersectedBuys(eachIndicatorBuys [][]Buy) []Buy {
@@ -648,6 +684,21 @@ func setupBuyIndicators(bot *Bot) {
 		bot.db,
 	)
 
+	if ENABLE_SHORT {
+		moreThanPreviousBuyIndicator := NewMoreThanPreviousBuyIndicator(
+			bot.Config,
+			bot.buffer,
+			bot.db,
+		)
+
+		bot.BuyIndicators = []BuyIndicator{
+			//&linearRegressionIndicator,
+			&moreThanPreviousBuyIndicator,
+			&gradientDescentIndicator,
+		}
+		return
+	}
+
 	//linearRegressionIndicator := NewLinearRegressionIndicator(
 	//	bot.Config,
 	//	bot.buffer,
@@ -675,8 +726,8 @@ func setupBuyIndicators(bot *Bot) {
 }
 
 func setupSellIndicators(bot *Bot) {
-	if ENABLE_FUTURES {
-		leverageSellIndicator := NewLeverageSellIndicator(
+	if ENABLE_SHORT {
+		shortLeverageSellIndicator := NewShortLeverageSellIndicator(
 			bot.Config,
 			bot.buffer,
 			bot.db,
@@ -684,25 +735,14 @@ func setupSellIndicators(bot *Bot) {
 
 		bot.SellIndicators = []SellIndicator{
 			//&highPercentageSellIndicator,
-			&leverageSellIndicator,
+			&shortLeverageSellIndicator,
 			//&trailingSellIndicator,
 		}
 		return
 	}
 
-	//highPercentageSellIndicator := NewHighPercentageSellIndicator(
-	//	bot.Config,
-	//	bot.buffer,
-	//	bot.db,
-	//)
-
-	desiredPriceSellIndicator := NewDesiredPriceSellIndicator(
-		bot.Config,
-		bot.buffer,
-		bot.db,
-	)
-
-	trailingSellIndicator := NewTrailingSellIndicator(
+	// Long orders only
+	leverageSellIndicator := NewLeverageSellIndicator(
 		bot.Config,
 		bot.buffer,
 		bot.db,
@@ -710,13 +750,8 @@ func setupSellIndicators(bot *Bot) {
 
 	bot.SellIndicators = []SellIndicator{
 		//&highPercentageSellIndicator,
-		&desiredPriceSellIndicator,
+		&leverageSellIndicator,
 		//&trailingSellIndicator,
-	}
-
-	bot.setIsTrailingSellIndicatorEnabled()
-	if bot.IsTrailingSellIndicatorEnabled {
-		bot.trailingSellIndicator = &trailingSellIndicator
 	}
 }
 

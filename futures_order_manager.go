@@ -242,6 +242,47 @@ func (manager *FuturesOrderManager) CreateMarketBuyOrder(symbol string, price, u
 	return 0, 0.0, 0.0
 }
 
+func (manager *FuturesOrderManager) CreateShortMarketBuyOrder(symbol string, price, usedMoney float64) (int64, float64, float64) {
+	if !manager.isEnabled {
+		return 0, 0.0, price
+	}
+
+	if info, hasLotSize := manager.exchangeInfo.GetInfoForSymbol(symbol); hasLotSize {
+		quantityLotSize := valueToLotSize(calcQuantity(price, manager.getOrderMoney(usedMoney)), info.LotSize.stepSize)
+		priceConverted := valueToPriceSize(price, info.PriceFilter.tickSize)
+
+		fmt.Println(fmt.Sprintf("CreateBuyOrder: %f, %f", priceConverted, quantityLotSize))
+
+		var errorMessage string
+		for i := 0; i < RETRIES_COUNT; i++ {
+			order, err := manager.futuresClient.
+				NewCreateOrderService().
+				Symbol(symbol).
+				Side(futures.SideTypeBuy).
+				Type(futures.OrderTypeMarket).
+				PositionSide(futures.PositionSideTypeShort).
+				Quantity(floatToBinancePrice(quantityLotSize)).
+				Do(context.Background())
+
+			if err != nil {
+				errorMessage = err.Error()
+				Log(errorMessage)
+				time.Sleep(RETRY_DELAY * time.Millisecond)
+				continue
+			}
+
+			realBuyPrice := manager.getRealBuyPrice(priceConverted, order)
+			realQuantity := manager.getRealBuyQuantity(quantityLotSize, order)
+
+			return order.OrderID, realQuantity, realBuyPrice
+		}
+
+		panic(errorMessage)
+	}
+
+	return 0, 0.0, 0.0
+}
+
 func (manager *FuturesOrderManager) CreateSellOrder(symbol string, stopPrice, quantity float64) int64 {
 	if !manager.isEnabled {
 		return 0
@@ -260,6 +301,45 @@ func (manager *FuturesOrderManager) CreateSellOrder(symbol string, stopPrice, qu
 				Side(futures.SideTypeSell).
 				Type(futures.OrderTypeLimit).
 				//PositionSide(futures.PositionSideTypeLong).
+				TimeInForce(futures.TimeInForceTypeGTC).
+				Quantity(floatToBinancePrice(quantity)).
+				Price(floatToBinancePrice(priceConverted)).
+				Do(context.Background())
+
+			if err != nil {
+				errorMessage = err.Error()
+				Log(errorMessage)
+				time.Sleep(RETRY_DELAY * time.Millisecond)
+				continue
+			}
+
+			return order.OrderID
+		}
+
+		panic(errorMessage)
+	}
+
+	return 0
+}
+
+func (manager *FuturesOrderManager) CreateShortSellOrder(symbol string, stopPrice, quantity float64) int64 {
+	if !manager.isEnabled {
+		return 0
+	}
+
+	if info, hasLotSize := manager.exchangeInfo.GetInfoForSymbol(symbol); hasLotSize {
+		priceConverted := valueToPriceSize(stopPrice, info.PriceFilter.tickSize)
+
+		fmt.Println(fmt.Sprintf("CreateSellOrder: %f, %f, %f", priceConverted, stopPrice, quantity))
+
+		var errorMessage string
+		for i := 0; i < RETRIES_COUNT; i++ {
+			order, err := manager.futuresClient.
+				NewCreateOrderService().
+				Symbol(symbol).
+				Side(futures.SideTypeSell).
+				Type(futures.OrderTypeLimit).
+				PositionSide(futures.PositionSideTypeShort).
 				TimeInForce(futures.TimeInForceTypeGTC).
 				Quantity(floatToBinancePrice(quantity)).
 				Price(floatToBinancePrice(priceConverted)).
