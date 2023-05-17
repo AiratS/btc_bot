@@ -8,11 +8,17 @@ import (
 	"time"
 )
 
-//const BINANCE_API_KEY = "vYnGaa6tvn1JNFe3NSGOGen2Y5hAoBL7n4p59Etiu9nm9X4vZyaejmwec7pFuHM6"
-//const BINANCE_SECRET_KEY = "Bb0oU4WdHCmF6HRLZbBvr0EVaLSOn2HMgAlOo5C9shu7Xzp2FK7cHSMjntwSL9gP"
+// Amazing
+//const BINANCE_API_KEY = "vWNmAhOl6ad99Ytgfb2NElNBN5jzTYkToxv6kxjv6ddGQY8sMuPSv9Eq9lNoL4UB"
+//const BINANCE_SECRET_KEY = "rVUQ6YeLm6yFRwBvnpzDdKpjEEZ9bOqRLHDKaNLUERL4Kcckl08prdnEqciksWNj"
 
-const BINANCE_API_KEY = "vWNmAhOl6ad99Ytgfb2NElNBN5jzTYkToxv6kxjv6ddGQY8sMuPSv9Eq9lNoL4UB"
-const BINANCE_SECRET_KEY = "rVUQ6YeLm6yFRwBvnpzDdKpjEEZ9bOqRLHDKaNLUERL4Kcckl08prdnEqciksWNj"
+// Lucky
+//const BINANCE_API_KEY = "VMWeJjjUvQNrkZxNd4IG6goKpmAb8aooRWtKAFR7xG7dhrtgNYLvScMFUz7vz5E9"    // 3 акк лакки
+//const BINANCE_SECRET_KEY = "kGuxVBS4NOrmkGlELNhUaCCoLdovcmNrk9bNGL4MTZwsOTsZocDxz8PsKY4npPXl" // 3 акк лакки
+
+// Ayaz
+const BINANCE_API_KEY = "blXKwv9BVFS52FqA6PePWGhNrFgolagVlyJahr94GkASHkxvD7sDBJImPAWiICHx"    // второй акк аяз
+const BINANCE_SECRET_KEY = "fxak06hMNtaSxyvTh6v8JO0uC7y8JgiRqFcNcnVfy37merNuBCY432ouKBwAqPsk" // второй акк аяз
 
 //const TG_API_KEY = "5055344139:AAGZrvVouQPWdU3Jn6p_4ipvCwSDOubVn-4" // телеграм фаболос//
 //const TG_API_KEY = "2083210132:AAHHp9h2dziqJbB1J9ySmv3vBoG8FCDLVag" // телеграм лакки//

@@ -135,7 +135,6 @@ func (bot *Bot) createLimitBuyOrder(candle Candle) {
 		candle.CloseTime,
 	)
 }
-
 func (bot *Bot) CheckBuyOrders() {
 	if 0 == len(bot.buffer.GetCandles()) {
 		return
@@ -162,7 +161,6 @@ func (bot *Bot) CheckBuyOrders() {
 		}
 	}
 }
-
 func (bot *Bot) isRejectionBuyOrder(buyOrderId int64, rejectionBuyOrders *[]BuyOrder) bool {
 	for _, buyOrder := range *rejectionBuyOrders {
 		if buyOrder.Id == buyOrderId {
@@ -342,12 +340,14 @@ func (bot *Bot) CanBuyForPrice(exchangeRate, usedMoney float64) bool {
 	return true
 }
 
-func (bot *Bot) CreateMarketBuyOrder(rawPrice, usedMoney float64) (int64, float64, float64) {
+func (bot *Bot) CreateMarketBuyOrder(exchangeRate, usedMoney float64) (int64, float64, float64) {
 	if ENABLE_SHORT {
-		return bot.futuresOrderManager.CreateShortMarketBuyOrder(CANDLE_SYMBOL, rawPrice, usedMoney)
+		quantity := (usedMoney * float64(bot.Config.Leverage)) / exchangeRate
+
+		return bot.futuresOrderManager.CreateShortMarketSellOrder(CANDLE_SYMBOL, exchangeRate, quantity)
 	}
 
-	return bot.futuresOrderManager.CreateMarketBuyOrder(CANDLE_SYMBOL, rawPrice, usedMoney)
+	return bot.futuresOrderManager.CreateMarketBuyOrder(CANDLE_SYMBOL, exchangeRate, usedMoney)
 }
 
 func (bot *Bot) runAfterBuy(buyId int64) {
@@ -586,7 +586,7 @@ func (bot *Bot) createAndUpdateSellOrder(buyId int64, sellPrice, quantity float6
 
 func (bot *Bot) CreateSellOrder(symbol string, sellPrice, quantity float64) int64 {
 	if ENABLE_SHORT {
-		return bot.futuresOrderManager.CreateShortSellOrder(symbol, sellPrice, quantity)
+		return bot.futuresOrderManager.CreateShortLimitBuyOrder(symbol, sellPrice, quantity)
 	}
 
 	return bot.futuresOrderManager.CreateSellOrder(symbol, sellPrice, quantity)
