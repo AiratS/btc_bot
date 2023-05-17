@@ -162,6 +162,32 @@ func (manager *FuturesOrderManager) HasEnoughMoneyForBuy(usedMoney float64) bool
 	panic(errorMessage)
 }
 
+func (manager *FuturesOrderManager) getBalance() float64 {
+	var errorMessage string
+
+	for i := 0; i < RETRIES_COUNT; i++ {
+		res, err := manager.futuresClient.NewGetBalanceService().
+			Do(context.Background())
+
+		if err != nil {
+			errorMessage = err.Error()
+			Log(errorMessage)
+			time.Sleep(RETRY_DELAY * time.Millisecond)
+			continue
+		}
+
+		for _, balance := range res {
+			if balance.Asset == "BUSD" {
+				return convertBinanceToFloat64(balance.Balance)
+			}
+		}
+
+		return 0
+	}
+
+	panic(errorMessage)
+}
+
 func (manager *FuturesOrderManager) IsBuySold(symbol string, orderId int64) bool {
 	var errorMessage string
 

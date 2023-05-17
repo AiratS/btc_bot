@@ -474,5 +474,9 @@ func CalcFuturesAvgPrice(buys []Buy) float64 {
 		}
 	}
 
+	if 0 == denominator {
+		return 0
+	}
+
 	return numerator / denominator
 }

@@ -253,6 +253,7 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder, 
 	// Create Binance Buy order
 	var orderId int64
 	if USE_REAL_MONEY {
+		bot.checkForMaintenanceMargin()
 		orderId, coinsCount, _ = bot.CreateMarketBuyOrder(exchangeRate, usedMoney)
 	}
 
@@ -287,6 +288,28 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder, 
 
 	// After buy stuff
 	bot.runAfterBuy(buyId)
+}
+
+func (bot *Bot) checkForMaintenanceMargin() {
+	maintenanceMarginRate := 0.50
+	maintenanceAmount := 50.0
+	avgFuturesPrice := CalcFuturesAvgPrice(bot.db.FetchUnsoldBuys())
+	maintenanceMargin := avgFuturesPrice*maintenanceMarginRate - maintenanceAmount
+
+	Log(fmt.Sprintf(
+		"MAINTENANCE_MARGIN\n"+
+			"Balance: %f\n"+
+			"MaintenanceMargin: %f\n"+
+			"NotionalPositionValue: %f\n"+
+			"MaintenanceMarginRate: %f\n"+
+			"MaintenanceAmount: %f\n",
+
+		bot.futuresOrderManager.getBalance(),
+		maintenanceMargin,
+		avgFuturesPrice,
+		maintenanceMarginRate,
+		maintenanceAmount,
+	))
 }
 
 func (bot *Bot) getBuyMessagePrefix(buyType BuyType) string {
