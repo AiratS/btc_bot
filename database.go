@@ -849,7 +849,7 @@ func (db *Database) GetShortFuturesTotalRevenue() float64 {
 		SELECT SUM(revenue) AS rev
 		FROM sells AS s
 		INNER JOIN buys AS b on s.buy_id = b.id
-		WHERE revenue > 0
+		WHERE revenue != 0
 	`
 	row := (*db).connect.QueryRow(query, float64(db.config.Leverage))
 	row.Scan(&rev.value)
