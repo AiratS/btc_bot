@@ -71,6 +71,13 @@ func (manager *FuturesOrderManager) adjustConfiguration() {
 		}
 		fmt.Println(res)
 	}
+
+	// Update position mode if required
+	if ENABLE_SHORT && !manager.isDualSidePositionMode() {
+		manager.changePositionMode(true)
+	} else if !ENABLE_SHORT && manager.isDualSidePositionMode() {
+		manager.changePositionMode(false)
+	}
 }
 
 func (manager *FuturesOrderManager) getPositionInfo() PositionInfo {
@@ -92,6 +99,27 @@ func (manager *FuturesOrderManager) getPositionInfo() PositionInfo {
 	}
 
 	panic("No futures position info.")
+}
+
+func (manager *FuturesOrderManager) isDualSidePositionMode() bool {
+	res, err := manager.futuresClient.NewGetPositionModeService().
+		Do(context.Background())
+
+	if err != nil {
+		panic(err)
+	}
+
+	return res.DualSidePosition
+}
+
+func (manager *FuturesOrderManager) changePositionMode(isDualSide bool) {
+	err := manager.futuresClient.NewChangePositionModeService().
+		DualSide(isDualSide).
+		Do(context.Background())
+
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (manager *FuturesOrderManager) CanBuyForPrice(symbol string, price, usedMoney float64) bool {
