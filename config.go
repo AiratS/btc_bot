@@ -13,7 +13,7 @@ const (
 
 const REAL_MONEY_DB_NAME = "amazing_real"
 
-const ENABLE_SHORT = true
+const ENABLE_SHORT = false
 
 //const ADD_REVENUE_TO_BALANCE = false
 
@@ -62,10 +62,11 @@ type Config struct {
 	TrailingSellActivationAdditionPercentage float64
 	TrailingSellStopPercentage               float64
 
-	LinearRegressionCandles int
-	LinearRegressionPeriod  int
-	LinearRegressionMse     float64
-	LinearRegressionK       float64
+	LinearRegressionCandles   int
+	LinearRegressionPeriod    int
+	LinearRegressionMse       float64
+	LinearRegressionK         float64
+	LinearRegressionDeviation float64
 
 	TotalMoneyAmount                    float64
 	TotalMoneyIncreasePercentage        float64

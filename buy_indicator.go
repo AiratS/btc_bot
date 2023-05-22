@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/markcheno/go-talib"
 	"math"
+
+	"github.com/markcheno/go-talib"
+	"github.com/montanaflynn/stats"
 )
 
 type BuyIndicator interface {
@@ -660,12 +662,21 @@ func (indicator *LinearRegressionIndicator) HasSignal() bool {
 	}
 
 	// Calc K coefficient
-	mse, k := findBestLineCoefficient(smoothedPrices)
-	if mse > indicator.config.LinearRegressionMse {
+	_, k := findBestLineCoefficient(smoothedPrices)
+	//if mse > indicator.config.LinearRegressionMse {
+	//	return false
+	//}
+
+	deviation, err := stats.StandardDeviation(stats.LoadRawData(smoothedPrices))
+	if err != nil {
+		panic(err)
+	}
+
+	if deviation > indicator.config.LinearRegressionDeviation {
 		return false
 	}
 
-	return indicator.config.LinearRegressionK >= k
+	return indicator.config.LinearRegressionK >= math.Abs(k)
 }
 
 func findBestLineCoefficient(priceValues []float64) (mse, kResulting float64) {

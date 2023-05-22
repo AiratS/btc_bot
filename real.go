@@ -53,10 +53,11 @@ func GetRealBotConfig() Config {
 		TrailingSellActivationAdditionPercentage: 1,
 		TrailingSellStopPercentage:               1,
 
-		LinearRegressionCandles: 1,
-		LinearRegressionPeriod:  1,
-		LinearRegressionMse:     1,
-		LinearRegressionK:       1,
+		LinearRegressionCandles:   1,
+		LinearRegressionPeriod:    1,
+		LinearRegressionMse:       1,
+		LinearRegressionK:         1,
+		LinearRegressionDeviation: 1,
 
 		TotalMoneyAmount:                1000,
 		TotalMoneyIncreasePercentage:    10,

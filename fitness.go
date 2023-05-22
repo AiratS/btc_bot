@@ -62,23 +62,18 @@ func doBuysAndSells(fitnessDatasets *[]Candle, botConfig Config) (float64, int, 
 	}
 
 	rev := 0.0
-	liquidationsCount := 0
-	if ENABLE_FUTURES {
-		liquidationsCount = bot.db.CountLiquidationBuys()
-		rev = bot.db.GetFuturesTotalRevenue()
-		if ENABLE_SHORT {
-			rev = bot.db.GetShortFuturesTotalRevenue()
-		}
-		//rev -= float64(liquidationsCount) * bot.Config.TotalMoneyAmount
+	liquidationsCount := bot.db.CountLiquidationBuys()
+	rev = bot.db.GetFuturesTotalRevenue()
+	if ENABLE_SHORT {
+		rev = bot.db.GetShortFuturesTotalRevenue()
+	}
+	//rev -= float64(liquidationsCount) * bot.Config.TotalMoneyAmount
 
-		//timeCancelRevenue := math.Abs(bot.db.GetTimeCancelTotalRevenue())
-		//rev -= timeCancelRevenue
+	//timeCancelRevenue := math.Abs(bot.db.GetTimeCancelTotalRevenue())
+	//rev -= timeCancelRevenue
 
-		if hasInvalidBuysCount(botConfig, liquidationsCount) {
-			panic("Invalid liquidations count")
-		}
-	} else {
-		rev = bot.db.GetTotalRevenue()
+	if hasInvalidBuysCount(botConfig, liquidationsCount) {
+		panic("Invalid liquidations count")
 	}
 
 	buyCount := bot.db.GetBuysCount()
