@@ -441,7 +441,19 @@ func (indicator *LessThanPreviousBuyIndicator) HasSignal() bool {
 
 	percentage := CalcGrowth(buy.ExchangeRate, indicator.buffer.GetLastCandleClosePrice())
 
-	return percentage <= indicator.config.LessThanPreviousBuyPercentage
+	return indicator.getLessThanPercentage() >= percentage
+}
+
+func (indicator *LessThanPreviousBuyIndicator) getLessThanPercentage() float64 {
+	unsoldCount := indicator.db.CountUnsoldBuys()
+	previousPercentage := math.Abs(indicator.config.LessThanPreviousBuyPercentage)
+
+	for i := 0; i < unsoldCount; i++ {
+		increasePercentage := math.Pow(float64(i), 2) / indicator.config.ParabolaDivider
+		previousPercentage = CalcUpperPrice(previousPercentage, increasePercentage)
+	}
+
+	return -1 * previousPercentage
 }
 
 func (indicator *LessThanPreviousBuyIndicator) IsStarted() bool {

@@ -38,6 +38,7 @@ type ConfigRestriction struct {
 
 	LessThanPreviousBuyPercentage MinMaxFloat64
 	MoreThanPreviousBuyPercentage MinMaxFloat64
+	ParabolaDivider               MinMaxFloat64
 
 	BoostBuyFallPercentage          MinMaxFloat64
 	BoostBuyPeriodMinutes           MinMaxInt
@@ -176,12 +177,16 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 
 		LessThanPreviousBuyPercentage: MinMaxFloat64{
-			min: -0.5,
-			max: 0,
+			min: -1,
+			max: -0.15,
 		},
 		MoreThanPreviousBuyPercentage: MinMaxFloat64{
 			min: 0,
 			max: 1,
+		},
+		ParabolaDivider: MinMaxFloat64{
+			min: 0.2,
+			max: 1.5,
 		},
 
 		BoostBuyFallPercentage: MinMaxFloat64{

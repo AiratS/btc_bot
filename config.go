@@ -78,6 +78,7 @@ type Config struct {
 
 	LessThanPreviousBuyPercentage float64
 	MoreThanPreviousBuyPercentage float64
+	ParabolaDivider               float64
 
 	BoostBuyFallPercentage          float64
 	BoostBuyPeriodMinutes           int

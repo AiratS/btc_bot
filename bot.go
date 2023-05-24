@@ -722,18 +722,18 @@ func setupBuyIndicators(bot *Bot) {
 		return
 	}
 
-	linearRegressionIndicator := NewLinearRegressionIndicator(
-		bot.Config,
-		bot.buffer,
-		bot.db,
-	)
+	//linearRegressionIndicator := NewLinearRegressionIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
 
 	bot.BuyIndicators = []BuyIndicator{
 		//&backTrailingBuyIndicator,
 		//&buysCountIndicator,
 		//&waitForPeriodIndicator,
 		//&bigFallIndicator,
-		&linearRegressionIndicator,
+		//&linearRegressionIndicator,
 		&lessThanPreviousBuyIndicator,
 		//&stopAfterUnsuccessfullySellIndicator,
 		&gradientDescentIndicator,

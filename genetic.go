@@ -47,6 +47,7 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 
 		dataframe.NewSeriesFloat64("LessThanPreviousBuyPercentage", nil),
 		dataframe.NewSeriesFloat64("MoreThanPreviousBuyPercentage", nil),
+		dataframe.NewSeriesFloat64("ParabolaDivider", nil),
 
 		dataframe.NewSeriesFloat64("BoostBuyFallPercentage", nil),
 		dataframe.NewSeriesInt64("BoostBuyPeriodMinutes", nil),
@@ -144,28 +145,29 @@ func ImportFromCsv(fileName string) []Config {
 
 			LessThanPreviousBuyPercentage: convertStringToFloat64(row[26]),
 			MoreThanPreviousBuyPercentage: convertStringToFloat64(row[27]),
+			ParabolaDivider:               convertStringToFloat64(row[28]),
 
-			BoostBuyFallPercentage:          convertStringToFloat64(row[28]),
-			BoostBuyPeriodMinutes:           convertStringToInt(row[29]),
-			BoostBuyMoneyIncreasePercentage: convertStringToFloat64(row[30]),
+			BoostBuyFallPercentage:          convertStringToFloat64(row[29]),
+			BoostBuyPeriodMinutes:           convertStringToInt(row[30]),
+			BoostBuyMoneyIncreasePercentage: convertStringToFloat64(row[31]),
 
-			StopAfterUnsuccessfullySellMinutes: convertStringToInt(row[31]),
+			StopAfterUnsuccessfullySellMinutes: convertStringToInt(row[32]),
 
-			TotalRevenue:     convertStringToFloat64(row[32]),
-			FinalBalance:     convertStringToFloat64(row[33]),
-			FinalRevenue:     convertStringToFloat64(row[34]),
-			TotalBuysCount:   convertStringToInt(row[35]),
-			UnsoldBuysCount:  convertStringToInt(row[36]),
-			LiquidationCount: convertStringToInt(row[37]),
-			AvgSellTime:      convertStringToFloat64(row[38]),
+			TotalRevenue:     convertStringToFloat64(row[33]),
+			FinalBalance:     convertStringToFloat64(row[34]),
+			FinalRevenue:     convertStringToFloat64(row[35]),
+			TotalBuysCount:   convertStringToInt(row[36]),
+			UnsoldBuysCount:  convertStringToInt(row[37]),
+			LiquidationCount: convertStringToInt(row[38]),
+			AvgSellTime:      convertStringToFloat64(row[39]),
 
-			ValidationTotalRevenue:     convertStringToFloat64(row[39]),
-			ValidationTotalBuysCount:   convertStringToInt(row[40]),
-			ValidationUnsoldBuysCount:  convertStringToInt(row[41]),
-			ValidationLiquidationCount: convertStringToInt(row[42]),
-			ValidationAvgSellTime:      convertStringToFloat64(row[43]),
+			ValidationTotalRevenue:     convertStringToFloat64(row[40]),
+			ValidationTotalBuysCount:   convertStringToInt(row[41]),
+			ValidationUnsoldBuysCount:  convertStringToInt(row[42]),
+			ValidationLiquidationCount: convertStringToInt(row[43]),
+			ValidationAvgSellTime:      convertStringToFloat64(row[44]),
 
-			Selection: convertStringToFloat64(row[44]),
+			Selection: convertStringToFloat64(row[45]),
 		}
 
 		bots = append(bots, bot)
@@ -215,6 +217,7 @@ func InitBotConfig() Config {
 
 		LessThanPreviousBuyPercentage: GetRandFloat64Config(restrict.LessThanPreviousBuyPercentage),
 		MoreThanPreviousBuyPercentage: GetRandFloat64Config(restrict.MoreThanPreviousBuyPercentage),
+		ParabolaDivider:               GetRandFloat64Config(restrict.ParabolaDivider),
 
 		BoostBuyFallPercentage:          GetRandFloat64Config(restrict.BoostBuyFallPercentage),
 		BoostBuyPeriodMinutes:           GetRandIntConfig(restrict.BoostBuyPeriodMinutes),
@@ -263,6 +266,7 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 
 		"LessThanPreviousBuyPercentage": botConfig.LessThanPreviousBuyPercentage,
 		"MoreThanPreviousBuyPercentage": botConfig.MoreThanPreviousBuyPercentage,
+		"ParabolaDivider":               botConfig.ParabolaDivider,
 
 		"BoostBuyFallPercentage":          botConfig.BoostBuyFallPercentage,
 		"BoostBuyPeriodMinutes":           botConfig.BoostBuyPeriodMinutes,
@@ -436,6 +440,7 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 
 		"LessThanPreviousBuyPercentage": bot["LessThanPreviousBuyPercentage"],
 		"MoreThanPreviousBuyPercentage": bot["MoreThanPreviousBuyPercentage"],
+		"ParabolaDivider":               bot["ParabolaDivider"],
 
 		"BoostBuyFallPercentage":          bot["BoostBuyFallPercentage"],
 		"BoostBuyPeriodMinutes":           bot["BoostBuyPeriodMinutes"],
@@ -557,6 +562,7 @@ func ConvertDataFrameToBotConfig(dataFrame map[interface{}]interface{}) Config {
 
 		LessThanPreviousBuyPercentage: convertToFloat64(dataFrame["LessThanPreviousBuyPercentage"]),
 		MoreThanPreviousBuyPercentage: convertToFloat64(dataFrame["MoreThanPreviousBuyPercentage"]),
+		ParabolaDivider:               convertToFloat64(dataFrame["ParabolaDivider"]),
 
 		BoostBuyFallPercentage:          convertToFloat64(dataFrame["BoostBuyFallPercentage"]),
 		BoostBuyPeriodMinutes:           convertToInt(dataFrame["BoostBuyPeriodMinutes"]),
@@ -608,6 +614,7 @@ func makeChild(
 
 		LessThanPreviousBuyPercentage: GetFloatFatherOrMomGen(maleBotConfig.LessThanPreviousBuyPercentage, femaleBotConfig.LessThanPreviousBuyPercentage),
 		MoreThanPreviousBuyPercentage: GetFloatFatherOrMomGen(maleBotConfig.MoreThanPreviousBuyPercentage, femaleBotConfig.MoreThanPreviousBuyPercentage),
+		ParabolaDivider:               GetFloatFatherOrMomGen(maleBotConfig.ParabolaDivider, femaleBotConfig.ParabolaDivider),
 
 		BoostBuyFallPercentage:          GetFloatFatherOrMomGen(maleBotConfig.BoostBuyFallPercentage, femaleBotConfig.BoostBuyFallPercentage),
 		BoostBuyPeriodMinutes:           GetIntFatherOrMomGen(maleBotConfig.BoostBuyPeriodMinutes, femaleBotConfig.BoostBuyPeriodMinutes),
@@ -616,8 +623,8 @@ func makeChild(
 		StopAfterUnsuccessfullySellMinutes: GetIntFatherOrMomGen(maleBotConfig.StopAfterUnsuccessfullySellMinutes, femaleBotConfig.StopAfterUnsuccessfullySellMinutes),
 	}
 
-	for i := 0; i < 26; i++ {
-		mutateGens(&childBotConfig, GetRandInt(0, 31))
+	for i := 0; i < 27; i++ {
+		mutateGens(&childBotConfig, GetRandInt(0, 32))
 	}
 
 	return GetBotConfigMapInterface(childBotConfig)
@@ -663,12 +670,13 @@ func mutateGens(botConfig *Config, randGenNumber int) {
 
 	mutateGenFloat64(randGenNumber, 26, &(botConfig.LessThanPreviousBuyPercentage), restrict.LessThanPreviousBuyPercentage)
 	mutateGenFloat64(randGenNumber, 27, &(botConfig.MoreThanPreviousBuyPercentage), restrict.MoreThanPreviousBuyPercentage)
+	mutateGenFloat64(randGenNumber, 28, &(botConfig.ParabolaDivider), restrict.ParabolaDivider)
 
-	mutateGenFloat64(randGenNumber, 28, &(botConfig.BoostBuyFallPercentage), restrict.BoostBuyFallPercentage)
-	mutateGenInt(randGenNumber, 29, &(botConfig.BoostBuyPeriodMinutes), restrict.BoostBuyPeriodMinutes)
-	mutateGenFloat64(randGenNumber, 30, &(botConfig.BoostBuyMoneyIncreasePercentage), restrict.BoostBuyMoneyIncreasePercentage)
+	mutateGenFloat64(randGenNumber, 29, &(botConfig.BoostBuyFallPercentage), restrict.BoostBuyFallPercentage)
+	mutateGenInt(randGenNumber, 30, &(botConfig.BoostBuyPeriodMinutes), restrict.BoostBuyPeriodMinutes)
+	mutateGenFloat64(randGenNumber, 31, &(botConfig.BoostBuyMoneyIncreasePercentage), restrict.BoostBuyMoneyIncreasePercentage)
 
-	mutateGenInt(randGenNumber, 31, &(botConfig.StopAfterUnsuccessfullySellMinutes), restrict.StopAfterUnsuccessfullySellMinutes)
+	mutateGenInt(randGenNumber, 32, &(botConfig.StopAfterUnsuccessfullySellMinutes), restrict.StopAfterUnsuccessfullySellMinutes)
 }
 
 func mutateGenFloat64(randGenNumber, genNumber int, genValue *float64, restrictMinMax MinMaxFloat64) {
