@@ -445,6 +445,10 @@ func (indicator *LessThanPreviousBuyIndicator) HasSignal() bool {
 }
 
 func (indicator *LessThanPreviousBuyIndicator) getLessThanPercentage() float64 {
+	if !ENABLE_DYNAMIC_NEXT_BUY_PERCENTAGE {
+		return indicator.config.LessThanPreviousBuyPercentage
+	}
+
 	unsoldCount := indicator.db.CountUnsoldBuys()
 	previousPercentage := math.Abs(indicator.config.LessThanPreviousBuyPercentage)
 

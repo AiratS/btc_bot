@@ -14,6 +14,7 @@ const (
 const REAL_MONEY_DB_NAME = "amazing_real"
 
 const ENABLE_SHORT = false
+const ENABLE_DYNAMIC_NEXT_BUY_PERCENTAGE = false
 
 //const ADD_REVENUE_TO_BALANCE = false
 
