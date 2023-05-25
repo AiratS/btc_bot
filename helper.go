@@ -480,3 +480,29 @@ func CalcFuturesAvgPrice(buys []Buy) float64 {
 
 	return numerator / denominator
 }
+
+func CalcAvgPriceForMaintenanceMargin(unsoldBuys []Buy, usedMoney, coinsCount float64) float64 {
+	numerator := usedMoney
+	denominator := coinsCount
+
+	for _, buy := range unsoldBuys {
+		numerator += buy.ExchangeRate * buy.Coins
+		denominator += buy.Coins
+	}
+
+	if 0 == denominator {
+		return 0
+	}
+
+	return numerator / denominator
+}
+
+func CalcTotalCoinsCountForMaintenanceMargin(unsoldBuys []Buy, coinsCount float64) float64 {
+	totalCoinsCount := coinsCount
+
+	for _, buy := range unsoldBuys {
+		totalCoinsCount += buy.Coins
+	}
+
+	return totalCoinsCount
+}

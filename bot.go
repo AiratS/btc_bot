@@ -93,8 +93,10 @@ func (bot *Bot) runBuyIndicators() {
 }
 
 func (bot *Bot) checkForMoneyAndBuy(candle Candle, buyType BuyType) {
-	moneyAmount := bot.getIncreasingTotalMoneyAmount(buyType)
-	if !bot.HasEnoughMoneyForBuy(moneyAmount) {
+	usedMoney := bot.getIncreasingTotalMoneyAmount(buyType)
+	coinsCount := (usedMoney * float64(bot.Config.Leverage)) / candle.GetPrice()
+
+	if !bot.HasEnoughMoneyForBuy(usedMoney, coinsCount) {
 		return
 	}
 
@@ -107,9 +109,10 @@ func (bot *Bot) createLimitBuyOrder(candle Candle) {
 
 	buyPrice := CalcBottomPrice(candle.ClosePrice, BUY_ORDER_REDUCTION_PERCENTAGE)
 	usedMoney := bot.getIncreasingTotalMoneyAmount(Default) // TODO; fix buy type
+	coinsCount := (usedMoney * float64(bot.Config.Leverage)) / candle.GetPrice()
 
 	if USE_REAL_MONEY &&
-		(!bot.HasEnoughMoneyForBuy(usedMoney) || !bot.CanBuyForPrice(buyPrice, usedMoney)) {
+		(!bot.HasEnoughMoneyForBuy(usedMoney, coinsCount) || !bot.CanBuyForPrice(buyPrice, usedMoney)) {
 		return
 	}
 
@@ -243,17 +246,16 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder, 
 
 	// Check for balance
 	usedMoney := bot.getIncreasingTotalMoneyAmount(buyType)
-	if !bot.CanBuyForPrice(exchangeRate, usedMoney) || !bot.HasEnoughMoneyForBuy(usedMoney) {
+	coinsCount := (usedMoney * float64(bot.Config.Leverage)) / exchangeRate
+	if !bot.CanBuyForPrice(exchangeRate, usedMoney) || !bot.HasEnoughMoneyForBuy(usedMoney, coinsCount) {
 		return
 	}
 
 	desiredPrice := bot.calcDesiredPrice(exchangeRate)
-	coinsCount := (usedMoney * float64(bot.Config.Leverage)) / exchangeRate
 
 	// Create Binance Buy order
 	var orderId int64
 	if USE_REAL_MONEY {
-		bot.checkForMaintenanceMargin()
 		orderId, coinsCount, _ = bot.CreateMarketBuyOrder(exchangeRate, usedMoney)
 	}
 
@@ -288,6 +290,19 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder, 
 
 	// After buy stuff
 	bot.runAfterBuy(buyId)
+}
+
+func (bot *Bot) calcLongMaintenance(usedMoney, coinsCount float64) float64 {
+	unsoldBuys := bot.db.FetchUnsoldBuys()
+
+	marginRate := 0.4
+	totalCoins := CalcTotalCoinsCountForMaintenanceMargin(unsoldBuys, coinsCount)
+	avgPrice := CalcAvgPriceForMaintenanceMargin(unsoldBuys, usedMoney, coinsCount)
+
+	a := (totalCoins * avgPrice) / 100
+	b := marginRate + COMMISSION - (COMMISSION / float64(bot.Config.Leverage))
+
+	return a * b
 }
 
 func (bot *Bot) checkForMaintenanceMargin() {
@@ -347,12 +362,29 @@ func (bot *Bot) getIncreasingTotalMoneyAmount(buyType BuyType) float64 {
 	return CalcUpperPrice(lastBuy.UsedMoney, bot.Config.TotalMoneyIncreasePercentage)
 }
 
-func (bot *Bot) HasEnoughMoneyForBuy(usedMoney float64) bool {
-	if USE_REAL_MONEY {
-		return bot.futuresOrderManager.HasEnoughMoneyForBuy(usedMoney)
+func (bot *Bot) HasEnoughMoneyForBuy(usedMoney, coinsCount float64) bool {
+	isBalanceEnough := bot.balance.HasEnoughMoneyForBuy(usedMoney)
+	if !USE_REAL_MONEY {
+		return isBalanceEnough
 	}
 
-	return bot.balance.HasEnoughMoneyForBuy(usedMoney)
+	// Only real
+	isBalanceEnough = bot.futuresOrderManager.HasEnoughMoneyForBuy(usedMoney)
+	if !isBalanceEnough {
+		return false
+	}
+
+	maintenanceMargin := bot.calcLongMaintenance(usedMoney, coinsCount)
+	balance := bot.futuresOrderManager.getBalance()
+	requiredMoney := usedMoney + maintenanceMargin
+
+	Log(fmt.Sprintf(
+		"MAINTENANCE_MARGIN\nMargin: %f\nRequired: %f",
+		maintenanceMargin,
+		requiredMoney,
+	))
+
+	return requiredMoney < balance
 }
 
 func (bot *Bot) CanBuyForPrice(exchangeRate, usedMoney float64) bool {
