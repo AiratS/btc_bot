@@ -39,6 +39,15 @@ func (buffer *Buffer) GetLastCandle() Candle {
 	return buffer.candles[len(buffer.candles)-1]
 }
 
+func (buffer *Buffer) GetPrevCandle() Candle {
+	//return Candle{
+	//	Symbol:     CANDLE_SYMBOL,
+	//	CloseTime:  time.Now().Format("2006-01-02 15:04:05"),
+	//	ClosePrice: 23398.11,
+	//}
+	return buffer.candles[len(buffer.candles)-2]
+}
+
 func (buffer *Buffer) GetLastCandleClosePrice() float64 {
 	candle := buffer.GetLastCandle()
 	return candle.GetPrice()

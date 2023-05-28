@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/adshao/go-binance/v2"
 	"github.com/adshao/go-binance/v2/futures"
+	"math"
 	"reflect"
 )
 
@@ -278,8 +279,9 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder, 
 
 	bot.balance.buy(usedMoney)
 	Log(fmt.Sprintf(
-		"%sBUY\nBuyId: %d\nExchangeRate: %f\nUsedMoney: %f\nCoinsCount: %f\nBalance: %f\nOrderId: %d",
+		"%sBUY\nCreatedAt: %s\nBuyId: %d\nExchangeRate: %f\nUsedMoney: %f\nCoinsCount: %f\nBalance: %f\nOrderId: %d",
 		bot.getBuyMessagePrefix(buyType),
+		closeTime,
 		buyId,
 		exchangeRate,
 		usedMoney,
@@ -305,28 +307,6 @@ func (bot *Bot) calcLongMaintenance(usedMoney, coinsCount float64) float64 {
 	return a * b
 }
 
-func (bot *Bot) checkForMaintenanceMargin() {
-	maintenanceMarginRate := 0.50
-	maintenanceAmount := 50.0
-	avgFuturesPrice := CalcFuturesAvgPrice(bot.db.FetchUnsoldBuys())
-	maintenanceMargin := avgFuturesPrice*maintenanceMarginRate - maintenanceAmount
-
-	Log(fmt.Sprintf(
-		"MAINTENANCE_MARGIN\n"+
-			"Balance: %f\n"+
-			"MaintenanceMargin: %f\n"+
-			"NotionalPositionValue: %f\n"+
-			"MaintenanceMarginRate: %f\n"+
-			"MaintenanceAmount: %f\n",
-
-		bot.futuresOrderManager.getBalance(),
-		maintenanceMargin,
-		avgFuturesPrice,
-		maintenanceMarginRate,
-		maintenanceAmount,
-	))
-}
-
 func (bot *Bot) getBuyMessagePrefix(buyType BuyType) string {
 	prefix := ""
 
@@ -339,27 +319,31 @@ func (bot *Bot) getBuyMessagePrefix(buyType BuyType) string {
 
 func (bot *Bot) getIncreasingTotalMoneyAmount(buyType BuyType) float64 {
 	// Boost money amount
-	if BuyTypeBoost == buyType {
-		return CalcUpperPrice(bot.Config.TotalMoneyAmount, bot.Config.BoostBuyMoneyIncreasePercentage)
-	}
+	//if BuyTypeBoost == buyType {
+	//	return CalcUpperPrice(bot.Config.TotalMoneyAmount, bot.Config.BoostBuyMoneyIncreasePercentage)
+	//}
 
 	// Increasing money amount
 	count := bot.db.CountUnsoldBuys()
 	if 0 == count {
-		return CalcUpperPrice(bot.Config.TotalMoneyAmount, bot.Config.FirstBuyMoneyIncreasePercentage)
+		return bot.Config.TotalMoneyAmount
+		//return CalcUpperPrice(bot.Config.TotalMoneyAmount, bot.Config.FirstBuyMoneyIncreasePercentage)
 	}
 
-	if 1 == count {
-		return CalcUpperPrice(bot.Config.TotalMoneyAmount, bot.Config.TotalMoneyIncreasePercentage)
-	}
+	//if 1 == count {
+	//	return CalcUpperPrice(bot.Config.TotalMoneyAmount, bot.Config.TotalMoneyIncreasePercentage)
+	//}
 
 	_, lastBuy := bot.db.GetLastUnsoldNotBoostBuy()
-	if ENABLE_STOP_INCREASE_AFTER_BUYS_COUNT &&
-		bot.Config.StopIncreaseMoneyAfterBuysCount <= count {
-		return lastBuy.UsedMoney
-	}
+	//if ENABLE_STOP_INCREASE_AFTER_BUYS_COUNT &&
+	//	bot.Config.StopIncreaseMoneyAfterBuysCount <= count {
+	//	return lastBuy.UsedMoney
+	//}
 
-	return CalcUpperPrice(lastBuy.UsedMoney, bot.Config.TotalMoneyIncreasePercentage)
+	prevCandle := bot.buffer.GetPrevCandle()
+	percentage := math.Abs(CalcGrowth(prevCandle.GetPrice(), bot.buffer.GetLastCandleClosePrice()))
+
+	return CalcUpperPrice(lastBuy.UsedMoney, percentage*100)
 }
 
 func (bot *Bot) HasEnoughMoneyForBuy(usedMoney, coinsCount float64) bool {
