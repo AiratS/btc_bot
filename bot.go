@@ -561,7 +561,8 @@ func (bot *Bot) sell(buy Buy) float64 {
 	}
 
 	Log(fmt.Sprintf(
-		"SELL\nBuyId: %d\nStartPrice: %f\nEndPrice: %f\nRevenue: %f",
+		"SELL\nCreatedAt: %s\nBuyId: %d\nStartPrice: %f\nEndPrice: %f\nRevenue: %f",
+		candle.CloseTime,
 		buy.Id,
 		buy.ExchangeRate,
 		candle.ClosePrice,
