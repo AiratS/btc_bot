@@ -340,8 +340,7 @@ func (bot *Bot) getIncreasingTotalMoneyAmount(buyType BuyType) float64 {
 	//	return lastBuy.UsedMoney
 	//}
 
-	prevCandle := bot.buffer.GetPrevCandle()
-	percentage := math.Abs(CalcGrowth(prevCandle.GetPrice(), bot.buffer.GetLastCandleClosePrice()))
+	percentage := math.Abs(CalcGrowth(lastBuy.ExchangeRate, bot.buffer.GetLastCandleClosePrice()))
 
 	return CalcUpperPrice(lastBuy.UsedMoney, percentage*100)
 }
