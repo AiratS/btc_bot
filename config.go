@@ -69,6 +69,10 @@ type Config struct {
 	LinearRegressionK         float64
 	LinearRegressionDeviation float64
 
+	GradientSwingIndicatorCandles   int
+	GradientSwingIndicatorPeriod    int
+	GradientSwingIndicatorSwingType int // 0 - Growth, 1 - Fall, 2 - Any
+
 	TotalMoneyAmount                    float64
 	TotalMoneyIncreasePercentage        float64
 	FirstBuyMoneyIncreasePercentage     float64

@@ -37,6 +37,10 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 		dataframe.NewSeriesFloat64("LinearRegressionK", nil),
 		dataframe.NewSeriesFloat64("LinearRegressionDeviation", nil),
 
+		dataframe.NewSeriesInt64("GradientSwingIndicatorCandles", nil),
+		dataframe.NewSeriesInt64("GradientSwingIndicatorPeriod", nil),
+		dataframe.NewSeriesInt64("GradientSwingIndicatorSwingType", nil),
+
 		dataframe.NewSeriesFloat64("TotalMoneyAmount", nil),
 		dataframe.NewSeriesFloat64("TotalMoneyIncreasePercentage", nil),
 		dataframe.NewSeriesFloat64("FirstBuyMoneyIncreasePercentage", nil),
@@ -134,40 +138,44 @@ func ImportFromCsv(fileName string) []Config {
 			LinearRegressionK:         convertStringToFloat64(row[17]),
 			LinearRegressionDeviation: convertStringToFloat64(row[18]),
 
-			TotalMoneyAmount:                convertStringToFloat64(row[19]),
-			TotalMoneyIncreasePercentage:    convertStringToFloat64(row[20]),
-			FirstBuyMoneyIncreasePercentage: convertStringToFloat64(row[21]),
-			StopIncreaseMoneyAfterBuysCount: convertStringToInt(row[22]),
-			Leverage:                        convertStringToInt(row[23]),
+			GradientSwingIndicatorCandles:   convertStringToInt(row[19]),
+			GradientSwingIndicatorPeriod:    convertStringToInt(row[20]),
+			GradientSwingIndicatorSwingType: convertStringToInt(row[21]),
 
-			FuturesAvgSellTimeMinutes:           convertStringToInt(row[24]),
-			FuturesLeverageActivationPercentage: convertStringToFloat64(row[25]),
+			TotalMoneyAmount:                convertStringToFloat64(row[22]),
+			TotalMoneyIncreasePercentage:    convertStringToFloat64(row[23]),
+			FirstBuyMoneyIncreasePercentage: convertStringToFloat64(row[24]),
+			StopIncreaseMoneyAfterBuysCount: convertStringToInt(row[25]),
+			Leverage:                        convertStringToInt(row[26]),
 
-			LessThanPreviousBuyPercentage: convertStringToFloat64(row[26]),
-			MoreThanPreviousBuyPercentage: convertStringToFloat64(row[27]),
-			ParabolaDivider:               convertStringToFloat64(row[28]),
+			FuturesAvgSellTimeMinutes:           convertStringToInt(row[27]),
+			FuturesLeverageActivationPercentage: convertStringToFloat64(row[28]),
 
-			BoostBuyFallPercentage:          convertStringToFloat64(row[29]),
-			BoostBuyPeriodMinutes:           convertStringToInt(row[30]),
-			BoostBuyMoneyIncreasePercentage: convertStringToFloat64(row[31]),
+			LessThanPreviousBuyPercentage: convertStringToFloat64(row[29]),
+			MoreThanPreviousBuyPercentage: convertStringToFloat64(row[30]),
+			ParabolaDivider:               convertStringToFloat64(row[31]),
 
-			StopAfterUnsuccessfullySellMinutes: convertStringToInt(row[32]),
+			BoostBuyFallPercentage:          convertStringToFloat64(row[32]),
+			BoostBuyPeriodMinutes:           convertStringToInt(row[33]),
+			BoostBuyMoneyIncreasePercentage: convertStringToFloat64(row[34]),
 
-			TotalRevenue:     convertStringToFloat64(row[33]),
-			FinalBalance:     convertStringToFloat64(row[34]),
-			FinalRevenue:     convertStringToFloat64(row[35]),
-			TotalBuysCount:   convertStringToInt(row[36]),
-			UnsoldBuysCount:  convertStringToInt(row[37]),
-			LiquidationCount: convertStringToInt(row[38]),
-			AvgSellTime:      convertStringToFloat64(row[39]),
+			StopAfterUnsuccessfullySellMinutes: convertStringToInt(row[35]),
 
-			ValidationTotalRevenue:     convertStringToFloat64(row[40]),
-			ValidationTotalBuysCount:   convertStringToInt(row[41]),
-			ValidationUnsoldBuysCount:  convertStringToInt(row[42]),
-			ValidationLiquidationCount: convertStringToInt(row[43]),
-			ValidationAvgSellTime:      convertStringToFloat64(row[44]),
+			TotalRevenue:     convertStringToFloat64(row[36]),
+			FinalBalance:     convertStringToFloat64(row[37]),
+			FinalRevenue:     convertStringToFloat64(row[38]),
+			TotalBuysCount:   convertStringToInt(row[39]),
+			UnsoldBuysCount:  convertStringToInt(row[40]),
+			LiquidationCount: convertStringToInt(row[41]),
+			AvgSellTime:      convertStringToFloat64(row[42]),
 
-			Selection: convertStringToFloat64(row[45]),
+			ValidationTotalRevenue:     convertStringToFloat64(row[43]),
+			ValidationTotalBuysCount:   convertStringToInt(row[44]),
+			ValidationUnsoldBuysCount:  convertStringToInt(row[45]),
+			ValidationLiquidationCount: convertStringToInt(row[46]),
+			ValidationAvgSellTime:      convertStringToFloat64(row[47]),
+
+			Selection: convertStringToFloat64(row[48]),
 		}
 
 		bots = append(bots, bot)
@@ -206,6 +214,10 @@ func InitBotConfig() Config {
 		LinearRegressionMse:       GetRandFloat64Config(restrict.LinearRegressionMse),
 		LinearRegressionK:         GetRandFloat64Config(restrict.LinearRegressionK),
 		LinearRegressionDeviation: GetRandFloat64Config(restrict.LinearRegressionDeviation),
+
+		GradientSwingIndicatorCandles:   GetRandIntConfig(restrict.GradientSwingIndicatorCandles),
+		GradientSwingIndicatorPeriod:    GetRandIntConfig(restrict.GradientSwingIndicatorPeriod),
+		GradientSwingIndicatorSwingType: GetRandIntConfig(restrict.GradientSwingIndicatorSwingType),
 
 		TotalMoneyAmount:                    GetRandFloat64Config(restrict.TotalMoneyAmount),
 		TotalMoneyIncreasePercentage:        GetRandFloat64Config(restrict.TotalMoneyIncreasePercentage),
@@ -255,6 +267,10 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 		"LinearRegressionMse":       botConfig.LinearRegressionMse,
 		"LinearRegressionK":         botConfig.LinearRegressionK,
 		"LinearRegressionDeviation": botConfig.LinearRegressionDeviation,
+
+		"GradientSwingIndicatorCandles":   botConfig.GradientSwingIndicatorCandles,
+		"GradientSwingIndicatorPeriod":    botConfig.GradientSwingIndicatorPeriod,
+		"GradientSwingIndicatorSwingType": botConfig.GradientSwingIndicatorSwingType,
 
 		"TotalMoneyAmount":                    botConfig.TotalMoneyAmount,
 		"TotalMoneyIncreasePercentage":        botConfig.TotalMoneyIncreasePercentage,
@@ -430,6 +446,10 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 		"LinearRegressionK":         bot["LinearRegressionK"],
 		"LinearRegressionDeviation": bot["LinearRegressionDeviation"],
 
+		"GradientSwingIndicatorCandles":   bot["GradientSwingIndicatorCandles"],
+		"GradientSwingIndicatorPeriod":    bot["GradientSwingIndicatorPeriod"],
+		"GradientSwingIndicatorSwingType": bot["GradientSwingIndicatorSwingType"],
+
 		"TotalMoneyAmount":                    bot["TotalMoneyAmount"],
 		"TotalMoneyIncreasePercentage":        bot["TotalMoneyIncreasePercentage"],
 		"FirstBuyMoneyIncreasePercentage":     bot["FirstBuyMoneyIncreasePercentage"],
@@ -552,6 +572,10 @@ func ConvertDataFrameToBotConfig(dataFrame map[interface{}]interface{}) Config {
 		LinearRegressionK:         convertToFloat64(dataFrame["LinearRegressionK"]),
 		LinearRegressionDeviation: convertToFloat64(dataFrame["LinearRegressionDeviation"]),
 
+		GradientSwingIndicatorCandles:   convertToInt(dataFrame["GradientSwingIndicatorCandles"]),
+		GradientSwingIndicatorPeriod:    convertToInt(dataFrame["GradientSwingIndicatorPeriod"]),
+		GradientSwingIndicatorSwingType: convertToInt(dataFrame["GradientSwingIndicatorSwingType"]),
+
 		TotalMoneyAmount:                    convertToFloat64(dataFrame["TotalMoneyAmount"]),
 		TotalMoneyIncreasePercentage:        convertToFloat64(dataFrame["TotalMoneyIncreasePercentage"]),
 		FirstBuyMoneyIncreasePercentage:     convertToFloat64(dataFrame["FirstBuyMoneyIncreasePercentage"]),
@@ -604,6 +628,10 @@ func makeChild(
 		LinearRegressionK:         GetFloatFatherOrMomGen(maleBotConfig.LinearRegressionK, femaleBotConfig.LinearRegressionK),
 		LinearRegressionDeviation: GetFloatFatherOrMomGen(maleBotConfig.LinearRegressionDeviation, femaleBotConfig.LinearRegressionDeviation),
 
+		GradientSwingIndicatorCandles:   GetIntFatherOrMomGen(maleBotConfig.GradientSwingIndicatorCandles, femaleBotConfig.GradientSwingIndicatorCandles),
+		GradientSwingIndicatorPeriod:    GetIntFatherOrMomGen(maleBotConfig.GradientSwingIndicatorPeriod, femaleBotConfig.GradientSwingIndicatorPeriod),
+		GradientSwingIndicatorSwingType: GetIntFatherOrMomGen(maleBotConfig.GradientSwingIndicatorSwingType, femaleBotConfig.GradientSwingIndicatorSwingType),
+
 		TotalMoneyAmount:                    GetFloatFatherOrMomGen(maleBotConfig.TotalMoneyAmount, femaleBotConfig.TotalMoneyAmount),
 		TotalMoneyIncreasePercentage:        GetFloatFatherOrMomGen(maleBotConfig.TotalMoneyIncreasePercentage, femaleBotConfig.TotalMoneyIncreasePercentage),
 		FirstBuyMoneyIncreasePercentage:     GetFloatFatherOrMomGen(maleBotConfig.FirstBuyMoneyIncreasePercentage, femaleBotConfig.FirstBuyMoneyIncreasePercentage),
@@ -623,8 +651,8 @@ func makeChild(
 		StopAfterUnsuccessfullySellMinutes: GetIntFatherOrMomGen(maleBotConfig.StopAfterUnsuccessfullySellMinutes, femaleBotConfig.StopAfterUnsuccessfullySellMinutes),
 	}
 
-	for i := 0; i < 27; i++ {
-		mutateGens(&childBotConfig, GetRandInt(0, 32))
+	for i := 0; i < 30; i++ {
+		mutateGens(&childBotConfig, GetRandInt(0, 35))
 	}
 
 	return GetBotConfigMapInterface(childBotConfig)
@@ -660,23 +688,27 @@ func mutateGens(botConfig *Config, randGenNumber int) {
 	mutateGenFloat64(randGenNumber, 17, &(botConfig.LinearRegressionK), restrict.LinearRegressionK)
 	mutateGenFloat64(randGenNumber, 18, &(botConfig.LinearRegressionDeviation), restrict.LinearRegressionDeviation)
 
-	mutateGenFloat64(randGenNumber, 19, &(botConfig.TotalMoneyAmount), restrict.TotalMoneyAmount)
-	mutateGenFloat64(randGenNumber, 20, &(botConfig.TotalMoneyIncreasePercentage), restrict.TotalMoneyIncreasePercentage)
-	mutateGenFloat64(randGenNumber, 21, &(botConfig.FirstBuyMoneyIncreasePercentage), restrict.FirstBuyMoneyIncreasePercentage)
-	mutateGenInt(randGenNumber, 22, &(botConfig.StopIncreaseMoneyAfterBuysCount), restrict.StopIncreaseMoneyAfterBuysCount)
-	mutateGenInt(randGenNumber, 23, &(botConfig.Leverage), restrict.Leverage)
-	mutateGenInt(randGenNumber, 24, &(botConfig.FuturesAvgSellTimeMinutes), restrict.FuturesAvgSellTimeMinutes)
-	mutateGenFloat64(randGenNumber, 25, &(botConfig.FuturesLeverageActivationPercentage), restrict.FuturesLeverageActivationPercentage)
+	mutateGenInt(randGenNumber, 19, &(botConfig.GradientSwingIndicatorCandles), restrict.GradientSwingIndicatorCandles)
+	mutateGenInt(randGenNumber, 20, &(botConfig.GradientSwingIndicatorPeriod), restrict.GradientSwingIndicatorPeriod)
+	mutateGenInt(randGenNumber, 21, &(botConfig.GradientSwingIndicatorSwingType), restrict.GradientSwingIndicatorSwingType)
 
-	mutateGenFloat64(randGenNumber, 26, &(botConfig.LessThanPreviousBuyPercentage), restrict.LessThanPreviousBuyPercentage)
-	mutateGenFloat64(randGenNumber, 27, &(botConfig.MoreThanPreviousBuyPercentage), restrict.MoreThanPreviousBuyPercentage)
-	mutateGenFloat64(randGenNumber, 28, &(botConfig.ParabolaDivider), restrict.ParabolaDivider)
+	mutateGenFloat64(randGenNumber, 22, &(botConfig.TotalMoneyAmount), restrict.TotalMoneyAmount)
+	mutateGenFloat64(randGenNumber, 23, &(botConfig.TotalMoneyIncreasePercentage), restrict.TotalMoneyIncreasePercentage)
+	mutateGenFloat64(randGenNumber, 24, &(botConfig.FirstBuyMoneyIncreasePercentage), restrict.FirstBuyMoneyIncreasePercentage)
+	mutateGenInt(randGenNumber, 25, &(botConfig.StopIncreaseMoneyAfterBuysCount), restrict.StopIncreaseMoneyAfterBuysCount)
+	mutateGenInt(randGenNumber, 26, &(botConfig.Leverage), restrict.Leverage)
+	mutateGenInt(randGenNumber, 27, &(botConfig.FuturesAvgSellTimeMinutes), restrict.FuturesAvgSellTimeMinutes)
+	mutateGenFloat64(randGenNumber, 28, &(botConfig.FuturesLeverageActivationPercentage), restrict.FuturesLeverageActivationPercentage)
 
-	mutateGenFloat64(randGenNumber, 29, &(botConfig.BoostBuyFallPercentage), restrict.BoostBuyFallPercentage)
-	mutateGenInt(randGenNumber, 30, &(botConfig.BoostBuyPeriodMinutes), restrict.BoostBuyPeriodMinutes)
-	mutateGenFloat64(randGenNumber, 31, &(botConfig.BoostBuyMoneyIncreasePercentage), restrict.BoostBuyMoneyIncreasePercentage)
+	mutateGenFloat64(randGenNumber, 29, &(botConfig.LessThanPreviousBuyPercentage), restrict.LessThanPreviousBuyPercentage)
+	mutateGenFloat64(randGenNumber, 30, &(botConfig.MoreThanPreviousBuyPercentage), restrict.MoreThanPreviousBuyPercentage)
+	mutateGenFloat64(randGenNumber, 31, &(botConfig.ParabolaDivider), restrict.ParabolaDivider)
 
-	mutateGenInt(randGenNumber, 32, &(botConfig.StopAfterUnsuccessfullySellMinutes), restrict.StopAfterUnsuccessfullySellMinutes)
+	mutateGenFloat64(randGenNumber, 32, &(botConfig.BoostBuyFallPercentage), restrict.BoostBuyFallPercentage)
+	mutateGenInt(randGenNumber, 33, &(botConfig.BoostBuyPeriodMinutes), restrict.BoostBuyPeriodMinutes)
+	mutateGenFloat64(randGenNumber, 34, &(botConfig.BoostBuyMoneyIncreasePercentage), restrict.BoostBuyMoneyIncreasePercentage)
+
+	mutateGenInt(randGenNumber, 35, &(botConfig.StopAfterUnsuccessfullySellMinutes), restrict.StopAfterUnsuccessfullySellMinutes)
 }
 
 func mutateGenFloat64(randGenNumber, genNumber int, genValue *float64, restrictMinMax MinMaxFloat64) {

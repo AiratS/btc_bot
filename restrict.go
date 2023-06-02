@@ -28,6 +28,10 @@ type ConfigRestriction struct {
 	LinearRegressionK         MinMaxFloat64
 	LinearRegressionDeviation MinMaxFloat64
 
+	GradientSwingIndicatorCandles   MinMaxInt
+	GradientSwingIndicatorPeriod    MinMaxInt
+	GradientSwingIndicatorSwingType MinMaxInt
+
 	TotalMoneyAmount                    MinMaxFloat64
 	TotalMoneyIncreasePercentage        MinMaxFloat64
 	FirstBuyMoneyIncreasePercentage     MinMaxFloat64
@@ -142,6 +146,20 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		LinearRegressionDeviation: MinMaxFloat64{
 			min: 5,
 			max: 30,
+		},
+
+		// ------------------------------------------------
+		GradientSwingIndicatorCandles: MinMaxInt{
+			min: 6,
+			max: 30,
+		},
+		GradientSwingIndicatorPeriod: MinMaxInt{
+			min: 3,
+			max: 15,
+		},
+		GradientSwingIndicatorSwingType: MinMaxInt{
+			min: 0,
+			max: 2,
 		},
 
 		// ------------------------------------------------

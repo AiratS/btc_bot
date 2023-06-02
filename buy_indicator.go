@@ -764,3 +764,98 @@ func (indicator *LinearRegressionIndicator) getPeriod() int {
 
 	return period
 }
+
+// ---------------------------------------
+
+type GradientSwingIndicator struct {
+	config *Config
+	buffer *Buffer
+	db     *Database
+}
+
+func NewGradientSwingIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) GradientSwingIndicator {
+	return GradientSwingIndicator{
+		config: config,
+		buffer: buffer,
+		db:     db,
+	}
+}
+
+const SwingTypeGrowth = 0
+const SwingTypeFall = 1
+const SwingTypeAny = 2
+
+func (indicator *GradientSwingIndicator) HasSignal() bool {
+	count := len(indicator.buffer.GetCandles())
+	if (indicator.config.GradientSwingIndicatorCandles + 1) > count {
+		return false
+	}
+
+	if indicator.db.CountUnsoldBuys() > 0 {
+		return true
+	}
+
+	closePrices := GetValuesFromSlice(
+		GetClosePrices(indicator.buffer.GetCandles()),
+		indicator.config.GradientSwingIndicatorCandles,
+	)
+	smoothedPrices := FilterZeroPrices(talib.Sma(closePrices, indicator.getPeriod()))
+	smoothedLen := len(smoothedPrices)
+	if 4 > smoothedLen {
+		return false
+	}
+
+	// Main part
+	lastIdx := smoothedLen - 1
+	penultPrice := smoothedPrices[lastIdx-2]
+	prevPrice := smoothedPrices[lastIdx-1]
+	currentCandle := smoothedPrices[lastIdx]
+
+	gradient1 := prevPrice - penultPrice
+	gradient2 := currentCandle - prevPrice
+
+	// Checks
+	isGradient1NegativeOrZero := 0 >= gradient1
+	isGradient2Positive := 0 < gradient2
+
+	isGradient1PlusOrZero := 0 <= gradient1
+	isGradient2Negative := 0 > gradient2
+
+	switch indicator.config.GradientSwingIndicatorSwingType {
+	case SwingTypeGrowth:
+		return isGradient1NegativeOrZero && isGradient2Positive
+	case SwingTypeFall:
+		return isGradient1PlusOrZero && isGradient2Negative
+	case SwingTypeAny:
+		return isGradient1NegativeOrZero && isGradient2Positive ||
+			isGradient1PlusOrZero && isGradient2Negative
+	}
+
+	return false
+}
+
+func (indicator *GradientSwingIndicator) getPeriod() int {
+	period := indicator.config.GradientSwingIndicatorCandles - indicator.config.GradientSwingIndicatorPeriod
+	if period <= 0 {
+		period = 1
+	}
+
+	return period
+}
+
+func (indicator *GradientSwingIndicator) IsStarted() bool {
+	return true
+}
+
+func (indicator *GradientSwingIndicator) Start() {
+}
+
+func (indicator *GradientSwingIndicator) Update() {
+}
+
+func (indicator *GradientSwingIndicator) Finish() {
+}

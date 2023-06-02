@@ -59,6 +59,10 @@ func GetRealBotConfig() Config {
 		LinearRegressionK:         1,
 		LinearRegressionDeviation: 1,
 
+		GradientSwingIndicatorCandles:   1,
+		GradientSwingIndicatorPeriod:    1,
+		GradientSwingIndicatorSwingType: 1,
+
 		TotalMoneyAmount:                1000,
 		TotalMoneyIncreasePercentage:    10,
 		FirstBuyMoneyIncreasePercentage: 1,
