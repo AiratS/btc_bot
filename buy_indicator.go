@@ -324,6 +324,7 @@ func NewGradientDescentIndicator(
 func (indicator *GradientDescentIndicator) HasSignal() bool {
 	count := len(indicator.buffer.GetCandles())
 	if (indicator.config.GradientDescentCandles + 1) > count {
+		Log(fmt.Sprintf("GradientDescentIndicator: not enough candles"))
 		return false
 	}
 
@@ -338,6 +339,7 @@ func (indicator *GradientDescentIndicator) HasSignal() bool {
 	smoothedPrices := FilterZeroPrices(talib.Sma(closePrices, indicator.getPeriod()))
 	smoothedLen := len(smoothedPrices)
 	if 4 > smoothedLen {
+		Log(fmt.Sprintf("GradientDescentIndicator: not enough smothed candles"))
 		return false
 	}
 
@@ -441,7 +443,7 @@ func (indicator *LessThanPreviousBuyIndicator) HasSignal() bool {
 
 	percentage := CalcGrowth(buy.ExchangeRate, indicator.buffer.GetLastCandleClosePrice())
 
-	return indicator.getLessThanPercentage() >= percentage
+	return indicator.config.LessThanPreviousBuyPercentage >= percentage
 }
 
 func (indicator *LessThanPreviousBuyIndicator) getLessThanPercentage() float64 {
