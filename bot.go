@@ -356,6 +356,9 @@ func (bot *Bot) HasEnoughMoneyForBuy(usedMoney, coinsCount float64) bool {
 		return isBalanceEnough
 	}
 
+	Log(fmt.Sprintf("HasEnoughMoneyForBuy UsedMoney: %f, coinscCount: %f",
+		usedMoney, coinsCount))
+
 	// Only real
 	isBalanceEnough = bot.futuresOrderManager.HasEnoughMoneyForBuy(usedMoney)
 	if !isBalanceEnough {
