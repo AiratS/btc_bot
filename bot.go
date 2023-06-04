@@ -85,6 +85,11 @@ func (bot *Bot) runBuyIndicators() {
 		}
 	}
 
+	// TODO: remove after test
+	if 0 < signalsCount {
+		Log(fmt.Sprintf("Has some signals"))
+	}
+
 	if len(bot.BuyIndicators) == signalsCount {
 		for _, indicator := range bot.BuyIndicators {
 			indicator.Finish()
@@ -354,6 +359,10 @@ func (bot *Bot) HasEnoughMoneyForBuy(usedMoney, coinsCount float64) bool {
 	// Only real
 	isBalanceEnough = bot.futuresOrderManager.HasEnoughMoneyForBuy(usedMoney)
 	if !isBalanceEnough {
+		// TODO: remove after test
+		balance := bot.futuresOrderManager.getBalance()
+		Log(fmt.Sprintf("Not enough money in balance %f", balance))
+
 		return false
 	}
 
@@ -717,17 +726,17 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	//gradientDescentIndicator := NewGradientDescentIndicator(
-	//	bot.Config,
-	//	bot.buffer,
-	//	bot.db,
-	//)
-
-	gradientSwingIndicator := NewGradientSwingIndicator(
+	gradientDescentIndicator := NewGradientDescentIndicator(
 		bot.Config,
 		bot.buffer,
 		bot.db,
 	)
+
+	//gradientSwingIndicator := NewGradientSwingIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
 
 	if ENABLE_SHORT {
 		moreThanPreviousBuyIndicator := NewMoreThanPreviousBuyIndicator(
@@ -739,8 +748,8 @@ func setupBuyIndicators(bot *Bot) {
 		bot.BuyIndicators = []BuyIndicator{
 			//&linearRegressionIndicator,
 			&moreThanPreviousBuyIndicator,
-			//&gradientDescentIndicator,
-			&gradientSwingIndicator,
+			&gradientDescentIndicator,
+			//&gradientSwingIndicator,
 		}
 		return
 	}
@@ -759,8 +768,8 @@ func setupBuyIndicators(bot *Bot) {
 		//&linearRegressionIndicator,
 		&lessThanPreviousBuyIndicator,
 		//&stopAfterUnsuccessfullySellIndicator,
-		//&gradientDescentIndicator,
-		&gradientSwingIndicator,
+		&gradientDescentIndicator,
+		//&gradientSwingIndicator,
 	}
 
 	// Boost buy indicator
