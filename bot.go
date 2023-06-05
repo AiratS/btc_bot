@@ -81,13 +81,10 @@ func (bot *Bot) runBuyIndicators() {
 	for _, indicator := range bot.BuyIndicators {
 		indicator.Update()
 		if indicator.HasSignal() {
+			Log(fmt.Sprintf("Has signal indicator: %T", indicator))
 			signalsCount++
 		}
 	}
-
-	//if 0 < signalsCount {
-	//	Log(fmt.Sprintf("Has some signals"))
-	//}
 
 	if len(bot.BuyIndicators) == signalsCount {
 		for _, indicator := range bot.BuyIndicators {
@@ -355,14 +352,14 @@ func (bot *Bot) HasEnoughMoneyForBuy(usedMoney, coinsCount float64) bool {
 		return isBalanceEnough
 	}
 
-	//Log(fmt.Sprintf("HasEnoughMoneyForBuy UsedMoney: %f, coinscCount: %f",
-	//	usedMoney, coinsCount))
+	Log(fmt.Sprintf("HasEnoughMoneyForBuy UsedMoney: %f, coinscCount: %f",
+		usedMoney, coinsCount))
 
 	// Only real
 	isBalanceEnough = bot.futuresOrderManager.HasEnoughMoneyForBuy(usedMoney)
 	if !isBalanceEnough {
-		//balance := bot.futuresOrderManager.getBalance()
-		//Log(fmt.Sprintf("Not enough money in balance %f", balance))
+		balance := bot.futuresOrderManager.getBalance()
+		Log(fmt.Sprintf("Not enough money in balance %f", balance))
 
 		return false
 	}

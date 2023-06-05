@@ -339,7 +339,11 @@ func (indicator *GradientDescentIndicator) HasSignal() bool {
 	smoothedPrices := FilterZeroPrices(talib.Sma(closePrices, indicator.getPeriod()))
 	smoothedLen := len(smoothedPrices)
 	if 4 > smoothedLen {
-		//Log(fmt.Sprintf("GradientDescentIndicator: not enough smothed candles"))
+		Log(fmt.Sprintf(
+			"GradientDescentIndicator: not enough smothed candles total: %d, smoothed: %d",
+			count,
+			smoothedLen,
+		))
 		return false
 	}
 
