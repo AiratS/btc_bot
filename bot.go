@@ -81,7 +81,7 @@ func (bot *Bot) runBuyIndicators() {
 	for _, indicator := range bot.BuyIndicators {
 		indicator.Update()
 		if indicator.HasSignal() {
-			Log(fmt.Sprintf("Has signal indicator: %T", indicator))
+			//Log(fmt.Sprintf("Has signal indicator: %T", indicator))
 			signalsCount++
 		}
 	}
@@ -352,8 +352,8 @@ func (bot *Bot) HasEnoughMoneyForBuy(usedMoney, coinsCount float64) bool {
 		return isBalanceEnough
 	}
 
-	Log(fmt.Sprintf("HasEnoughMoneyForBuy UsedMoney: %f, coinscCount: %f",
-		usedMoney, coinsCount))
+	//Log(fmt.Sprintf("HasEnoughMoneyForBuy UsedMoney: %f, coinscCount: %f",
+	//	usedMoney, coinsCount))
 
 	// Only real
 	isBalanceEnough = bot.futuresOrderManager.HasEnoughMoneyForBuy(usedMoney)
