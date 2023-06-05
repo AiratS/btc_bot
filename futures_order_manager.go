@@ -37,6 +37,11 @@ func NewFuturesOrderManager(futuresClient *futures.Client) FuturesOrderManager {
 			panic(err)
 		}
 
+		balance := service.getBalance()
+		if 10.0 >= balance {
+			panic(fmt.Sprintf("Not enough money in balance: %f", balance))
+		}
+
 		info := NewFuturesExchangeInfo(res)
 		service.exchangeInfo = &info
 
