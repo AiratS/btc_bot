@@ -481,6 +481,51 @@ func (indicator *LessThanPreviousBuyIndicator) Finish() {
 
 // ---------------------------------------
 
+type LessThanPreviousAverageIndicator struct {
+	config *Config
+	buffer *Buffer
+	db     *Database
+}
+
+func NewLessThanPreviousAverageIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) LessThanPreviousAverageIndicator {
+	return LessThanPreviousAverageIndicator{
+		config: config,
+		buffer: buffer,
+		db:     db,
+	}
+}
+
+func (indicator *LessThanPreviousAverageIndicator) HasSignal() bool {
+	unsoldBuys := indicator.db.FetchUnsoldBuys()
+	if 0 == len(unsoldBuys) {
+		return true
+	}
+
+	avgFuturesPrice := CalcFuturesAvgPrice(unsoldBuys)
+	percentage := CalcGrowth(avgFuturesPrice, indicator.buffer.GetLastCandleClosePrice())
+
+	return indicator.config.LessThanPreviousBuyPercentage >= percentage
+}
+
+func (indicator *LessThanPreviousAverageIndicator) IsStarted() bool {
+	return true
+}
+
+func (indicator *LessThanPreviousAverageIndicator) Start() {
+}
+
+func (indicator *LessThanPreviousAverageIndicator) Update() {
+}
+
+func (indicator *LessThanPreviousAverageIndicator) Finish() {
+}
+
+// ---------------------------------------
+
 type MoreThanPreviousBuyIndicator struct {
 	config *Config
 	buffer *Buffer
@@ -524,6 +569,49 @@ func (indicator *MoreThanPreviousBuyIndicator) Finish() {
 }
 
 // ---------------------------------------
+
+type MoreThanPreviousAverageIndicator struct {
+	config *Config
+	buffer *Buffer
+	db     *Database
+}
+
+func NewMoreThanPreviousAverageIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) MoreThanPreviousAverageIndicator {
+	return MoreThanPreviousAverageIndicator{
+		config: config,
+		buffer: buffer,
+		db:     db,
+	}
+}
+
+func (indicator *MoreThanPreviousAverageIndicator) HasSignal() bool {
+	unsoldBuys := indicator.db.FetchUnsoldBuys()
+	if 0 == len(unsoldBuys) {
+		return true
+	}
+
+	avgFuturesPrice := CalcFuturesAvgPrice(unsoldBuys)
+	percentage := CalcGrowth(avgFuturesPrice, indicator.buffer.GetLastCandleClosePrice())
+
+	return indicator.config.MoreThanPreviousBuyPercentage <= percentage
+}
+
+func (indicator *MoreThanPreviousAverageIndicator) IsStarted() bool {
+	return true
+}
+
+func (indicator *MoreThanPreviousAverageIndicator) Start() {
+}
+
+func (indicator *MoreThanPreviousAverageIndicator) Update() {
+}
+
+func (indicator *MoreThanPreviousAverageIndicator) Finish() {
+}
 
 // ---------------------------------------
 

@@ -687,37 +687,7 @@ func resolveBufferSize(config *Config) int {
 }
 
 func setupBuyIndicators(bot *Bot) {
-	//backTrailingBuyIndicator := NewBackTrailingBuyIndicator(
-	//	bot.Config,
-	//	bot.buffer,
-	//	bot.db,
-	//)
-
-	//buysCountIndicator := NewBuysCountIndicator(
-	//	bot.Config,
-	//	bot.buffer,
-	//	bot.db,
-	//)
-
-	//waitForPeriodIndicator := NewWaitForPeriodIndicator(
-	//	bot.Config,
-	//	bot.buffer,
-	//	bot.db,
-	//)
-
 	//bigFallIndicator := NewBigFallIndicator(
-	//	bot.Config,
-	//	bot.buffer,
-	//	bot.db,
-	//)
-
-	lessThanPreviousBuyIndicator := NewLessThanPreviousBuyIndicator(
-		bot.Config,
-		bot.buffer,
-		bot.db,
-	)
-
-	//stopAfterUnsuccessfullySellIndicator := NewStopAfterUnsuccessfullySellIndicator(
 	//	bot.Config,
 	//	bot.buffer,
 	//	bot.db,
@@ -736,7 +706,13 @@ func setupBuyIndicators(bot *Bot) {
 	//)
 
 	if ENABLE_SHORT {
-		moreThanPreviousBuyIndicator := NewMoreThanPreviousBuyIndicator(
+		//moreThanPreviousBuyIndicator := NewMoreThanPreviousBuyIndicator(
+		//	bot.Config,
+		//	bot.buffer,
+		//	bot.db,
+		//)
+
+		moreThanPreviousAverageIndicator := NewMoreThanPreviousAverageIndicator(
 			bot.Config,
 			bot.buffer,
 			bot.db,
@@ -744,7 +720,8 @@ func setupBuyIndicators(bot *Bot) {
 
 		bot.BuyIndicators = []BuyIndicator{
 			//&linearRegressionIndicator,
-			&moreThanPreviousBuyIndicator,
+			//&moreThanPreviousBuyIndicator,
+			&moreThanPreviousAverageIndicator,
 			&gradientDescentIndicator,
 			//&gradientSwingIndicator,
 		}
@@ -757,14 +734,23 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
+	//lessThanPreviousBuyIndicator := NewLessThanPreviousBuyIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
+
+	lessThanPreviousAverageIndicator := NewLessThanPreviousAverageIndicator(
+		bot.Config,
+		bot.buffer,
+		bot.db,
+	)
+
 	bot.BuyIndicators = []BuyIndicator{
-		//&backTrailingBuyIndicator,
-		//&buysCountIndicator,
-		//&waitForPeriodIndicator,
 		//&bigFallIndicator,
 		//&linearRegressionIndicator,
-		&lessThanPreviousBuyIndicator,
-		//&stopAfterUnsuccessfullySellIndicator,
+		//&lessThanPreviousBuyIndicator,
+		&lessThanPreviousAverageIndicator,
 		&gradientDescentIndicator,
 		//&gradientSwingIndicator,
 	}
