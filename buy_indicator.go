@@ -250,7 +250,8 @@ func (indicator *BigFallIndicator) HasSignal() bool {
 		GetClosePrices(indicator.buffer.GetCandles()),
 		indicator.config.BigFallCandlesCount,
 	)
-	smoothedPrices := FilterZeroPrices(talib.Sma(closePrices, indicator.getPeriod()))
+	//smoothedPrices := FilterZeroPrices(talib.Sma(closePrices, indicator.getPeriod()))
+	smoothedPrices := closePrices
 	smoothedLen := len(smoothedPrices)
 
 	if IS_REAL_ENABLED {
@@ -260,9 +261,9 @@ func (indicator *BigFallIndicator) HasSignal() bool {
 		))
 	}
 
-	if 4 > smoothedLen {
-		return false
-	}
+	//if 4 > smoothedLen {
+	//	return false
+	//}
 
 	firstPrice := smoothedPrices[0]
 	lastPrice := smoothedPrices[smoothedLen-1]
