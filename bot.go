@@ -341,11 +341,9 @@ func (bot *Bot) getIncreasingTotalMoneyAmount(buyType BuyType) float64 {
 	//	return lastBuy.UsedMoney
 	//}
 
-	Log(fmt.Sprintf("LastBuy.usedMoney: %f, time: %s, count: %d", lastBuy.UsedMoney, lastBuy.CreatedAt, count))
-
 	percentage := math.Abs(CalcGrowth(lastBuy.ExchangeRate, bot.buffer.GetLastCandleClosePrice()))
 
-	return CalcUpperPrice(lastBuy.UsedMoney, percentage*100)
+	return CalcUpperPrice(lastBuy.UsedMoney, percentage*100*1.7)
 }
 
 func (bot *Bot) HasEnoughMoneyForBuy(usedMoney, coinsCount float64) bool {
