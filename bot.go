@@ -345,7 +345,7 @@ func (bot *Bot) getIncreasingTotalMoneyAmount(buyType BuyType) float64 {
 	//	return lastBuy.UsedMoney
 	//}
 
-	Log(fmt.Sprintf("LastBuy.usedMoney: %f, time: %s", lastBuy.UsedMoney, lastBuy.CreatedAt))
+	Log(fmt.Sprintf("LastBuy.usedMoney: %f, time: %s, count: %d", lastBuy.UsedMoney, lastBuy.CreatedAt, count))
 
 	percentage := math.Abs(CalcGrowth(lastBuy.ExchangeRate, bot.buffer.GetLastCandleClosePrice()))
 
