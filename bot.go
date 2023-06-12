@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/adshao/go-binance/v2"
 	"github.com/adshao/go-binance/v2/futures"
@@ -97,6 +98,9 @@ func (bot *Bot) runBuyIndicators() {
 func (bot *Bot) checkForMoneyAndBuy(candle Candle, buyType BuyType) {
 	usedMoney := bot.getIncreasingTotalMoneyAmount(buyType)
 	coinsCount := (usedMoney * float64(bot.Config.Leverage)) / candle.GetPrice()
+
+	b, _ := json.Marshal(bot.Config)
+	Log(string(b))
 
 	if !bot.HasEnoughMoneyForBuy(usedMoney, coinsCount) {
 		return
