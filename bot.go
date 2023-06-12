@@ -365,16 +365,18 @@ func (bot *Bot) HasEnoughMoneyForBuy(usedMoney, coinsCount float64) bool {
 	//	usedMoney, coinsCount))
 
 	// Only real
+	balance := bot.futuresOrderManager.getBalance()
 	isBalanceEnough = bot.futuresOrderManager.HasEnoughMoneyForBuy(usedMoney)
 	if !isBalanceEnough {
-		balance := bot.futuresOrderManager.getBalance()
 		Log(fmt.Sprintf("Not enough money in balance %f", balance))
 
 		return false
 	}
 
+	Log(fmt.Sprintf("balance: %f", balance))
+
 	maintenanceMargin := bot.calcLongMaintenance(usedMoney, coinsCount)
-	balance := bot.futuresOrderManager.getBalance()
+	//balance := bot.futuresOrderManager.getBalance()
 	requiredMoney := usedMoney + maintenanceMargin
 
 	Log(fmt.Sprintf(
