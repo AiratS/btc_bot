@@ -302,7 +302,7 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder, 
 func (bot *Bot) calcLongMaintenance(usedMoney, coinsCount float64) float64 {
 	unsoldBuys := bot.db.FetchUnsoldBuys()
 
-	marginRate := 0.5
+	marginRate := 0.4
 	totalCoins := CalcTotalCoinsCountForMaintenanceMargin(unsoldBuys, coinsCount)
 	avgPrice := CalcAvgPriceForMaintenanceMargin(unsoldBuys, usedMoney, coinsCount)
 
