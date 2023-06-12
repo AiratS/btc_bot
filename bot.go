@@ -347,6 +347,9 @@ func (bot *Bot) getIncreasingTotalMoneyAmount(buyType BuyType) float64 {
 }
 
 func (bot *Bot) HasEnoughMoneyForBuy(usedMoney, coinsCount float64) bool {
+
+	Log(fmt.Sprintf("usedMoney: %f, coinsCouns: %f", usedMoney, coinsCount))
+
 	isBalanceEnough := bot.balance.HasEnoughMoneyForBuy(usedMoney)
 	if !USE_REAL_MONEY {
 		return isBalanceEnough
