@@ -217,6 +217,30 @@ func (manager *FuturesOrderManager) IsBuySold(symbol string, orderId int64) bool
 	panic(errorMessage)
 }
 
+func (manager *FuturesOrderManager) GetOrderInfo(orderId int64) *futures.Order {
+	var errorMessage string
+
+	for i := 0; i < RETRIES_COUNT; i++ {
+		res, err := manager.futuresClient.NewGetOrderService().
+			OrderID(orderId).
+			Symbol(CANDLE_SYMBOL).
+			Do(context.Background())
+
+		if err != nil {
+			errorMessage = err.Error()
+			Log(errorMessage)
+			time.Sleep(RETRY_DELAY * time.Millisecond)
+			continue
+		}
+
+		fmt.Println(res.Status)
+
+		return res
+	}
+
+	panic(errorMessage)
+}
+
 func (manager *FuturesOrderManager) CreateBuyOrder(symbol string, price, usedMoney float64) (int64, float64, float64) {
 	if !manager.isEnabled {
 		return 0, 0.0, price
@@ -330,6 +354,20 @@ func (manager *FuturesOrderManager) CreateMarketBuyOrder(symbol string, price, u
 				Log(errorMessage)
 				time.Sleep(RETRY_DELAY * time.Millisecond)
 				continue
+			}
+
+			for j := 0; j < 10; j++ {
+				time.Sleep(RETRY_DELAY * time.Millisecond)
+
+				orderInfo := manager.GetOrderInfo(order.OrderID)
+				realBuyPrice := convertBinanceToFloat64(orderInfo.Price)
+				ExecutedQuantity := convertBinanceToFloat64(orderInfo.ExecutedQuantity)
+
+				Log(fmt.Sprintf("realBuyPrice: %f, ExecutedQuantity: %f", realBuyPrice, ExecutedQuantity))
+
+				if realBuyPrice != 0 {
+					break
+				}
 			}
 
 			realBuyPrice := manager.getRealBuyPrice(priceConverted, order)
