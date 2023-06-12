@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/adshao/go-binance/v2"
 	"github.com/adshao/go-binance/v2/futures"
@@ -98,9 +97,6 @@ func (bot *Bot) runBuyIndicators() {
 func (bot *Bot) checkForMoneyAndBuy(candle Candle, buyType BuyType) {
 	usedMoney := bot.getIncreasingTotalMoneyAmount(buyType)
 	coinsCount := (usedMoney * float64(bot.Config.Leverage)) / candle.GetPrice()
-
-	b, _ := json.Marshal(bot.Config)
-	Log(string(b))
 
 	if !bot.HasEnoughMoneyForBuy(usedMoney, coinsCount) {
 		return
@@ -353,9 +349,6 @@ func (bot *Bot) getIncreasingTotalMoneyAmount(buyType BuyType) float64 {
 }
 
 func (bot *Bot) HasEnoughMoneyForBuy(usedMoney, coinsCount float64) bool {
-
-	Log(fmt.Sprintf("usedMoney: %f, coinsCouns: %f", usedMoney, coinsCount))
-
 	isBalanceEnough := bot.balance.HasEnoughMoneyForBuy(usedMoney)
 	if !USE_REAL_MONEY {
 		return isBalanceEnough
@@ -698,11 +691,11 @@ func resolveBufferSize(config *Config) int {
 }
 
 func setupBuyIndicators(bot *Bot) {
-	bigFallIndicator := NewBigFallIndicator(
-		bot.Config,
-		bot.buffer,
-		bot.db,
-	)
+	//bigFallIndicator := NewBigFallIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
 
 	gradientDescentIndicator := NewGradientDescentIndicator(
 		bot.Config,
@@ -758,11 +751,11 @@ func setupBuyIndicators(bot *Bot) {
 	)
 
 	bot.BuyIndicators = []BuyIndicator{
-		&bigFallIndicator,
+		//&bigFallIndicator,
 		//&linearRegressionIndicator,
 		//&lessThanPreviousBuyIndicator,
 		&lessThanPreviousAverageIndicator,
-		//&gradientDescentIndicator,
+		&gradientDescentIndicator,
 		//&gradientSwingIndicator,
 	}
 
