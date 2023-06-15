@@ -272,8 +272,7 @@ func (manager *FuturesOrderManager) CreateBuyOrder(symbol string, price, usedMon
 				continue
 			}
 
-			realBuyPrice := manager.getRealBuyPrice(priceConverted, order)
-			realQuantity := manager.getRealBuyQuantity(quantityLotSize, order)
+			realBuyPrice, realQuantity := manager.getRealBuyPriceAndQuantity(priceConverted, quantityLotSize, order)
 
 			return order.OrderID, realQuantity, realBuyPrice
 		}
@@ -356,22 +355,7 @@ func (manager *FuturesOrderManager) CreateMarketBuyOrder(symbol string, price, u
 				continue
 			}
 
-			for j := 0; j < 10; j++ {
-				time.Sleep(RETRY_DELAY * time.Millisecond)
-
-				orderInfo := manager.GetOrderInfo(order.OrderID)
-				realBuyPrice := convertBinanceToFloat64(orderInfo.Price)
-				ExecutedQuantity := convertBinanceToFloat64(orderInfo.ExecutedQuantity)
-
-				Log(fmt.Sprintf("realBuyPrice: %f, ExecutedQuantity: %f", realBuyPrice, ExecutedQuantity))
-
-				if realBuyPrice != 0 {
-					break
-				}
-			}
-
-			realBuyPrice := manager.getRealBuyPrice(priceConverted, order)
-			realQuantity := manager.getRealBuyQuantity(quantityLotSize, order)
+			realBuyPrice, realQuantity := manager.getRealBuyPriceAndQuantity(priceConverted, quantityLotSize, order)
 
 			return order.OrderID, realQuantity, realBuyPrice
 		}
@@ -411,8 +395,7 @@ func (manager *FuturesOrderManager) CreateShortMarketBuyOrder(symbol string, pri
 				continue
 			}
 
-			realBuyPrice := manager.getRealBuyPrice(priceConverted, order)
-			realQuantity := manager.getRealBuyQuantity(quantityLotSize, order)
+			realBuyPrice, realQuantity := manager.getRealBuyPriceAndQuantity(priceConverted, quantityLotSize, order)
 
 			return order.OrderID, realQuantity, realBuyPrice
 		}
@@ -575,16 +558,29 @@ func (manager *FuturesOrderManager) getOrderMoney(usedMoney float64) float64 {
 	return usedMoney * LEVERAGE
 }
 
-func (manager *FuturesOrderManager) getRealBuyPrice(rawPrice float64, order *futures.CreateOrderResponse) float64 {
-	//if len(order.Fills) > 0 {
-	//	return convertBinanceToFloat64(order.Fills[len(order.Fills)-1].Price)
-	//}
+func (manager *FuturesOrderManager) getRealBuyPriceAndQuantity(rawPrice, rawQuantity float64, order *futures.CreateOrderResponse) (float64, float64) {
+	realBuyPrice := rawPrice
+	realQuantity := rawQuantity
 
-	return rawPrice
+	for j := 0; j < 10; j++ {
+		time.Sleep(RETRY_DELAY * time.Millisecond)
+
+		orderInfo := manager.GetOrderInfo(order.OrderID)
+		realBuyPrice = convertBinanceToFloat64(orderInfo.AvgPrice)
+		realQuantity = convertBinanceToFloat64(orderInfo.ExecutedQuantity)
+
+		Log(fmt.Sprintf("realBuyPrice: %f, ExecutedQuantity: %f", realBuyPrice, realQuantity))
+
+		if realBuyPrice != 0 && realQuantity != 0 {
+			break
+		}
+	}
+
+	return realBuyPrice, realQuantity
 }
 
 func (manager *FuturesOrderManager) getRealBuyQuantity(rawQuantity float64, order *futures.CreateOrderResponse) float64 {
-	return rawQuantity
+	return convertBinanceToFloat64(order.ExecutedQuantity)
 	//if 0 == len(order.Fills) {
 	//	return rawQuantity
 	//}
