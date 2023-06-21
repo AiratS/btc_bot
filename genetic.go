@@ -59,6 +59,14 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 
 		dataframe.NewSeriesInt64("StopAfterUnsuccessfullySellMinutes", nil),
 
+		// ------------------------
+		dataframe.NewSeriesInt64("WindowWindowsCount", nil),
+		dataframe.NewSeriesFloat64("WindowBasePercentage", nil),
+		dataframe.NewSeriesFloat64("WindowOffsetPercentage", nil),
+		dataframe.NewSeriesInt64("WindowBasePeriodMinutes", nil),
+		dataframe.NewSeriesInt64("WindowOffsetPeriodMinutes", nil),
+		// ------------------------
+
 		dataframe.NewSeriesFloat64("TotalRevenue", nil),
 		dataframe.NewSeriesFloat64("FinalBalance", nil),
 		dataframe.NewSeriesFloat64("FinalRevenue", nil),
@@ -161,21 +169,29 @@ func ImportFromCsv(fileName string) []Config {
 
 			StopAfterUnsuccessfullySellMinutes: convertStringToInt(row[35]),
 
-			TotalRevenue:     convertStringToFloat64(row[36]),
-			FinalBalance:     convertStringToFloat64(row[37]),
-			FinalRevenue:     convertStringToFloat64(row[38]),
-			TotalBuysCount:   convertStringToInt(row[39]),
-			UnsoldBuysCount:  convertStringToInt(row[40]),
-			LiquidationCount: convertStringToInt(row[41]),
-			AvgSellTime:      convertStringToFloat64(row[42]),
+			// ------------------------
+			WindowWindowsCount:        convertStringToInt(row[36]),
+			WindowBasePercentage:      convertStringToFloat64(row[37]),
+			WindowOffsetPercentage:    convertStringToFloat64(row[38]),
+			WindowBasePeriodMinutes:   convertStringToInt(row[39]),
+			WindowOffsetPeriodMinutes: convertStringToInt(row[40]),
+			// ------------------------
 
-			ValidationTotalRevenue:     convertStringToFloat64(row[43]),
-			ValidationTotalBuysCount:   convertStringToInt(row[44]),
-			ValidationUnsoldBuysCount:  convertStringToInt(row[45]),
-			ValidationLiquidationCount: convertStringToInt(row[46]),
-			ValidationAvgSellTime:      convertStringToFloat64(row[47]),
+			TotalRevenue:     convertStringToFloat64(row[41]),
+			FinalBalance:     convertStringToFloat64(row[42]),
+			FinalRevenue:     convertStringToFloat64(row[43]),
+			TotalBuysCount:   convertStringToInt(row[44]),
+			UnsoldBuysCount:  convertStringToInt(row[45]),
+			LiquidationCount: convertStringToInt(row[46]),
+			AvgSellTime:      convertStringToFloat64(row[47]),
 
-			Selection: convertStringToFloat64(row[48]),
+			ValidationTotalRevenue:     convertStringToFloat64(row[48]),
+			ValidationTotalBuysCount:   convertStringToInt(row[49]),
+			ValidationUnsoldBuysCount:  convertStringToInt(row[50]),
+			ValidationLiquidationCount: convertStringToInt(row[51]),
+			ValidationAvgSellTime:      convertStringToFloat64(row[52]),
+
+			Selection: convertStringToFloat64(row[53]),
 		}
 
 		bots = append(bots, bot)
@@ -236,6 +252,14 @@ func InitBotConfig() Config {
 		BoostBuyMoneyIncreasePercentage: GetRandFloat64Config(restrict.BoostBuyMoneyIncreasePercentage),
 
 		StopAfterUnsuccessfullySellMinutes: GetRandIntConfig(restrict.StopAfterUnsuccessfullySellMinutes),
+
+		// ----------------------------
+		WindowWindowsCount:        GetRandIntConfig(restrict.WindowWindowsCount),
+		WindowBasePercentage:      GetRandFloat64Config(restrict.WindowBasePercentage),
+		WindowOffsetPercentage:    GetRandFloat64Config(restrict.WindowOffsetPercentage),
+		WindowBasePeriodMinutes:   GetRandIntConfig(restrict.WindowBasePeriodMinutes),
+		WindowOffsetPeriodMinutes: GetRandIntConfig(restrict.WindowOffsetPeriodMinutes),
+		// ----------------------------
 	}
 }
 
@@ -289,6 +313,14 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 		"BoostBuyMoneyIncreasePercentage": botConfig.BoostBuyMoneyIncreasePercentage,
 
 		"StopAfterUnsuccessfullySellMinutes": botConfig.StopAfterUnsuccessfullySellMinutes,
+
+		// --------------------------
+		"WindowWindowsCount":        botConfig.WindowWindowsCount,
+		"WindowBasePercentage":      botConfig.WindowBasePercentage,
+		"WindowOffsetPercentage":    botConfig.WindowOffsetPercentage,
+		"WindowBasePeriodMinutes":   botConfig.WindowBasePeriodMinutes,
+		"WindowOffsetPeriodMinutes": botConfig.WindowOffsetPeriodMinutes,
+		// --------------------------
 
 		"TotalRevenue":     botConfig.TotalRevenue,
 		"FinalBalance":     botConfig.FinalBalance,
@@ -468,6 +500,14 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 
 		"StopAfterUnsuccessfullySellMinutes": bot["StopAfterUnsuccessfullySellMinutes"],
 
+		// -------------------------------
+		"WindowWindowsCount":        bot["WindowWindowsCount"],
+		"WindowBasePercentage":      bot["WindowBasePercentage"],
+		"WindowOffsetPercentage":    bot["WindowOffsetPercentage"],
+		"WindowBasePeriodMinutes":   bot["WindowBasePeriodMinutes"],
+		"WindowOffsetPeriodMinutes": bot["WindowOffsetPeriodMinutes"],
+		// -------------------------------
+
 		"TotalRevenue":     bot["TotalRevenue"],
 		"FinalBalance":     bot["FinalBalance"],
 		"FinalRevenue":     bot["FinalRevenue"],
@@ -593,6 +633,14 @@ func ConvertDataFrameToBotConfig(dataFrame map[interface{}]interface{}) Config {
 		BoostBuyMoneyIncreasePercentage: convertToFloat64(dataFrame["BoostBuyMoneyIncreasePercentage"]),
 
 		StopAfterUnsuccessfullySellMinutes: convertToInt(dataFrame["StopAfterUnsuccessfullySellMinutes"]),
+
+		// -----------------------------
+		WindowWindowsCount:        convertToInt(dataFrame["WindowWindowsCount"]),
+		WindowBasePercentage:      convertToFloat64(dataFrame["WindowBasePercentage"]),
+		WindowOffsetPercentage:    convertToFloat64(dataFrame["WindowOffsetPercentage"]),
+		WindowBasePeriodMinutes:   convertToInt(dataFrame["WindowBasePeriodMinutes"]),
+		WindowOffsetPeriodMinutes: convertToInt(dataFrame["WindowOffsetPeriodMinutes"]),
+		// -----------------------------
 	}
 }
 
@@ -649,10 +697,18 @@ func makeChild(
 		BoostBuyMoneyIncreasePercentage: GetFloatFatherOrMomGen(maleBotConfig.BoostBuyMoneyIncreasePercentage, femaleBotConfig.BoostBuyMoneyIncreasePercentage),
 
 		StopAfterUnsuccessfullySellMinutes: GetIntFatherOrMomGen(maleBotConfig.StopAfterUnsuccessfullySellMinutes, femaleBotConfig.StopAfterUnsuccessfullySellMinutes),
+
+		// -------------------------------
+		WindowWindowsCount:        GetIntFatherOrMomGen(maleBotConfig.WindowWindowsCount, femaleBotConfig.WindowWindowsCount),
+		WindowBasePercentage:      GetFloatFatherOrMomGen(maleBotConfig.WindowBasePercentage, femaleBotConfig.WindowBasePercentage),
+		WindowOffsetPercentage:    GetFloatFatherOrMomGen(maleBotConfig.WindowOffsetPercentage, femaleBotConfig.WindowOffsetPercentage),
+		WindowBasePeriodMinutes:   GetIntFatherOrMomGen(maleBotConfig.WindowBasePeriodMinutes, femaleBotConfig.WindowBasePeriodMinutes),
+		WindowOffsetPeriodMinutes: GetIntFatherOrMomGen(maleBotConfig.WindowOffsetPeriodMinutes, femaleBotConfig.WindowOffsetPeriodMinutes),
+		// -------------------------------
 	}
 
-	for i := 0; i < 30; i++ {
-		mutateGens(&childBotConfig, GetRandInt(0, 35))
+	for i := 0; i < 35; i++ {
+		mutateGens(&childBotConfig, GetRandInt(0, 40))
 	}
 
 	return GetBotConfigMapInterface(childBotConfig)
@@ -709,6 +765,14 @@ func mutateGens(botConfig *Config, randGenNumber int) {
 	mutateGenFloat64(randGenNumber, 34, &(botConfig.BoostBuyMoneyIncreasePercentage), restrict.BoostBuyMoneyIncreasePercentage)
 
 	mutateGenInt(randGenNumber, 35, &(botConfig.StopAfterUnsuccessfullySellMinutes), restrict.StopAfterUnsuccessfullySellMinutes)
+
+	// --------------------------------------
+	mutateGenInt(randGenNumber, 36, &(botConfig.WindowWindowsCount), restrict.WindowWindowsCount)
+	mutateGenFloat64(randGenNumber, 37, &(botConfig.WindowBasePercentage), restrict.WindowBasePercentage)
+	mutateGenFloat64(randGenNumber, 38, &(botConfig.WindowOffsetPercentage), restrict.WindowOffsetPercentage)
+	mutateGenInt(randGenNumber, 39, &(botConfig.WindowBasePeriodMinutes), restrict.WindowBasePeriodMinutes)
+	mutateGenInt(randGenNumber, 40, &(botConfig.WindowOffsetPeriodMinutes), restrict.WindowOffsetPeriodMinutes)
+	// --------------------------------------
 }
 
 func mutateGenFloat64(randGenNumber, genNumber int, genValue *float64, restrictMinMax MinMaxFloat64) {

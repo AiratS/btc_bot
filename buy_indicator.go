@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/golang-module/carbon/v2"
 	"math"
+	"time"
 
 	"github.com/markcheno/go-talib"
 	"github.com/montanaflynn/stats"
@@ -953,4 +955,136 @@ func (indicator *GradientSwingIndicator) Update() {
 }
 
 func (indicator *GradientSwingIndicator) Finish() {
+}
+
+// ------------------------------------------------------
+
+type WindowLongIndicator struct {
+	config         *Config
+	buffer         *Buffer
+	db             *Database
+	currentWindow  int
+	lastWindowTime time.Time
+}
+
+func NewWindowLongIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) WindowLongIndicator {
+	return WindowLongIndicator{
+		config:        config,
+		buffer:        buffer,
+		db:            db,
+		currentWindow: config.WindowWindowsCount,
+	}
+}
+
+func (indicator *WindowLongIndicator) HasSignal() bool {
+	if indicator.checkForPercentage() {
+		indicator.ResetWindow()
+		return true
+	}
+
+	// If the last window and no signal, wait until percentage reached
+	if 1 == indicator.currentWindow {
+		return false
+	}
+
+	// Check for period
+	_, buy := indicator.db.GetLastUnsoldBuy()
+	if indicator.config.WindowWindowsCount == indicator.currentWindow {
+		indicator.lastWindowTime = carbon.Parse(buy.CreatedAt).ToStdTime()
+	}
+
+	currentCandle := indicator.buffer.GetLastCandle()
+	currentPeriod := indicator.getCurrentWindowPeriod()
+	diffInMinutes := carbon.FromStdTime(indicator.lastWindowTime).
+		DiffInMinutes(carbon.Parse(currentCandle.CloseTime))
+
+	if currentPeriod > diffInMinutes {
+		return false
+	}
+
+	// Decrease window
+	indicator.DecreaseWindow()
+	indicator.lastWindowTime = carbon.Parse(currentCandle.CloseTime).ToStdTime()
+
+	// Check for percentage
+	hasSignal := indicator.checkForPercentage()
+	if hasSignal {
+		indicator.ResetWindow()
+	}
+
+	return hasSignal
+}
+
+func (indicator *WindowLongIndicator) getCurrentWindowPeriod() int64 {
+	return int64(
+		indicator.config.WindowBasePeriodMinutes +
+			indicator.config.WindowOffsetPeriodMinutes*(indicator.currentWindow-1))
+}
+
+func (indicator *WindowLongIndicator) getCurrentWindowPercentage() float64 {
+	return indicator.config.WindowBasePercentage +
+		indicator.config.WindowOffsetPercentage*(float64(indicator.currentWindow)-1)
+}
+
+func (indicator *WindowLongIndicator) checkForPercentage() bool {
+	hasValue, buy := indicator.db.GetLastUnsoldBuy()
+	if !hasValue {
+		return true
+	}
+
+	currentCandle := indicator.buffer.GetLastCandle()
+	// Check for percentage
+	percentage := CalcGrowth(buy.ExchangeRate, currentCandle.GetPrice())
+	if 0 <= percentage {
+		return false
+	}
+
+	currentWindowPercentage := indicator.getCurrentWindowPercentage()
+
+	return currentWindowPercentage <= math.Abs(percentage)
+}
+
+func (indicator *WindowLongIndicator) ResetWindow() {
+	currentCandle := indicator.buffer.GetLastCandle()
+	Log(fmt.Sprintf(
+		"WindowLongIndicator__ResetWindow\nCreatedAt: %s\nCurrentWindow: %d\nCurrentPercentage: %f",
+		currentCandle.CloseTime,
+		indicator.currentWindow,
+		indicator.getCurrentWindowPercentage(),
+	))
+
+	indicator.currentWindow = indicator.config.WindowWindowsCount
+}
+
+func (indicator *WindowLongIndicator) DecreaseWindow() {
+	currentCandle := indicator.buffer.GetLastCandle()
+	Log(fmt.Sprintf(
+		"WindowLongIndicator__DecreaseWindow\nCreatedAt: %s\nCurrentWindow: %d\nCurrentPercentage: %f",
+		currentCandle.CloseTime,
+		indicator.currentWindow,
+		indicator.getCurrentWindowPercentage(),
+	))
+
+	indicator.currentWindow--
+
+	if 1 > indicator.currentWindow {
+		panic("Invalid currentWindow")
+	}
+}
+
+func (indicator *WindowLongIndicator) IsStarted() bool {
+	return true
+}
+
+func (indicator *WindowLongIndicator) Start() {
+}
+
+func (indicator *WindowLongIndicator) Update() {
+}
+
+func (indicator *WindowLongIndicator) Finish() {
 }

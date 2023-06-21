@@ -18,6 +18,7 @@ require (
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.0.2 // indirect
 	github.com/frankban/quicktest v1.5.0 // indirect
+	github.com/golang-module/carbon/v2 v2.2.3 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/google/btree v1.0.0 // indirect
 	github.com/google/go-cmp v0.4.0 // indirect

@@ -49,6 +49,12 @@ type ConfigRestriction struct {
 	BoostBuyMoneyIncreasePercentage MinMaxFloat64
 
 	StopAfterUnsuccessfullySellMinutes MinMaxInt
+
+	WindowWindowsCount        MinMaxInt
+	WindowBasePercentage      MinMaxFloat64
+	WindowOffsetPercentage    MinMaxFloat64
+	WindowBasePeriodMinutes   MinMaxInt
+	WindowOffsetPeriodMinutes MinMaxInt
 }
 
 type MinMaxInt struct {
@@ -224,6 +230,28 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		StopAfterUnsuccessfullySellMinutes: MinMaxInt{
 			min: 60 * 1,       // 1 hour
 			max: 60 * 24 * 14, // 5 days
+		},
+
+		// ------------------------------------------------
+		WindowWindowsCount: MinMaxInt{
+			min: 3,
+			max: 10,
+		},
+		WindowBasePercentage: MinMaxFloat64{
+			min: 0.25,
+			max: 2,
+		},
+		WindowOffsetPercentage: MinMaxFloat64{
+			min: 0.15,
+			max: 0.5,
+		},
+		WindowBasePeriodMinutes: MinMaxInt{
+			min: 20,
+			max: 120,
+		},
+		WindowOffsetPeriodMinutes: MinMaxInt{
+			min: 10,
+			max: 60,
 		},
 	}
 }

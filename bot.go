@@ -742,7 +742,13 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	lessThanPreviousAverageIndicator := NewLessThanPreviousAverageIndicator(
+	//lessThanPreviousAverageIndicator := NewLessThanPreviousAverageIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
+
+	windowLongIndicator := NewWindowLongIndicator(
 		bot.Config,
 		bot.buffer,
 		bot.db,
@@ -752,7 +758,8 @@ func setupBuyIndicators(bot *Bot) {
 		//&bigFallIndicator,
 		//&linearRegressionIndicator,
 		//&lessThanPreviousBuyIndicator,
-		&lessThanPreviousAverageIndicator,
+		//&lessThanPreviousAverageIndicator,
+		&windowLongIndicator,
 		&gradientDescentIndicator,
 		//&gradientSwingIndicator,
 	}

@@ -21,7 +21,7 @@ const ENABLE_DYNAMIC_NEXT_BUY_PERCENTAGE = false
 // Candle
 const CANDLE_SYMBOL = "BTCUSDT"
 const CANDLE_INTERVAL = "30m"
-const BALANCE_MONEY = 3000.0
+const BALANCE_MONEY = 10000.0
 const COMMISSION = 0.06
 const DATASETS_DIRECTORY = "datasets"
 const UNSOLD_BUYS_COUNT = 20
@@ -90,6 +90,12 @@ type Config struct {
 	BoostBuyMoneyIncreasePercentage float64
 
 	StopAfterUnsuccessfullySellMinutes int
+
+	WindowWindowsCount        int
+	WindowBasePercentage      float64
+	WindowOffsetPercentage    float64
+	WindowBasePeriodMinutes   int
+	WindowOffsetPeriodMinutes int
 
 	TotalRevenue     float64
 	FinalBalance     float64
