@@ -272,9 +272,9 @@ func (manager *FuturesOrderManager) CreateBuyOrder(symbol string, price, usedMon
 				continue
 			}
 
-			realBuyPrice, realQuantity := manager.getRealBuyPriceAndQuantity(priceConverted, quantityLotSize, order)
+			//realBuyPrice, realQuantity := manager.getRealBuyPriceAndQuantity(priceConverted, quantityLotSize, order)
 
-			return order.OrderID, realQuantity, realBuyPrice
+			return order.OrderID, quantityLotSize, priceConverted
 		}
 
 		panic(errorMessage)

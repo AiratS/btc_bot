@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/adshao/go-binance/v2/futures"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"sync"
 	"time"
 )
 
@@ -20,19 +22,52 @@ func RunFuturesRealTime() {
 	realBot = NewFuturesRealBot(&config, client)
 	ticker = NewTicker(TickerIntervalMinutes)
 
-	errHandler := func(err error) {
-		fmt.Println(err)
-	}
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+	go runWsCombinedKlineServe(client)
+	go runWsUserDataServe(client, &realBot)
+	wg.Wait()
+}
 
+func runWsCombinedKlineServe(client *futures.Client) {
 	for {
 		fmt.Println("Connect to binance...")
 		symbols := map[string]string{CANDLE_SYMBOL: CANDLE_INTERVAL}
-		doneC, _, err := futures.WsCombinedKlineServe(symbols, KlineEventHandlerFutures, errHandler)
+		doneC, _, err := futures.WsCombinedKlineServe(symbols, KlineEventHandlerFutures, func(err error) {
+			fmt.Println(err)
+		})
 		if err != nil {
 			fmt.Println(err)
-			continue
 		}
 		<-doneC
+
+		fmt.Println("Disconnected, Reconnect in 3 seconds")
+		time.Sleep(time.Second * 3)
+	}
+}
+
+func runWsUserDataServe(client *futures.Client, bot *Bot) {
+	listenKey, err := client.NewStartUserStreamService().Do(context.Background())
+	if err != nil {
+		panic(err)
+		return
+	}
+
+	for {
+		doneA, _, _ := futures.WsUserDataServe(listenKey, func(event *futures.WsUserDataEvent) {
+			orderData := event.OrderTradeUpdate
+
+			if event.Event == futures.UserDataEventTypeOrderTradeUpdate &&
+				orderData.Side == futures.SideTypeBuy &&
+				orderData.Status == futures.OrderStatusTypeFilled {
+
+				fmt.Println("OrderTradeUpdate", event.OrderTradeUpdate)
+				bot.OnLimitBuyFilled(orderData.ID)
+			}
+		}, func(err error) {
+			fmt.Println(err)
+		})
+		<-doneA
 
 		fmt.Println("Disconnected, Reconnect in 3 seconds")
 		time.Sleep(time.Second * 3)

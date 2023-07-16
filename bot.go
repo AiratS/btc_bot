@@ -20,6 +20,8 @@ type Bot struct {
 	balance                        *Balance
 	IsTrailingSellIndicatorEnabled bool
 	trailingSellIndicator          *TrailingSellIndicator
+
+	windowBuyer *WindowBuyer
 }
 
 func NewBot(config *Config) Bot {
@@ -34,6 +36,7 @@ func NewBot(config *Config) Bot {
 		balance:                        &balance,
 		IsTrailingSellIndicatorEnabled: false,
 	}
+	bot.windowBuyer = NewWindowBuyer(bot.Config, bot.buffer, bot.db, bot.futuresOrderManager)
 
 	setupBuyIndicators(&bot)
 	setupSellIndicators(&bot)
@@ -71,8 +74,26 @@ func (bot *Bot) runBuyIndicators() {
 	candle := bot.buffer.GetLastCandle()
 
 	// Run BoostBuyIndicator
-	if ENABLE_BOOST_BUY_INDICATOR && bot.BoostBuyIndicator.HasSignal() {
-		bot.checkForMoneyAndBuy(candle, BuyTypeBoost)
+	//if ENABLE_BOOST_BUY_INDICATOR && bot.BoostBuyIndicator.HasSignal() {
+	//	bot.checkForMoneyAndBuy(candle, BuyTypeBoost)
+	//	return
+	//}
+
+	if bot.windowBuyer.IsStarted {
+		if !USE_REAL_MONEY {
+			if bot.windowBuyer.CheckForPercentage() {
+				hasValue, buyOrder := bot.db.GetLastNewBuyOrder()
+				if !hasValue {
+					panic("no new last buy order")
+				}
+
+				bot.OnLimitBuyFilled(buyOrder.RealOrderId)
+				return
+			}
+		}
+
+		usedMoney := bot.getIncreasingTotalMoneyAmount(Default)
+		bot.windowBuyer.MoveWindows(usedMoney)
 		return
 	}
 
@@ -90,8 +111,37 @@ func (bot *Bot) runBuyIndicators() {
 		for _, indicator := range bot.BuyIndicators {
 			indicator.Finish()
 		}
-		bot.checkForMoneyAndBuy(candle, Default)
+		//bot.checkForMoneyAndBuy(candle, Default)
+
+		bot.startLimitBuy(candle, Default)
 	}
+}
+
+func (bot *Bot) OnLimitBuyFilled(realOrderId int64) {
+	hasValue, buyOrder := bot.db.FindLastNewBuyOrderByOrderId(realOrderId)
+	if !hasValue {
+		panic("No limit buy order")
+	}
+
+	candle := bot.buffer.GetLastCandle()
+	bot.windowBuyer.Finish()
+	bot.buyForLimit(
+		buyOrder.ExchangeRate,
+		candle.CloseTime,
+		&buyOrder,
+		Default,
+	)
+}
+
+func (bot *Bot) startLimitBuy(candle Candle, buyType BuyType) {
+	usedMoney := bot.getIncreasingTotalMoneyAmount(buyType)
+	coinsCount := (usedMoney * float64(bot.Config.Leverage)) / candle.GetPrice()
+	if !bot.HasEnoughMoneyForBuy(usedMoney, coinsCount) {
+		return
+	}
+
+	// Start
+	bot.windowBuyer.Start(usedMoney)
 }
 
 func (bot *Bot) checkForMoneyAndBuy(candle Candle, buyType BuyType) {
@@ -241,6 +291,51 @@ func (bot *Bot) finishSellIndicators(buy Buy) {
 	for _, indicator := range bot.SellIndicators {
 		indicator.Finish(buy.Id)
 	}
+}
+
+func (bot *Bot) buyForLimit(exchangeRate float64, closeTime string, buyOrder *BuyOrder, buyType BuyType) {
+	Log(fmt.Sprintf("GOT_BUY_SIGNAL\nExchangeRate: %f", exchangeRate))
+
+	// Check for balance
+	usedMoney := bot.getIncreasingTotalMoneyAmount(buyType)
+	coinsCount := (usedMoney * float64(bot.Config.Leverage)) / exchangeRate
+	desiredPrice := bot.calcDesiredPrice(exchangeRate)
+
+	// Create Binance Buy order
+	var orderId int64
+
+	// Save buy to database
+	buyId, err := bot.db.AddRealBuy(
+		CANDLE_SYMBOL,
+		usedMoney,
+		coinsCount,
+		exchangeRate,
+		desiredPrice,
+		closeTime,
+		orderId,
+		coinsCount,
+		buyType,
+	).LastInsertId()
+
+	if err != nil {
+		panic(err)
+	}
+
+	bot.balance.buy(usedMoney)
+	Log(fmt.Sprintf(
+		"%sBUY\nCreatedAt: %s\nBuyId: %d\nExchangeRate: %f\nUsedMoney: %f\nCoinsCount: %f\nBalance: %f\nOrderId: %d",
+		bot.getBuyMessagePrefix(buyType),
+		closeTime,
+		buyId,
+		exchangeRate,
+		usedMoney,
+		coinsCount,
+		bot.balance.inBalanceMoney,
+		orderId,
+	))
+
+	// After buy stuff
+	bot.runAfterBuy(buyId)
 }
 
 func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder, buyType BuyType) {
@@ -755,18 +850,18 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	windowLongIndicator := NewWindowLongIndicator(
-		bot.Config,
-		bot.buffer,
-		bot.db,
-	)
+	//windowLongIndicator := NewWindowLongIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
 
 	bot.BuyIndicators = []BuyIndicator{
 		//&bigFallIndicator,
 		//&linearRegressionIndicator,
 		//&lessThanPreviousBuyIndicator,
 		//&lessThanPreviousAverageIndicator,
-		&windowLongIndicator,
+		//&windowLongIndicator,
 		&gradientDescentIndicator,
 		//&gradientSwingIndicator,
 	}

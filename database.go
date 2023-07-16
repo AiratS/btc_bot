@@ -316,6 +316,32 @@ func (db *Database) GetLastNewBuyOrder() (bool, BuyOrder) {
 	return buyOrder.CreatedAt != "", buyOrder
 }
 
+func (db *Database) FindLastNewBuyOrderByOrderId(realOrderId int64) (bool, BuyOrder) {
+	query := `
+		SELECT *
+		FROM buy_orders
+		WHERE symbol = $1 AND status = $2 AND real_order_id = $3
+		ORDER BY id DESC
+		LIMIT 1
+	`
+
+	row := (*db).connect.QueryRow(query, CANDLE_SYMBOL, BuyOrderStatusNew, realOrderId)
+	buyOrder := BuyOrder{}
+	row.Scan(
+		&buyOrder.Id,
+		&buyOrder.Symbol,
+		&buyOrder.UsedMoney,
+		&buyOrder.Coins,
+		&buyOrder.ExchangeRate,
+		&buyOrder.BuyPrice,
+		&buyOrder.RealOrderId,
+		&buyOrder.CreatedAt,
+		&buyOrder.Status,
+	)
+
+	return buyOrder.CreatedAt != "", buyOrder
+}
+
 func (db *Database) AddBuy(
 	symbol string,
 	usedMoney,
