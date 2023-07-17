@@ -106,7 +106,7 @@ func (buyer *WindowBuyer) CheckForPercentage() bool {
 
 	currentCandle := buyer.buffer.GetLastCandle()
 	// Check for percentage
-	percentage := CalcGrowth(buyOrder.ExchangeRate, currentCandle.GetPrice())
+	percentage := CalcGrowth(buyOrder.ExchangeRate, currentCandle.LowPrice)
 	if 0 <= percentage {
 		return false
 	}
