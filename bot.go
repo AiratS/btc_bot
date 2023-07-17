@@ -56,6 +56,7 @@ func NewFuturesRealBot(config *Config, futuresClient *futures.Client) Bot {
 	futuresOrderManager := NewFuturesOrderManager(futuresClient)
 	bot := NewBot(config)
 	bot.futuresOrderManager = &futuresOrderManager
+	bot.windowBuyer = NewWindowBuyer(bot.Config, bot.buffer, bot.db, bot.futuresOrderManager)
 
 	return bot
 }
