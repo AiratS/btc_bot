@@ -112,8 +112,7 @@ func (bot *Bot) runBuyIndicators() {
 		for _, indicator := range bot.BuyIndicators {
 			indicator.Finish()
 		}
-		//bot.checkForMoneyAndBuy(candle, Default)
-
+		bot.checkForMoneyAndBuy(candle, Default)
 		bot.startLimitBuy(candle, Default)
 	}
 }
