@@ -20,6 +20,8 @@ type Bot struct {
 	balance                        *Balance
 	IsTrailingSellIndicatorEnabled bool
 	trailingSellIndicator          *TrailingSellIndicator
+
+	windowLongIndicator WindowLongIndicator
 }
 
 func NewBot(config *Config) Bot {
@@ -341,9 +343,10 @@ func (bot *Bot) getIncreasingTotalMoneyAmount(buyType BuyType) float64 {
 	//	return lastBuy.UsedMoney
 	//}
 
-	percentage := math.Abs(CalcGrowth(lastBuy.ExchangeRate, bot.buffer.GetLastCandleClosePrice()))
+	//percentage := math.Abs(CalcGrowth(lastBuy.ExchangeRate, bot.buffer.GetLastCandleClosePrice()))
+	percentage := math.Abs(CalcGrowth(lastBuy.ExchangeRate, bot.windowLongIndicator.getCurrentBuyPercentage()))
 
-	return CalcUpperPrice(lastBuy.UsedMoney, percentage*100*1.7)
+	return CalcUpperPrice(lastBuy.UsedMoney, percentage*100)
 }
 
 func (bot *Bot) HasEnoughMoneyForBuy(usedMoney, coinsCount float64) bool {
@@ -755,7 +758,7 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	windowLongIndicator := NewWindowLongIndicator(
+	bot.windowLongIndicator = NewWindowLongIndicator(
 		bot.Config,
 		bot.buffer,
 		bot.db,
@@ -766,8 +769,8 @@ func setupBuyIndicators(bot *Bot) {
 		//&linearRegressionIndicator,
 		//&lessThanPreviousBuyIndicator,
 		//&lessThanPreviousAverageIndicator,
-		&windowLongIndicator,
 		&gradientDescentIndicator,
+		&bot.windowLongIndicator,
 		//&gradientSwingIndicator,
 	}
 
