@@ -165,8 +165,14 @@ func (buyer *WindowBuyer) getCurrentWindowPercentage() float64 {
 }
 
 func (buyer *WindowBuyer) getCurrentWindowBuyPercentage() float64 {
-	return buyer.config.WindowBasePercentage +
-		buyer.config.WindowOffsetPercentage*(float64(buyer.currentWindow)-1)
+	maxPercentage := buyer.config.WindowBasePercentage +
+		buyer.config.WindowOffsetPercentage*(float64(buyer.config.WindowWindowsCount)-1)
+
+	currentMinus := buyer.config.WindowOffsetPercentage * (float64(buyer.currentWindow) - 1)
+
+	Log(fmt.Sprintf("CURRENT_BUY_PERCENTAGE: max: %f, current: %f", maxPercentage, currentMinus))
+
+	return maxPercentage - currentMinus
 }
 
 func (buyer *WindowBuyer) getCurrentWindowPeriod() int64 {
