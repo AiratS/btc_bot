@@ -134,7 +134,8 @@ func (bot *Bot) OnLimitBuyFilled(realOrderId int64) {
 }
 
 func (bot *Bot) startLimitBuy(candle Candle, buyType BuyType) {
-	usedMoney := bot.getIncreasingTotalMoneyAmount(buyType)
+	//usedMoney := bot.getIncreasingTotalMoneyAmount(buyType)
+	usedMoney := bot.getLimitBuyTotalMoneyAmount()
 	coinsCount := (usedMoney * float64(bot.Config.Leverage)) / candle.GetPrice()
 	if !bot.HasEnoughMoneyForBuy(usedMoney, coinsCount) {
 		return
@@ -294,10 +295,10 @@ func (bot *Bot) finishSellIndicators(buy Buy) {
 }
 
 func (bot *Bot) buyForLimit(exchangeRate float64, closeTime string, buyOrder *BuyOrder, buyType BuyType) {
-	Log(fmt.Sprintf("GOT_BUY_SIGNAL\nExchangeRate: %f", exchangeRate))
+	Log(fmt.Sprintf("LIMIT_BUY\nExchangeRate: %f", exchangeRate))
 
 	// Check for balance
-	usedMoney := bot.getIncreasingTotalMoneyAmount(buyType)
+	usedMoney := bot.getLimitBuyTotalMoneyAmount()
 	coinsCount := (usedMoney * float64(bot.Config.Leverage)) / exchangeRate
 	desiredPrice := bot.calcDesiredPrice(exchangeRate)
 
@@ -411,6 +412,13 @@ func (bot *Bot) getBuyMessagePrefix(buyType BuyType) string {
 	}
 
 	return prefix
+}
+
+func (bot *Bot) getLimitBuyTotalMoneyAmount() float64 {
+	return CalcUpperPrice(
+		bot.Config.TotalMoneyAmount,
+		bot.windowBuyer.getCurrentWindowBuyPercentage(),
+	)
 }
 
 func (bot *Bot) getIncreasingTotalMoneyAmount(buyType BuyType) float64 {

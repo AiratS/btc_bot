@@ -36,6 +36,7 @@ func NewWindowBuyer(
 }
 
 func (buyer *WindowBuyer) Start(usedMoney float64) {
+	Log("WindowBuyer__START")
 	if buyer.IsStarted {
 		return
 	}
@@ -46,6 +47,8 @@ func (buyer *WindowBuyer) Start(usedMoney float64) {
 }
 
 func (buyer *WindowBuyer) Finish() {
+	Log("WindowBuyer__FINISH")
+
 	buyer.IsStarted = false
 	buyer.currentWindow = buyer.config.WindowWindowsCount
 
@@ -84,6 +87,7 @@ func (buyer *WindowBuyer) MoveWindows(usedMoney float64) {
 	}
 
 	// Decrease window
+	Log("WindowBuyer__MOVE")
 	buyer.decreaseWindow()
 	buyer.lastWindowTime = carbon.Parse(currentCandle.CloseTime, carbon.Greenwich).ToStdTime()
 
@@ -156,6 +160,11 @@ func (buyer *WindowBuyer) decreaseWindow() {
 }
 
 func (buyer *WindowBuyer) getCurrentWindowPercentage() float64 {
+	return buyer.config.WindowBasePercentage +
+		buyer.config.WindowOffsetPercentage*(float64(buyer.currentWindow)-1)
+}
+
+func (buyer *WindowBuyer) getCurrentWindowBuyPercentage() float64 {
 	return buyer.config.WindowBasePercentage +
 		buyer.config.WindowOffsetPercentage*(float64(buyer.currentWindow)-1)
 }
