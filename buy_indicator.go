@@ -1040,7 +1040,7 @@ func (indicator *WindowLongIndicator) getCurrentBuyPercentage() float64 {
 
 	currentMinus := indicator.config.WindowOffsetPercentage * (float64(indicator.currentWindow) - 1)
 
-	Log(fmt.Sprintf("CURRENT_BUY_PERCENTAGE: max: %f, current: %f", maxPercentage, currentMinus))
+	//Log(fmt.Sprintf("CURRENT_BUY_PERCENTAGE: max: %f, current: %f", maxPercentage, currentMinus))
 
 	return maxPercentage - currentMinus
 }
