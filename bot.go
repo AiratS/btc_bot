@@ -138,9 +138,11 @@ func (bot *Bot) startLimitBuy(candle Candle, buyType BuyType) {
 	usedMoney := bot.getLimitBuyTotalMoneyAmount()
 	coinsCount := (usedMoney * float64(bot.Config.Leverage)) / candle.GetPrice()
 	if !bot.HasEnoughMoneyForBuy(usedMoney, coinsCount) {
+		Log(fmt.Sprintf("startLimitBuy: not enough money %f", usedMoney))
 		return
 	}
 
+	Log(fmt.Sprintf("startLimitBuy: bot.windowBuyer.Start %f", usedMoney))
 	// Start
 	bot.windowBuyer.Start(usedMoney)
 }
@@ -417,7 +419,7 @@ func (bot *Bot) getBuyMessagePrefix(buyType BuyType) string {
 func (bot *Bot) getLimitBuyTotalMoneyAmount() float64 {
 	return CalcUpperPrice(
 		bot.Config.TotalMoneyAmount,
-		bot.windowBuyer.getCurrentWindowBuyPercentage(),
+		bot.windowBuyer.getCurrentWindowBuyPercentage()*10,
 	)
 }
 
