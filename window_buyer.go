@@ -57,6 +57,19 @@ func (buyer *WindowBuyer) Finish() {
 	}
 }
 
+func (buyer *WindowBuyer) RejectAllOrders() int {
+	buyOrders := buyer.db.FetchNewBuyOrders(CANDLE_SYMBOL)
+	for _, buyOrder := range buyOrders {
+		if USE_REAL_MONEY {
+			Log(fmt.Sprintf("CANCEL_LIMIT_BUY: orderId: %d", buyOrder.RealOrderId))
+			buyer.futuresOrderManager.CancelOrder(CANDLE_SYMBOL, buyOrder.RealOrderId)
+		}
+		buyer.db.UpdateBuyOrderStatus(buyOrder.Id, BuyOrderStatusRejected)
+	}
+
+	return len(buyOrders)
+}
+
 func (buyer *WindowBuyer) MoveWindows(usedMoney float64) {
 	if !buyer.IsStarted {
 		return

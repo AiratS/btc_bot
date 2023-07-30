@@ -624,6 +624,12 @@ func (bot *Bot) createRealMoneySellOrder(buy Buy) {
 }
 
 func (bot *Bot) sell(buy Buy) float64 {
+	// Cancel all buy orders
+	buyOrdersCount := bot.windowBuyer.RejectAllOrders()
+	if buyOrdersCount > 0 {
+		bot.windowBuyer.Finish()
+	}
+
 	candle := bot.buffer.GetLastCandle()
 	exchangeRate := candle.GetPrice()
 	//rev := bot.calcRevenue(buy.Coins, bot.Config.HighSellPercentage, buy.ExchangeRate)
