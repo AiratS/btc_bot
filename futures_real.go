@@ -63,6 +63,7 @@ func runWsUserDataServe(client *futures.Client, bot *Bot) {
 				orderData.Status == futures.OrderStatusTypeFilled {
 
 				fmt.Println("OrderTradeUpdate", event.OrderTradeUpdate)
+				fmt.Printf("%+v\n", orderData)
 				bot.OnLimitBuyFilled(orderData.ID)
 			}
 		}, func(err error) {
