@@ -59,6 +59,7 @@ func runWsUserDataServe(client *futures.Client, bot *Bot) {
 
 			if event.Event == futures.UserDataEventTypeOrderTradeUpdate &&
 				orderData.Side == futures.SideTypeBuy &&
+				orderData.Type == futures.OrderTypeLimit &&
 				orderData.Status == futures.OrderStatusTypeFilled {
 
 				fmt.Println("OrderTradeUpdate", event.OrderTradeUpdate)
