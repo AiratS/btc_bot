@@ -960,11 +960,12 @@ func (indicator *GradientSwingIndicator) Finish() {
 // ------------------------------------------------------
 
 type WindowLongIndicator struct {
-	config         *Config
-	buffer         *Buffer
-	db             *Database
-	currentWindow  int
-	lastWindowTime time.Time
+	config                   *Config
+	buffer                   *Buffer
+	db                       *Database
+	currentWindow            int
+	currentWindowBeforeReset int
+	lastWindowTime           time.Time
 }
 
 func NewWindowLongIndicator(
@@ -973,10 +974,11 @@ func NewWindowLongIndicator(
 	db *Database,
 ) WindowLongIndicator {
 	return WindowLongIndicator{
-		config:        config,
-		buffer:        buffer,
-		db:            db,
-		currentWindow: config.WindowWindowsCount,
+		config:                   config,
+		buffer:                   buffer,
+		db:                       db,
+		currentWindow:            config.WindowWindowsCount,
+		currentWindowBeforeReset: config.WindowWindowsCount,
 	}
 }
 
@@ -1038,9 +1040,15 @@ func (indicator *WindowLongIndicator) getCurrentBuyPercentage() float64 {
 	maxPercentage := indicator.config.WindowBasePercentage +
 		indicator.config.WindowOffsetPercentage*(float64(indicator.config.WindowWindowsCount)-1)
 
-	currentMinus := indicator.config.WindowOffsetPercentage * (float64(indicator.currentWindow) - 1)
+	currentMinus := indicator.config.WindowOffsetPercentage * (float64(indicator.currentWindowBeforeReset) - 1)
 
-	//Log(fmt.Sprintf("CURRENT_BUY_PERCENTAGE: max: %f, current: %f", maxPercentage, currentMinus))
+	Log(fmt.Sprintf(
+		"CURRENT_BUY_PERCENTAGE: window: %d, max: %f, current: %f, resulting: %f",
+		indicator.currentWindowBeforeReset,
+		maxPercentage,
+		currentMinus,
+		maxPercentage-currentMinus,
+	))
 
 	return maxPercentage - currentMinus
 }
@@ -1065,6 +1073,8 @@ func (indicator *WindowLongIndicator) checkForPercentage() bool {
 
 func (indicator *WindowLongIndicator) ResetWindow() {
 	currentCandle := indicator.buffer.GetLastCandle()
+	indicator.currentWindowBeforeReset = indicator.currentWindow
+
 	Log(fmt.Sprintf(
 		"WindowLongIndicator__ResetWindow\nCreatedAt: %s\nCurrentWindow: %d\nCurrentPercentage: %f",
 		currentCandle.CloseTime,

@@ -19,8 +19,6 @@ type Bot struct {
 	balance                        *Balance
 	IsTrailingSellIndicatorEnabled bool
 	trailingSellIndicator          *TrailingSellIndicator
-
-	windowLongIndicator WindowLongIndicator
 }
 
 func NewBot(config *Config) Bot {
@@ -344,7 +342,7 @@ func (bot *Bot) getIncreasingTotalMoneyAmount(buyType BuyType) float64 {
 
 	return CalcUpperPrice(
 		lastBuy.UsedMoney,
-		bot.windowLongIndicator.getCurrentBuyPercentage()*10,
+		bot.getWindowLongIndicator().getCurrentBuyPercentage()*10,
 	)
 }
 
@@ -709,35 +707,35 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	if ENABLE_SHORT {
-		//moreThanPreviousBuyIndicator := NewMoreThanPreviousBuyIndicator(
-		//	bot.Config,
-		//	bot.buffer,
-		//	bot.db,
-		//)
-
-		//moreThanPreviousAverageIndicator := NewMoreThanPreviousAverageIndicator(
-		//	bot.Config,
-		//	bot.buffer,
-		//	bot.db,
-		//)
-
-		windowShortIndicator := NewWindowShortIndicator(
-			bot.Config,
-			bot.buffer,
-			bot.db,
-		)
-
-		bot.BuyIndicators = []BuyIndicator{
-			//&linearRegressionIndicator,
-			//&moreThanPreviousBuyIndicator,
-			//&moreThanPreviousAverageIndicator,
-			&windowShortIndicator,
-			&gradientDescentIndicator,
-			//&gradientSwingIndicator,
-		}
-		return
-	}
+	//if ENABLE_SHORT {
+	//	//moreThanPreviousBuyIndicator := NewMoreThanPreviousBuyIndicator(
+	//	//	bot.Config,
+	//	//	bot.buffer,
+	//	//	bot.db,
+	//	//)
+	//
+	//	//moreThanPreviousAverageIndicator := NewMoreThanPreviousAverageIndicator(
+	//	//	bot.Config,
+	//	//	bot.buffer,
+	//	//	bot.db,
+	//	//)
+	//
+	//	windowShortIndicator := NewWindowShortIndicator(
+	//		bot.Config,
+	//		bot.buffer,
+	//		bot.db,
+	//	)
+	//
+	//	bot.BuyIndicators = []BuyIndicator{
+	//		//&linearRegressionIndicator,
+	//		//&moreThanPreviousBuyIndicator,
+	//		//&moreThanPreviousAverageIndicator,
+	//		&windowShortIndicator,
+	//		&gradientDescentIndicator,
+	//		//&gradientSwingIndicator,
+	//	}
+	//	return
+	//}
 
 	//linearRegressionIndicator := NewLinearRegressionIndicator(
 	//	bot.Config,
@@ -757,7 +755,7 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	bot.windowLongIndicator = NewWindowLongIndicator(
+	windowLongIndicator := NewWindowLongIndicator(
 		bot.Config,
 		bot.buffer,
 		bot.db,
@@ -769,17 +767,26 @@ func setupBuyIndicators(bot *Bot) {
 		//&lessThanPreviousBuyIndicator,
 		//&lessThanPreviousAverageIndicator,
 		&gradientDescentIndicator,
-		&bot.windowLongIndicator,
+		&windowLongIndicator,
 		//&gradientSwingIndicator,
 	}
+	//// Boost buy indicator
+	//boostBuyIndicator := NewBoostBuyIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
+	//bot.BoostBuyIndicator = &boostBuyIndicator
+}
 
-	// Boost buy indicator
-	boostBuyIndicator := NewBoostBuyIndicator(
-		bot.Config,
-		bot.buffer,
-		bot.db,
-	)
-	bot.BoostBuyIndicator = &boostBuyIndicator
+func (bot *Bot) getWindowLongIndicator() *WindowLongIndicator {
+	for _, indicator := range bot.BuyIndicators {
+		if val, ok := indicator.(*WindowLongIndicator); ok {
+			return val
+		}
+	}
+
+	panic("No WindowLongIndicator")
 }
 
 func setupSellIndicators(bot *Bot) {
