@@ -64,6 +64,9 @@ func runWsUserDataServe(client *futures.Client, bot *Bot) {
 
 				fmt.Println("OrderTradeUpdate", event.OrderTradeUpdate)
 				fmt.Printf("OrderData: %+v\n", orderData)
+
+				Log(fmt.Sprintf("Limit buy filled: %+v", orderData))
+
 				bot.OnLimitBuyFilled(orderData.ID)
 			}
 		}, func(err error) {
