@@ -154,6 +154,12 @@ func (buyer *WindowBuyer) createLimitBuyOrder(usedMoney float64) {
 		realOrderId,
 		candle.CloseTime,
 	)
+
+	Log(fmt.Sprintf(
+		"LIMIT_BUY_ORDER_CREATED: orderId: %d, quantity: %f",
+		realOrderId,
+		quantity,
+	))
 }
 
 func (buyer *WindowBuyer) decreaseWindow() {
