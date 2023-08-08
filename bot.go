@@ -108,7 +108,8 @@ func (bot *Bot) runBuyIndicators() {
 		}
 	}
 
-	if len(bot.BuyIndicators) == signalsCount {
+	unsoldBuysCount := bot.db.CountUnsoldBuys()
+	if len(bot.BuyIndicators) == signalsCount && 0 == unsoldBuysCount {
 		for _, indicator := range bot.BuyIndicators {
 			indicator.Finish()
 		}
@@ -131,6 +132,10 @@ func (bot *Bot) OnLimitBuyFilled(realOrderId int64) {
 		&buyOrder,
 		Default,
 	)
+
+	// Create new limit order
+	usedMoney := bot.getIncreasingTotalMoneyAmount(Default)
+	bot.windowBuyer.Start(usedMoney)
 }
 
 func (bot *Bot) startLimitBuy(candle Candle, buyType BuyType) {
