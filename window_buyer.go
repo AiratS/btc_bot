@@ -148,6 +148,7 @@ func (buyer *WindowBuyer) createLimitBuyOrder(usedMoney float64) {
 			buyer.balance.inBalanceMoney,
 			usedMoney,
 		))
+		buyer.Finish()
 		return
 	}
 
@@ -157,6 +158,7 @@ func (buyer *WindowBuyer) createLimitBuyOrder(usedMoney float64) {
 			balance,
 			usedMoney,
 		))
+		buyer.Finish()
 		return
 	}
 
