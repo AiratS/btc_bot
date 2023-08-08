@@ -36,7 +36,13 @@ func NewBot(config *Config) Bot {
 		balance:                        &balance,
 		IsTrailingSellIndicatorEnabled: false,
 	}
-	bot.windowBuyer = NewWindowBuyer(bot.Config, bot.buffer, bot.db, bot.futuresOrderManager)
+	bot.windowBuyer = NewWindowBuyer(
+		bot.Config,
+		bot.buffer,
+		bot.db,
+		bot.futuresOrderManager,
+		bot.balance,
+	)
 
 	setupBuyIndicators(&bot)
 	setupSellIndicators(&bot)
@@ -56,7 +62,12 @@ func NewFuturesRealBot(config *Config, futuresClient *futures.Client) Bot {
 	futuresOrderManager := NewFuturesOrderManager(futuresClient)
 	bot := NewBot(config)
 	bot.futuresOrderManager = &futuresOrderManager
-	bot.windowBuyer = NewWindowBuyer(bot.Config, bot.buffer, bot.db, bot.futuresOrderManager)
+	bot.windowBuyer = NewWindowBuyer(
+		bot.Config,
+		bot.buffer,
+		bot.db, bot.futuresOrderManager,
+		bot.balance,
+	)
 
 	return bot
 }
@@ -134,7 +145,7 @@ func (bot *Bot) OnLimitBuyFilled(realOrderId int64) {
 	)
 
 	// Create new limit order
-	usedMoney := bot.getIncreasingTotalMoneyAmount(Default)
+	usedMoney := bot.getLimitBuyTotalMoneyAmount()
 	bot.windowBuyer.Start(usedMoney)
 }
 

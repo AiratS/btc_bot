@@ -16,6 +16,7 @@ type WindowBuyer struct {
 	buffer              *Buffer
 	db                  *Database
 	futuresOrderManager *FuturesOrderManager
+	balance             *Balance
 }
 
 func NewWindowBuyer(
@@ -23,6 +24,7 @@ func NewWindowBuyer(
 	buffer *Buffer,
 	db *Database,
 	futuresOrderManager *FuturesOrderManager,
+	balance *Balance,
 ) *WindowBuyer {
 	return &WindowBuyer{
 		IsStarted:     false,
@@ -32,6 +34,7 @@ func NewWindowBuyer(
 		buffer:              buffer,
 		db:                  db,
 		futuresOrderManager: futuresOrderManager,
+		balance:             balance,
 	}
 }
 
@@ -138,6 +141,24 @@ func (buyer *WindowBuyer) createLimitBuyOrder(usedMoney float64) {
 	var realOrderId int64 = 1
 	buyPrice := CalcBottomPrice(candle.ClosePrice, buyer.getCurrentWindowPercentage())
 	quantity := (usedMoney * float64(buyer.config.Leverage)) / buyPrice
+
+	// Check for money
+	if !buyer.balance.HasEnoughMoneyForBuy(usedMoney) {
+		Log(fmt.Sprintf("Not enough money: balance %f, usedMoney: %f",
+			buyer.balance.inBalanceMoney,
+			usedMoney,
+		))
+		return
+	}
+
+	if USE_REAL_MONEY && !buyer.futuresOrderManager.HasEnoughMoneyForBuy(usedMoney) {
+		balance := buyer.futuresOrderManager.getBalance()
+		Log(fmt.Sprintf("Not enough money: balance %f, usedMoney: %f",
+			balance,
+			usedMoney,
+		))
+		return
+	}
 
 	// Only for real money
 	if IS_REAL_ENABLED && USE_REAL_MONEY {
