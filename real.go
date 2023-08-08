@@ -76,6 +76,12 @@ func GetRealBotConfig() Config {
 		BoostBuyMoneyIncreasePercentage: 1,
 
 		StopAfterUnsuccessfullySellMinutes: 1,
+
+		WindowWindowsCount:        1,
+		WindowBasePercentage:      1,
+		WindowOffsetPercentage:    1,
+		WindowBasePeriodMinutes:   1,
+		WindowOffsetPeriodMinutes: 1,
 	}
 }
 
