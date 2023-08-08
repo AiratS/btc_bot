@@ -628,6 +628,13 @@ func (bot *Bot) createRealMoneySellOrder(buy Buy) {
 	}
 }
 
+func (bot *Bot) OnRealSell(orderId int64) {
+	unsoldBuy, ok := bot.db.FindUnsoldBuyByRealOrderId(orderId)
+	if ok {
+		bot.sell(unsoldBuy)
+	}
+}
+
 func (bot *Bot) sell(buy Buy) float64 {
 	// Cancel all buy orders
 	buyOrdersCount := bot.windowBuyer.RejectAllOrders()

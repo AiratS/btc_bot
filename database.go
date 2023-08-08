@@ -553,6 +553,37 @@ func (db *Database) FetchUnsoldBuysByLowerPercentage(exchangeRate, lowerPercenta
 	return unsoldBuys
 }
 
+func (db *Database) FindUnsoldBuyByRealOrderId(realOrderId int64) (Buy, bool) {
+	query := `
+		SELECT b.*
+		FROM buys AS b 
+        LEFT JOIN sells AS s 
+        	ON s.buy_id = b.id 
+        WHERE s.id IS NULL 
+            AND b.real_order_id = $1
+		LIMIT 1
+	`
+
+	row := db.connect.QueryRow(query, realOrderId)
+
+	buy := Buy{}
+	row.Scan(
+		&buy.Id,
+		&buy.Symbol,
+		&buy.UsedMoney,
+		&buy.Coins,
+		&buy.ExchangeRate,
+		&buy.DesiredPrice,
+		&buy.CreatedAt,
+		&buy.RealOrderId,
+		&buy.RealQuantity,
+		&buy.HasSellOrder,
+		&buy.BuyType,
+	)
+
+	return buy, buy.CreatedAt != ""
+}
+
 func (db *Database) FetchUnsoldBuysByDesiredPrice(exchangeRate float64) []Buy {
 	unsoldBuys := []Buy{}
 	query := `

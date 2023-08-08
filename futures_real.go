@@ -57,6 +57,7 @@ func runWsUserDataServe(client *futures.Client, bot *Bot) {
 		doneA, _, _ := futures.WsUserDataServe(listenKey, func(event *futures.WsUserDataEvent) {
 			orderData := event.OrderTradeUpdate
 
+			// On buy limit order filled
 			if event.Event == futures.UserDataEventTypeOrderTradeUpdate &&
 				orderData.Side == futures.SideTypeBuy &&
 				orderData.Type == futures.OrderTypeLimit &&
@@ -65,9 +66,20 @@ func runWsUserDataServe(client *futures.Client, bot *Bot) {
 				fmt.Println("OrderTradeUpdate", event.OrderTradeUpdate)
 				fmt.Printf("OrderData: %+v\n", orderData)
 
-				Log(fmt.Sprintf("Limit buy filled: %+v", orderData))
+				Log(fmt.Sprintf("BUY filled: %+v", orderData))
 
 				bot.OnLimitBuyFilled(orderData.ID)
+			}
+
+			// On sell limit order filled
+			if event.Event == futures.UserDataEventTypeOrderTradeUpdate &&
+				orderData.Side == futures.SideTypeSell &&
+				orderData.Type == futures.OrderTypeLimit &&
+				orderData.Status == futures.OrderStatusTypeFilled {
+
+				Log(fmt.Sprintf("SELL filled: %+v", orderData))
+
+				bot.OnRealSell(orderData.ID)
 			}
 		}, func(err error) {
 			fmt.Println(err)
