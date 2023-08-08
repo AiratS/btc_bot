@@ -300,8 +300,8 @@ func (bot *Bot) buyForLimit(exchangeRate float64, closeTime string, buyOrder *Bu
 	Log(fmt.Sprintf("LIMIT_BUY\nExchangeRate: %f", exchangeRate))
 
 	// Check for balance
-	usedMoney := bot.getLimitBuyTotalMoneyAmount()
-	coinsCount := (usedMoney * float64(bot.Config.Leverage)) / exchangeRate
+	usedMoney := buyOrder.UsedMoney
+	coinsCount := buyOrder.Coins
 	desiredPrice := bot.calcDesiredPrice(exchangeRate)
 
 	// Create Binance Buy order
