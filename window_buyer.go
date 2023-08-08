@@ -156,9 +156,10 @@ func (buyer *WindowBuyer) createLimitBuyOrder(usedMoney float64) {
 	)
 
 	Log(fmt.Sprintf(
-		"LIMIT_BUY_ORDER_CREATED: orderId: %d, quantity: %f",
+		"LIMIT_BUY_ORDER_CREATED: orderId: %d, quantity: %f, usedMoney: %f",
 		realOrderId,
 		quantity,
+		usedMoney,
 	))
 }
 
