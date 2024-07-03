@@ -32,6 +32,10 @@ type ConfigRestriction struct {
 	GradientSwingIndicatorPeriod    MinMaxInt
 	GradientSwingIndicatorSwingType MinMaxInt
 
+	CatchingFallingKnifeCandles    MinMaxInt
+	CatchingFallingKnifeSellPercentage       MinMaxFloat64
+	CatchingFallingKnifeAdditionalBuyPercentage         MinMaxFloat64
+
 	TotalMoneyAmount                    MinMaxFloat64
 	TotalMoneyIncreasePercentage        MinMaxFloat64
 	FirstBuyMoneyIncreasePercentage     MinMaxFloat64
@@ -164,6 +168,20 @@ func GetBotConfigRestrictions() ConfigRestriction {
 			max: 15,
 		},
 		GradientSwingIndicatorSwingType: MinMaxInt{
+			min: 0,
+			max: 2,
+		},
+
+		// ------------------------------------------------
+		CatchingFallingKnifeCandles: MinMaxInt{
+			min: 1,
+			max: 25,
+		},
+		CatchingFallingKnifeSellPercentage: MinMaxFloat64{
+			min: 100,
+			max: 2000,
+		},
+		CatchingFallingKnifeAdditionalBuyPercentage: MinMaxFloat64{
 			min: 0,
 			max: 2,
 		},

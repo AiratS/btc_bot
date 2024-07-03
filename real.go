@@ -63,6 +63,10 @@ func GetRealBotConfig() Config {
 		GradientSwingIndicatorPeriod:    1,
 		GradientSwingIndicatorSwingType: 1,
 
+		CatchingFallingKnifeCandles:   1,
+		CatchingFallingKnifeSellPercentage:   1,
+		CatchingFallingKnifeAdditionalBuyPercentage:   1,
+
 		TotalMoneyAmount:                1000,
 		TotalMoneyIncreasePercentage:    10,
 		FirstBuyMoneyIncreasePercentage: 1,

@@ -73,6 +73,10 @@ type Config struct {
 	GradientSwingIndicatorPeriod    int
 	GradientSwingIndicatorSwingType int // 0 - Growth, 1 - Fall, 2 - Any
 
+	CatchingFallingKnifeCandles int
+	CatchingFallingKnifeSellPercentage float64
+	CatchingFallingKnifeAdditionalBuyPercentage float64
+
 	TotalMoneyAmount                    float64
 	TotalMoneyIncreasePercentage        float64
 	FirstBuyMoneyIncreasePercentage     float64

@@ -1224,3 +1224,54 @@ func (indicator *WindowShortIndicator) Update() {
 
 func (indicator *WindowShortIndicator) Finish() {
 }
+// ------------------------------------------------------
+
+type CatchingFallingKnifeIndicator struct {
+	config         *Config
+	buffer         *Buffer
+	db             *Database
+	currentWindow  int
+	lastWindowTime time.Time
+}
+
+func NewCatchingFallingKnifeIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) CatchingFallingKnifeIndicator {
+	return CatchingFallingKnifeIndicator{
+		config:        config,
+		buffer:        buffer,
+		db:            db,
+		currentWindow: config.CatchingFallingKnifeCandles,
+	}
+}
+
+func (indicator *CatchingFallingKnifeIndicator) HasSignal() bool {
+	count := len(indicator.buffer.GetCandles())
+	if (indicator.config.CatchingFallingKnifeCandles + 1) > count {
+		return false
+	}
+
+	if indicator.db.CountUnsoldBuys() > 0 {
+		return true
+	}
+
+	givenPeriodMinPrice := Min(GetClosePrices(indicator.buffer.GetCandles()))
+	currentPrice := indicator.buffer.GetLastCandle().GetPrice()
+
+	return givenPeriodMinPrice > currentPrice
+}
+
+func (indicator *CatchingFallingKnifeIndicator) IsStarted() bool {
+	return true
+}
+
+func (indicator *CatchingFallingKnifeIndicator) Start() {
+}
+
+func (indicator *CatchingFallingKnifeIndicator) Update() {
+}
+
+func (indicator *CatchingFallingKnifeIndicator) Finish() {
+}

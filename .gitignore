@@ -7,3 +7,4 @@ plots/*.png
 *.csv
 data.json
 .idea/
+.DS_Store
