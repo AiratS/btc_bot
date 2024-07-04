@@ -20,7 +20,7 @@ const ENABLE_DYNAMIC_NEXT_BUY_PERCENTAGE = false
 
 // Candle
 const CANDLE_SYMBOL = "BTCUSDT"
-const CANDLE_INTERVAL = "30m"
+const CANDLE_INTERVAL = "1m"
 const BALANCE_MONEY = 10000.0
 const COMMISSION = 0.06
 const DATASETS_DIRECTORY = "datasets"
@@ -73,8 +73,8 @@ type Config struct {
 	GradientSwingIndicatorPeriod    int
 	GradientSwingIndicatorSwingType int // 0 - Growth, 1 - Fall, 2 - Any
 
-	CatchingFallingKnifeCandles int
-	CatchingFallingKnifeSellPercentage float64
+	CatchingFallingKnifeCandles                 int
+	CatchingFallingKnifeSellPercentage          float64
 	CatchingFallingKnifeAdditionalBuyPercentage float64
 
 	TotalMoneyAmount                    float64

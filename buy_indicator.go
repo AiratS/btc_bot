@@ -1224,6 +1224,7 @@ func (indicator *WindowShortIndicator) Update() {
 
 func (indicator *WindowShortIndicator) Finish() {
 }
+
 // ------------------------------------------------------
 
 type CatchingFallingKnifeIndicator struct {
@@ -1257,8 +1258,12 @@ func (indicator *CatchingFallingKnifeIndicator) HasSignal() bool {
 		return true
 	}
 
-	givenPeriodMinPrice := Min(GetClosePrices(indicator.buffer.GetCandles()))
-	currentPrice := indicator.buffer.GetLastCandle().GetPrice()
+	closePrices := GetValuesFromSlice(
+		GetClosePrices(indicator.buffer.GetCandles()),
+		indicator.config.CatchingFallingKnifeCandles+1,
+	)
+	givenPeriodMinPrice := Min(closePrices[:len(closePrices)-1])
+	currentPrice := indicator.buffer.GetLastCandle().ClosePrice
 
 	return givenPeriodMinPrice > currentPrice
 }

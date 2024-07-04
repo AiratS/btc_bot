@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/adshao/go-binance/v2"
 	"github.com/adshao/go-binance/v2/futures"
-	"math"
 	"reflect"
 )
 
@@ -341,7 +340,8 @@ func (bot *Bot) getIncreasingTotalMoneyAmount(buyType BuyType) float64 {
 	//	return lastBuy.UsedMoney
 	//}
 
-	percentage := math.Abs(CalcGrowth(lastBuy.ExchangeRate, bot.buffer.GetLastCandleClosePrice()))
+	//percentage := math.Abs(CalcGrowth(lastBuy.ExchangeRate, bot.buffer.GetLastCandleClosePrice()))
+	percentage := CalcUpperPrice(bot.Config.TotalMoneyAmount, bot.Config.TotalMoneyIncreasePercentage)
 
 	return CalcUpperPrice(lastBuy.UsedMoney, percentage*100*1.7)
 }
@@ -761,19 +761,19 @@ func setupBuyIndicators(bot *Bot) {
 		bot.db,
 	)
 
-	windowLongIndicator := NewWindowLongIndicator(
-		bot.Config,
-		bot.buffer,
-		bot.db,
-	)
+	//windowLongIndicator := NewWindowLongIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
 
 	bot.BuyIndicators = []BuyIndicator{
 		//&bigFallIndicator,
 		//&linearRegressionIndicator,
 		//&lessThanPreviousAverageIndicator,
 		&catchingFallingKnifeIndicator,
+		//&gradientDescentIndicator,
 		&lessThanPreviousBuyIndicator,
-		// &gradientDescentIndicator,
 		//&gradientSwingIndicator,
 	}
 

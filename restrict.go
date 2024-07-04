@@ -32,9 +32,9 @@ type ConfigRestriction struct {
 	GradientSwingIndicatorPeriod    MinMaxInt
 	GradientSwingIndicatorSwingType MinMaxInt
 
-	CatchingFallingKnifeCandles    MinMaxInt
-	CatchingFallingKnifeSellPercentage       MinMaxFloat64
-	CatchingFallingKnifeAdditionalBuyPercentage         MinMaxFloat64
+	CatchingFallingKnifeCandles                 MinMaxInt
+	CatchingFallingKnifeSellPercentage          MinMaxFloat64
+	CatchingFallingKnifeAdditionalBuyPercentage MinMaxFloat64
 
 	TotalMoneyAmount                    MinMaxFloat64
 	TotalMoneyIncreasePercentage        MinMaxFloat64
@@ -73,7 +73,7 @@ type MinMaxFloat64 struct {
 
 func GetBotConfigRestrictions() ConfigRestriction {
 	return ConfigRestriction{
-		HighSellPercentage: MinMaxFloat64{
+		HighSellPercentage: MinMaxFloat64{ // Use me
 			min: 0.12,
 			max: 0.3,
 		},
@@ -173,8 +173,8 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		},
 
 		// ------------------------------------------------
-		CatchingFallingKnifeCandles: MinMaxInt{
-			min: 1,
+		CatchingFallingKnifeCandles: MinMaxInt{ // Use me
+			min: 10,
 			max: 25,
 		},
 		CatchingFallingKnifeSellPercentage: MinMaxFloat64{
@@ -191,7 +191,7 @@ func GetBotConfigRestrictions() ConfigRestriction {
 			min: 3,
 			max: 200,
 		},
-		TotalMoneyIncreasePercentage: MinMaxFloat64{
+		TotalMoneyIncreasePercentage: MinMaxFloat64{ // Use me
 			min: 30,
 			max: 100,
 		},
@@ -218,7 +218,7 @@ func GetBotConfigRestrictions() ConfigRestriction {
 			max: 300,
 		},
 
-		LessThanPreviousBuyPercentage: MinMaxFloat64{
+		LessThanPreviousBuyPercentage: MinMaxFloat64{ // Use me
 			min: -1,
 			max: -0.15,
 		},

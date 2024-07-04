@@ -154,9 +154,9 @@ func ImportFromCsv(fileName string) []Config {
 			GradientSwingIndicatorPeriod:    convertStringToInt(row[20]),
 			GradientSwingIndicatorSwingType: convertStringToInt(row[21]),
 
-			CatchingFallingKnifeCandles:   convertStringToInt(row[22]),
-			CatchingFallingKnifeSellPercentage:    convertStringToInt(row[23]),
-			CatchingFallingKnifeAdditionalBuyPercentage: convertStringToInt(row[24]),
+			CatchingFallingKnifeCandles:                 convertStringToInt(row[22]),
+			CatchingFallingKnifeSellPercentage:          convertStringToFloat64(row[23]),
+			CatchingFallingKnifeAdditionalBuyPercentage: convertStringToFloat64(row[24]),
 
 			TotalMoneyAmount:                convertStringToFloat64(row[25]),
 			TotalMoneyIncreasePercentage:    convertStringToFloat64(row[26]),
@@ -243,9 +243,9 @@ func InitBotConfig() Config {
 		GradientSwingIndicatorPeriod:    GetRandIntConfig(restrict.GradientSwingIndicatorPeriod),
 		GradientSwingIndicatorSwingType: GetRandIntConfig(restrict.GradientSwingIndicatorSwingType),
 
-		CatchingFallingKnifeCandles:    GetRandIntConfig(restrict.CatchingFallingKnifeCandles),
-		CatchingFallingKnifeSellPercentage:       GetRandFloat64Config(restrict.CatchingFallingKnifeSellPercentage),
-		CatchingFallingKnifeAdditionalBuyPercentage:         GetRandFloat64Config(restrict.CatchingFallingKnifeAdditionalBuyPercentage),
+		CatchingFallingKnifeCandles:                 GetRandIntConfig(restrict.CatchingFallingKnifeCandles),
+		CatchingFallingKnifeSellPercentage:          GetRandFloat64Config(restrict.CatchingFallingKnifeSellPercentage),
+		CatchingFallingKnifeAdditionalBuyPercentage: GetRandFloat64Config(restrict.CatchingFallingKnifeAdditionalBuyPercentage),
 
 		TotalMoneyAmount:                    GetRandFloat64Config(restrict.TotalMoneyAmount),
 		TotalMoneyIncreasePercentage:        GetRandFloat64Config(restrict.TotalMoneyIncreasePercentage),
@@ -308,8 +308,8 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 		"GradientSwingIndicatorPeriod":    botConfig.GradientSwingIndicatorPeriod,
 		"GradientSwingIndicatorSwingType": botConfig.GradientSwingIndicatorSwingType,
 
-		"CatchingFallingKnifeCandles":   botConfig.CatchingFallingKnifeCandles,
-		"CatchingFallingKnifeSellPercentage":    botConfig.CatchingFallingKnifeSellPercentage,
+		"CatchingFallingKnifeCandles":                 botConfig.CatchingFallingKnifeCandles,
+		"CatchingFallingKnifeSellPercentage":          botConfig.CatchingFallingKnifeSellPercentage,
 		"CatchingFallingKnifeAdditionalBuyPercentage": botConfig.CatchingFallingKnifeAdditionalBuyPercentage,
 
 		"TotalMoneyAmount":                    botConfig.TotalMoneyAmount,
@@ -498,8 +498,8 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 		"GradientSwingIndicatorPeriod":    bot["GradientSwingIndicatorPeriod"],
 		"GradientSwingIndicatorSwingType": bot["GradientSwingIndicatorSwingType"],
 
-		"CatchingFallingKnifeCandles":   bot["CatchingFallingKnifeCandles"],
-		"CatchingFallingKnifeSellPercentage":    bot["CatchingFallingKnifeSellPercentage"],
+		"CatchingFallingKnifeCandles":                 bot["CatchingFallingKnifeCandles"],
+		"CatchingFallingKnifeSellPercentage":          bot["CatchingFallingKnifeSellPercentage"],
 		"CatchingFallingKnifeAdditionalBuyPercentage": bot["CatchingFallingKnifeAdditionalBuyPercentage"],
 
 		"TotalMoneyAmount":                    bot["TotalMoneyAmount"],
@@ -636,9 +636,9 @@ func ConvertDataFrameToBotConfig(dataFrame map[interface{}]interface{}) Config {
 		GradientSwingIndicatorPeriod:    convertToInt(dataFrame["GradientSwingIndicatorPeriod"]),
 		GradientSwingIndicatorSwingType: convertToInt(dataFrame["GradientSwingIndicatorSwingType"]),
 
-		CatchingFallingKnifeCandles:    convertToInt(dataFrame["CatchingFallingKnifeCandles"]),
-		CatchingFallingKnifeSellPercentage:       convertToFloat64(dataFrame["CatchingFallingKnifeSellPercentage"]),
-		CatchingFallingKnifeAdditionalBuyPercentage:         convertToFloat64(dataFrame["CatchingFallingKnifeAdditionalBuyPercentage"]),
+		CatchingFallingKnifeCandles:                 convertToInt(dataFrame["CatchingFallingKnifeCandles"]),
+		CatchingFallingKnifeSellPercentage:          convertToFloat64(dataFrame["CatchingFallingKnifeSellPercentage"]),
+		CatchingFallingKnifeAdditionalBuyPercentage: convertToFloat64(dataFrame["CatchingFallingKnifeAdditionalBuyPercentage"]),
 
 		TotalMoneyAmount:                    convertToFloat64(dataFrame["TotalMoneyAmount"]),
 		TotalMoneyIncreasePercentage:        convertToFloat64(dataFrame["TotalMoneyIncreasePercentage"]),
@@ -704,9 +704,9 @@ func makeChild(
 		GradientSwingIndicatorPeriod:    GetIntFatherOrMomGen(maleBotConfig.GradientSwingIndicatorPeriod, femaleBotConfig.GradientSwingIndicatorPeriod),
 		GradientSwingIndicatorSwingType: GetIntFatherOrMomGen(maleBotConfig.GradientSwingIndicatorSwingType, femaleBotConfig.GradientSwingIndicatorSwingType),
 
-		CatchingFallingKnifeCandles:    GetIntFatherOrMomGen(maleBotConfig.CatchingFallingKnifeCandles, femaleBotConfig.CatchingFallingKnifeCandles),
-		CatchingFallingKnifeSellPercentage:       GetFloatFatherOrMomGen(maleBotConfig.CatchingFallingKnifeSellPercentage, femaleBotConfig.CatchingFallingKnifeSellPercentage),
-		CatchingFallingKnifeAdditionalBuyPercentage:         GetFloatFatherOrMomGen(maleBotConfig.CatchingFallingKnifeAdditionalBuyPercentage, femaleBotConfig.CatchingFallingKnifeAdditionalBuyPercentage),
+		CatchingFallingKnifeCandles:                 GetIntFatherOrMomGen(maleBotConfig.CatchingFallingKnifeCandles, femaleBotConfig.CatchingFallingKnifeCandles),
+		CatchingFallingKnifeSellPercentage:          GetFloatFatherOrMomGen(maleBotConfig.CatchingFallingKnifeSellPercentage, femaleBotConfig.CatchingFallingKnifeSellPercentage),
+		CatchingFallingKnifeAdditionalBuyPercentage: GetFloatFatherOrMomGen(maleBotConfig.CatchingFallingKnifeAdditionalBuyPercentage, femaleBotConfig.CatchingFallingKnifeAdditionalBuyPercentage),
 
 		TotalMoneyAmount:                    GetFloatFatherOrMomGen(maleBotConfig.TotalMoneyAmount, femaleBotConfig.TotalMoneyAmount),
 		TotalMoneyIncreasePercentage:        GetFloatFatherOrMomGen(maleBotConfig.TotalMoneyIncreasePercentage, femaleBotConfig.TotalMoneyIncreasePercentage),
@@ -776,11 +776,9 @@ func mutateGens(botConfig *Config, randGenNumber int) {
 	mutateGenInt(randGenNumber, 20, &(botConfig.GradientSwingIndicatorPeriod), restrict.GradientSwingIndicatorPeriod)
 	mutateGenInt(randGenNumber, 21, &(botConfig.GradientSwingIndicatorSwingType), restrict.GradientSwingIndicatorSwingType)
 
-
 	mutateGenInt(randGenNumber, 22, &(botConfig.CatchingFallingKnifeCandles), restrict.CatchingFallingKnifeCandles)
 	mutateGenFloat64(randGenNumber, 23, &(botConfig.CatchingFallingKnifeSellPercentage), restrict.CatchingFallingKnifeSellPercentage)
 	mutateGenFloat64(randGenNumber, 24, &(botConfig.CatchingFallingKnifeAdditionalBuyPercentage), restrict.CatchingFallingKnifeAdditionalBuyPercentage)
-
 
 	mutateGenFloat64(randGenNumber, 25, &(botConfig.TotalMoneyAmount), restrict.TotalMoneyAmount)
 	mutateGenFloat64(randGenNumber, 26, &(botConfig.TotalMoneyIncreasePercentage), restrict.TotalMoneyIncreasePercentage)
