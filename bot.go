@@ -689,11 +689,11 @@ func resolveBufferSize(config *Config) int {
 }
 
 func setupBuyIndicators(bot *Bot) {
-	//bigFallIndicator := NewBigFallIndicator(
-	//	bot.Config,
-	//	bot.buffer,
-	//	bot.db,
-	//)
+	bigFallIndicator := NewBigFallIndicator(
+		bot.Config,
+		bot.buffer,
+		bot.db,
+	)
 
 	gradientDescentIndicator := NewGradientDescentIndicator(
 		bot.Config,
@@ -743,11 +743,11 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	lessThanPreviousBuyIndicator := NewLessThanPreviousBuyIndicator(
-		bot.Config,
-		bot.buffer,
-		bot.db,
-	)
+	//lessThanPreviousBuyIndicator := NewLessThanPreviousBuyIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
 
 	//lessThanPreviousAverageIndicator := NewLessThanPreviousAverageIndicator(
 	//	bot.Config,
@@ -755,11 +755,11 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	catchingFallingKnifeIndicator := NewCatchingFallingKnifeIndicator(
-		bot.Config,
-		bot.buffer,
-		bot.db,
-	)
+	//catchingFallingKnifeIndicator := NewCatchingFallingKnifeIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
 
 	//windowLongIndicator := NewWindowLongIndicator(
 	//	bot.Config,
@@ -768,12 +768,12 @@ func setupBuyIndicators(bot *Bot) {
 	//)
 
 	bot.BuyIndicators = []BuyIndicator{
-		//&bigFallIndicator,
+		&bigFallIndicator,
 		//&linearRegressionIndicator,
 		//&lessThanPreviousAverageIndicator,
-		&catchingFallingKnifeIndicator,
+		//&catchingFallingKnifeIndicator,
 		//&gradientDescentIndicator,
-		&lessThanPreviousBuyIndicator,
+		//&lessThanPreviousBuyIndicator,
 		//&gradientSwingIndicator,
 	}
 
