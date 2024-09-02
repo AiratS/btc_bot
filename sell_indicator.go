@@ -247,10 +247,11 @@ func (indicator *LeverageSellIndicator) HasSignal() (bool, []Buy) {
 	//indicator.appendBuyIfNotExists(&resultingBuys, upperBuys)
 
 	// Desired price buys
-	currentPrice := candle.GetPrice()
-	if USE_REAL_MONEY {
-		currentPrice = candle.HighPrice
-	}
+	// currentPrice := candle.GetPrice()
+	// if USE_REAL_MONEY {
+	// 	currentPrice = candle.HighPrice
+	// }
+	currentPrice := candle.HighPrice
 
 	desiredPriceBuys := indicator.db.FetchUnsoldBuysByDesiredPrice(currentPrice)
 	indicator.appendBuyIfNotExists(&resultingBuys, desiredPriceBuys)

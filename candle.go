@@ -37,7 +37,7 @@ type Candle struct {
 }
 
 func (candle *Candle) GetPrice() float64 {
-	return candle.ClosePrice
+	return candle.LowPrice
 }
 
 // Candle source converter
