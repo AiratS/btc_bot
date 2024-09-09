@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"github.com/adshao/go-binance/v2"
 	"github.com/adshao/go-binance/v2/futures"
 	"reflect"
@@ -347,6 +348,10 @@ func (bot *Bot) getIncreasingTotalMoneyAmount(buyType BuyType) float64 {
 }
 
 func (bot *Bot) HasEnoughMoneyForBuy(usedMoney, coinsCount float64) bool {
+	if _, err := os.Stat("./block"); err == nil {
+		return false
+	}
+	
 	isBalanceEnough := bot.balance.HasEnoughMoneyForBuy(usedMoney)
 	if !USE_REAL_MONEY {
 		return isBalanceEnough
