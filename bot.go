@@ -20,6 +20,8 @@ type Bot struct {
 	balance                        *Balance
 	IsTrailingSellIndicatorEnabled bool
 	trailingSellIndicator          *TrailingSellIndicator
+
+	hadBuy bool
 }
 
 func NewBot(config *Config) Bot {
@@ -33,6 +35,8 @@ func NewBot(config *Config) Bot {
 		db:                             &db,
 		balance:                        &balance,
 		IsTrailingSellIndicatorEnabled: false,
+
+		hadBuy: false
 	}
 
 	setupBuyIndicators(&bot)
@@ -103,6 +107,8 @@ func (bot *Bot) checkForMoneyAndBuy(candle Candle, buyType BuyType) {
 	}
 
 	bot.buy(candle.GetPrice(), candle.CloseTime, &BuyOrder{}, buyType)
+
+	bot.hadBuy = true
 }
 
 // NOT USED
@@ -183,10 +189,16 @@ func (bot *Bot) runSellIndicators() {
 		indicator.Update()
 		hasSignal, buys := indicator.HasSignal()
 		if !hasSignal {
+			bot.hadBuy = false
 			return
 		}
 
 		eachIndicatorBuys = append(eachIndicatorBuys, buys)
+	}
+
+	if bot.hadBuy {
+		bot.hadBuy = false
+		return
 	}
 
 	// Sell
@@ -227,6 +239,8 @@ func (bot *Bot) runSellIndicators() {
 			//))
 		}
 	}
+
+	bot.hadBuy = false
 }
 
 func (bot *Bot) IsOrderFilled(symbol string, realOrderId int64) bool {
@@ -342,9 +356,9 @@ func (bot *Bot) getIncreasingTotalMoneyAmount(buyType BuyType) float64 {
 	//}
 
 	//percentage := math.Abs(CalcGrowth(lastBuy.ExchangeRate, bot.buffer.GetLastCandleClosePrice()))
-	percentage := CalcUpperPrice(bot.Config.TotalMoneyAmount, bot.Config.TotalMoneyIncreasePercentage)
+	// percentage := CalcUpperPrice(bot.Config.TotalMoneyAmount, bot.Config.TotalMoneyIncreasePercentage)
 
-	return CalcUpperPrice(lastBuy.UsedMoney, percentage*100*1.7)
+	return CalcUpperPrice(lastBuy.UsedMoney, bot.Config.TotalMoneyIncreasePercentage)
 }
 
 func (bot *Bot) HasEnoughMoneyForBuy(usedMoney, coinsCount float64) bool {
@@ -748,11 +762,11 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	//lessThanPreviousBuyIndicator := NewLessThanPreviousBuyIndicator(
-	//	bot.Config,
-	//	bot.buffer,
-	//	bot.db,
-	//)
+	lessThanPreviousBuyIndicator := NewLessThanPreviousBuyIndicator(
+		bot.Config,
+		bot.buffer,
+		bot.db,
+	)
 
 	//lessThanPreviousAverageIndicator := NewLessThanPreviousAverageIndicator(
 	//	bot.Config,
@@ -778,7 +792,7 @@ func setupBuyIndicators(bot *Bot) {
 		//&lessThanPreviousAverageIndicator,
 		//&catchingFallingKnifeIndicator,
 		//&gradientDescentIndicator,
-		//&lessThanPreviousBuyIndicator,
+		&lessThanPreviousBuyIndicator,
 		//&gradientSwingIndicator,
 	}
 
