@@ -67,13 +67,17 @@ func (bot *Bot) Kill() {
 
 func (bot *Bot) DoStuff(candle Candle) {
 	bot.buffer.AddCandle(candle)
-	bot.runBuyIndicators()
+
+	if !IS_REAL_ENABLED {
+		candle := bot.buffer.GetLastCandle()
+		bot.runBuyIndicators(candle)
+	}
+
 	bot.runSellIndicators()
 }
 
-func (bot *Bot) runBuyIndicators() {
-	candle := bot.buffer.GetLastCandle()
 
+func (bot *Bot) runBuyIndicators(candle Candle) {
 	// Run BoostBuyIndicator
 	if ENABLE_BOOST_BUY_INDICATOR && bot.BoostBuyIndicator.HasSignal() {
 		bot.checkForMoneyAndBuy(candle, BuyTypeBoost)

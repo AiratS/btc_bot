@@ -114,6 +114,10 @@ func KlineEventHandler(event *binance.WsKlineEvent) {
 	secCandle := WebSocketCandleToKlineCandle(event.Kline)
 	fmt.Println(fmt.Sprintf("%s - Coin: %s, Price: %f", secCandle.CloseTime, secCandle.Symbol, secCandle.ClosePrice))
 
+	if IS_REAL_ENABLED {
+		realBot.runBuyIndicators(secCandle)
+	}
+
 	if convertedCandle, ok := candleConverter.Convert(secCandle); ok {
 		realBot.DoStuff(convertedCandle)
 	}
