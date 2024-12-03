@@ -79,7 +79,7 @@ func (bot *Bot) DoStuff(candle Candle) {
 
 func (bot *Bot) runBuyIndicators(candle Candle) {
 	// Run BoostBuyIndicator
-	if ENABLE_BOOST_BUY_INDICATOR && bot.BoostBuyIndicator.HasSignal() {
+	if ENABLE_BOOST_BUY_INDICATOR && bot.BoostBuyIndicator.HasSignal(candle) {
 		bot.checkForMoneyAndBuy(candle, BuyTypeBoost)
 		return
 	}
@@ -88,7 +88,7 @@ func (bot *Bot) runBuyIndicators(candle Candle) {
 	signalsCount := 0
 	for _, indicator := range bot.BuyIndicators {
 		indicator.Update()
-		if indicator.HasSignal() {
+		if indicator.HasSignal(candle) {
 			//Log(fmt.Sprintf("Has signal indicator: %T", indicator))
 			signalsCount++
 		}

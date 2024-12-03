@@ -11,7 +11,7 @@ import (
 )
 
 type BuyIndicator interface {
-	HasSignal() bool
+	HasSignal(candle Candle) bool
 	IsStarted() bool
 	Start()
 	Update()
@@ -111,7 +111,7 @@ func (indicator *BackTrailingBuyIndicator) Finish() {
 	indicator.updatedTimesBeforeFinish = 0
 }
 
-func (indicator *BackTrailingBuyIndicator) HasSignal() bool {
+func (indicator *BackTrailingBuyIndicator) HasSignal(candle Candle) bool {
 	return indicator.hasSignal
 }
 
@@ -157,7 +157,7 @@ func NewBuysCountIndicator(
 	}
 }
 
-func (indicator *BuysCountIndicator) HasSignal() bool {
+func (indicator *BuysCountIndicator) HasSignal(candle Candle) bool {
 	val := indicator.db.CountUnsoldBuys()
 	return UNSOLD_BUYS_COUNT > val
 }
@@ -195,7 +195,7 @@ func NewWaitForPeriodIndicator(
 	}
 }
 
-func (indicator *WaitForPeriodIndicator) HasSignal() bool {
+func (indicator *WaitForPeriodIndicator) HasSignal(candle Candle) bool {
 	candle := indicator.buffer.GetLastCandle()
 	return indicator.db.CanBuyInGivenPeriod(candle.CloseTime, indicator.config.WaitAfterLastBuyPeriod)
 }
@@ -233,7 +233,7 @@ func NewBigFallIndicator(
 	}
 }
 
-func (indicator *BigFallIndicator) HasSignal() bool {
+func (indicator *BigFallIndicator) HasSignal(candle Candle) bool {
 	count := len(indicator.buffer.GetCandles())
 	if (indicator.config.BigFallCandlesCount + 1) > count {
 		return false
@@ -252,6 +252,7 @@ func (indicator *BigFallIndicator) HasSignal() bool {
 		GetClosePrices(indicator.buffer.GetCandles()),
 		indicator.config.BigFallCandlesCount,
 	)
+	closePrices = append(closePrices, candle.GetPrice())
 	//smoothedPrices := FilterZeroPrices(talib.Sma(closePrices, indicator.getPeriod()))
 	smoothedPrices := closePrices
 	smoothedLen := len(smoothedPrices)
@@ -324,7 +325,7 @@ func NewGradientDescentIndicator(
 	}
 }
 
-func (indicator *GradientDescentIndicator) HasSignal() bool {
+func (indicator *GradientDescentIndicator) HasSignal(candle Candle) bool {
 	count := len(indicator.buffer.GetCandles())
 	if (indicator.config.GradientDescentCandles + 1) > count {
 		//Log(fmt.Sprintf("GradientDescentIndicator: not enough candles"))
@@ -442,7 +443,7 @@ func NewLessThanPreviousBuyIndicator(
 	}
 }
 
-func (indicator *LessThanPreviousBuyIndicator) HasSignal() bool {
+func (indicator *LessThanPreviousBuyIndicator) HasSignal(candle Candle) bool {
 	hasValue, buy := indicator.db.GetLastUnsoldBuy()
 	if !hasValue {
 		return true
@@ -502,7 +503,7 @@ func NewLessThanPreviousAverageIndicator(
 	}
 }
 
-func (indicator *LessThanPreviousAverageIndicator) HasSignal() bool {
+func (indicator *LessThanPreviousAverageIndicator) HasSignal(candle Candle) bool {
 	unsoldBuys := indicator.db.FetchUnsoldBuys()
 	if 0 == len(unsoldBuys) {
 		return true
@@ -547,7 +548,7 @@ func NewMoreThanPreviousBuyIndicator(
 	}
 }
 
-func (indicator *MoreThanPreviousBuyIndicator) HasSignal() bool {
+func (indicator *MoreThanPreviousBuyIndicator) HasSignal(candle Candle) bool {
 	hasValue, buy := indicator.db.GetLastUnsoldBuy()
 	if !hasValue {
 		return true
@@ -591,7 +592,7 @@ func NewMoreThanPreviousAverageIndicator(
 	}
 }
 
-func (indicator *MoreThanPreviousAverageIndicator) HasSignal() bool {
+func (indicator *MoreThanPreviousAverageIndicator) HasSignal(candle Candle) bool {
 	unsoldBuys := indicator.db.FetchUnsoldBuys()
 	if 0 == len(unsoldBuys) {
 		return true
@@ -636,7 +637,7 @@ func NewBoostBuyIndicator(
 	}
 }
 
-func (indicator *BoostBuyIndicator) HasSignal() bool {
+func (indicator *BoostBuyIndicator) HasSignal(candle Candle) bool {
 	hasFirstBuy, firstBuy := indicator.db.FindFirstUnsoldBuy()
 	if !hasFirstBuy {
 		return false
@@ -696,7 +697,7 @@ func NewStopAfterUnsuccessfullySellIndicator(
 	}
 }
 
-func (indicator *StopAfterUnsuccessfullySellIndicator) HasSignal() bool {
+func (indicator *StopAfterUnsuccessfullySellIndicator) HasSignal(candle Candle) bool {
 	hasSell, sell := indicator.db.FindLastLiquidationSell()
 	if !hasSell {
 		return true
@@ -748,7 +749,7 @@ func NewLinearRegressionIndicator(
 	}
 }
 
-func (indicator *LinearRegressionIndicator) HasSignal() bool {
+func (indicator *LinearRegressionIndicator) HasSignal(candle Candle) bool {
 	count := len(indicator.buffer.GetCandles())
 	if (indicator.config.LinearRegressionCandles + 1) > count {
 		return false
@@ -886,7 +887,7 @@ const SwingTypeGrowth = 0
 const SwingTypeFall = 1
 const SwingTypeAny = 2
 
-func (indicator *GradientSwingIndicator) HasSignal() bool {
+func (indicator *GradientSwingIndicator) HasSignal(candle Candle) bool {
 	count := len(indicator.buffer.GetCandles())
 	if (indicator.config.GradientSwingIndicatorCandles + 1) > count {
 		return false
@@ -980,7 +981,7 @@ func NewWindowLongIndicator(
 	}
 }
 
-func (indicator *WindowLongIndicator) HasSignal() bool {
+func (indicator *WindowLongIndicator) HasSignal(candle Candle) bool {
 	if indicator.checkForPercentage() {
 		indicator.ResetWindow()
 		return true
@@ -1116,7 +1117,7 @@ func NewWindowShortIndicator(
 	}
 }
 
-func (indicator *WindowShortIndicator) HasSignal() bool {
+func (indicator *WindowShortIndicator) HasSignal(candle Candle) bool {
 	if indicator.checkForPercentage() {
 		indicator.ResetWindow()
 		return true
@@ -1248,7 +1249,7 @@ func NewCatchingFallingKnifeIndicator(
 	}
 }
 
-func (indicator *CatchingFallingKnifeIndicator) HasSignal() bool {
+func (indicator *CatchingFallingKnifeIndicator) HasSignal(candle Candle) bool {
 	count := len(indicator.buffer.GetCandles())
 	if (indicator.config.CatchingFallingKnifeCandles + 1) > count {
 		return false
