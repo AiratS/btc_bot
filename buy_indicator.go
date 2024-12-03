@@ -196,8 +196,8 @@ func NewWaitForPeriodIndicator(
 }
 
 func (indicator *WaitForPeriodIndicator) HasSignal(candle Candle) bool {
-	candle := indicator.buffer.GetLastCandle()
-	return indicator.db.CanBuyInGivenPeriod(candle.CloseTime, indicator.config.WaitAfterLastBuyPeriod)
+	candle1 := indicator.buffer.GetLastCandle()
+	return indicator.db.CanBuyInGivenPeriod(candle1.CloseTime, indicator.config.WaitAfterLastBuyPeriod)
 }
 
 func (indicator *WaitForPeriodIndicator) IsStarted() bool {
