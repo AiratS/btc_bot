@@ -68,8 +68,8 @@ func (bot *Bot) Kill() {
 func (bot *Bot) DoStuff(candle Candle) {
 	bot.buffer.AddCandle(candle)
 
-	candle := bot.buffer.GetLastCandle()
-	bot.runBuyIndicators(candle)
+	candle1 := bot.buffer.GetLastCandle()
+	bot.runBuyIndicators(candle1)
 
 	bot.runSellIndicators()
 }
