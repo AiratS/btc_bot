@@ -68,8 +68,10 @@ func (bot *Bot) Kill() {
 func (bot *Bot) DoStuff(candle Candle) {
 	bot.buffer.AddCandle(candle)
 
-	candle1 := bot.buffer.GetLastCandle()
-	bot.runBuyIndicators(candle1)
+	if IS_REAL_ENABLED {
+		candle1 := bot.buffer.GetLastCandle()
+		bot.runBuyIndicators(candle1)
+	}
 
 	bot.runSellIndicators()
 }
@@ -82,12 +84,14 @@ func (bot *Bot) runBuyIndicators(candle Candle) {
 		return
 	}
 
+	Log(fmt.Sprintf("0 Has signal indicator: %T", indicator))
+
 	// Run Usual indicators
 	signalsCount := 0
 	for _, indicator := range bot.BuyIndicators {
 		indicator.Update()
 		if indicator.HasSignal(candle) {
-			//Log(fmt.Sprintf("Has signal indicator: %T", indicator))
+			Log(fmt.Sprintf("Has signal indicator: %T", indicator))
 			signalsCount++
 		}
 	}
@@ -96,6 +100,7 @@ func (bot *Bot) runBuyIndicators(candle Candle) {
 		for _, indicator := range bot.BuyIndicators {
 			indicator.Finish()
 		}
+		Log(fmt.Sprintf("2 Has signal indicator: %T", indicator))
 		bot.checkForMoneyAndBuy(candle, Default)
 	}
 }
