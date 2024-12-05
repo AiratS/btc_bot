@@ -258,10 +258,10 @@ func (indicator *BigFallIndicator) HasSignal(candle Candle) bool {
 	smoothedLen := len(smoothedPrices)
 
 	if IS_REAL_ENABLED {
-		Log(fmt.Sprintf(
-			"BigFallIndicator__smoothedPricesCount: %d",
-			len(smoothedPrices),
-		))
+		// Log(fmt.Sprintf(
+		// 	"BigFallIndicator__smoothedPricesCount: %d",
+		// 	len(smoothedPrices),
+		// ))
 	}
 
 	//if 4 > smoothedLen {
@@ -273,10 +273,10 @@ func (indicator *BigFallIndicator) HasSignal(candle Candle) bool {
 	fallPercentage := -1 * CalcGrowth(firstPrice, lastPrice)
 
 	if IS_REAL_ENABLED {
-		Log(fmt.Sprintf(
-			"BigFallIndicator__fallPercentage: %f",
-			CalcGrowth(firstPrice, lastPrice),
-		))
+		// Log(fmt.Sprintf(
+		// 	"BigFallIndicator__fallPercentage: %f",
+		// 	CalcGrowth(firstPrice, lastPrice),
+		// ))
 	}
 	// ----------------------
 
