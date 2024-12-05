@@ -100,7 +100,7 @@ func (bot *Bot) runBuyIndicators(candle Candle) {
 		for _, indicator := range bot.BuyIndicators {
 			indicator.Finish()
 		}
-		Log(fmt.Sprintf("2 Has signal indicator: %T", indicator))
+		Log(fmt.Sprintf("2 Has signal indicator"))
 		bot.checkForMoneyAndBuy(candle, Default)
 	}
 }
