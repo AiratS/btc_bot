@@ -234,7 +234,6 @@ func NewBigFallIndicator(
 }
 
 func (indicator *BigFallIndicator) HasSignal(candle Candle) bool {
-	return true
 	count := len(indicator.buffer.GetCandles())
 	if (indicator.config.BigFallCandlesCount + 1) > count {
 		return false
