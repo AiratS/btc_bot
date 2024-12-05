@@ -277,7 +277,8 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder, 
 	// Create Binance Buy order
 	var orderId int64
 	if USE_REAL_MONEY {
-		orderId, coinsCount, _ = bot.CreateMarketBuyOrder(exchangeRate, usedMoney)
+		orderId, coinsCount, realBuyPrice = bot.CreateMarketBuyOrder(exchangeRate, usedMoney)
+		exchangeRate = realBuyPrice
 	}
 
 	// Save buy to database
