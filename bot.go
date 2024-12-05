@@ -277,8 +277,7 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder, 
 	// Create Binance Buy order
 	var orderId int64
 	if USE_REAL_MONEY {
-		orderId, coinsCount, realBuyPrice = bot.CreateMarketBuyOrder(exchangeRate, usedMoney)
-		exchangeRate = realBuyPrice
+		orderId, coinsCount, exchangeRate = bot.CreateMarketBuyOrder(exchangeRate, usedMoney)
 	}
 
 	desiredPrice := bot.calcDesiredPrice(exchangeRate)
