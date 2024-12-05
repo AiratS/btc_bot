@@ -445,7 +445,6 @@ func NewLessThanPreviousBuyIndicator(
 }
 
 func (indicator *LessThanPreviousBuyIndicator) HasSignal(candle Candle) bool {
-	return true
 	hasValue, buy := indicator.db.GetLastUnsoldBuy()
 	if !hasValue {
 		return true
