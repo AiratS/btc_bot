@@ -116,8 +116,8 @@ func KlineEventHandler(event *binance.WsKlineEvent) {
 
 
 	if IS_REAL_ENABLED {
-		Log(secCandle.GetPrice())
-		
+		Log(fmt.Sprintf("%f", secCandle.GetPrice()))
+
 		realBot.runBuyIndicators(secCandle)
 	}
 
