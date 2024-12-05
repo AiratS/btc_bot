@@ -68,7 +68,7 @@ func (bot *Bot) Kill() {
 func (bot *Bot) DoStuff(candle Candle) {
 	bot.buffer.AddCandle(candle)
 
-	if IS_REAL_ENABLED {
+	if !IS_REAL_ENABLED {
 		candle1 := bot.buffer.GetLastCandle()
 		bot.runBuyIndicators(candle1)
 	}
