@@ -84,7 +84,7 @@ func (bot *Bot) runBuyIndicators(candle Candle) {
 		return
 	}
 
-	Log(fmt.Sprintf("0 Has signal indicator: %T", indicator))
+	Log(fmt.Sprintf("0 Has signal indicator"))
 
 	// Run Usual indicators
 	signalsCount := 0
