@@ -48,6 +48,7 @@ func KlineEventHandlerFutures(event *futures.WsKlineEvent) {
 	}
 
 	if convertedCandle, ok := candleConverter.Convert(secCandle); ok {
+		Log("I am OK")
 		realBot.DoStuff(convertedCandle)
 	}
 
