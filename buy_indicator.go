@@ -449,7 +449,7 @@ func (indicator *LessThanPreviousBuyIndicator) HasSignal(candle Candle) bool {
 		return true
 	}
 
-	percentage := CalcGrowth(buy.ExchangeRate, indicator.buffer.GetLastCandleClosePrice())
+	percentage := CalcGrowth(buy.ExchangeRate, candle.GetPrice())
 
 	return indicator.config.LessThanPreviousBuyPercentage >= percentage
 }
