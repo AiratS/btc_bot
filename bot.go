@@ -272,7 +272,7 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder, 
 		return
 	}
 
-	desiredPrice := bot.calcDesiredPrice(exchangeRate)
+	// desiredPrice := bot.calcDesiredPrice(exchangeRate)
 
 	// Create Binance Buy order
 	var orderId int64
@@ -281,6 +281,7 @@ func (bot *Bot) buy(exchangeRate float64, closeTime string, buyOrder *BuyOrder, 
 		exchangeRate = realBuyPrice
 	}
 
+	desiredPrice := bot.calcDesiredPrice(exchangeRate)
 	// Save buy to database
 	buyId, err := bot.db.AddRealBuy(
 		CANDLE_SYMBOL,
