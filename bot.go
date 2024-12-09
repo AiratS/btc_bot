@@ -435,18 +435,18 @@ func (bot *Bot) runAfterBuy(buyId int64) {
 		avgFuturesPrice,
 		GetLeverageLiquidationPercentage(bot.Config.Leverage),
 	)
-	Log(fmt.Sprintf(
-		"RUN_AFTER_BUY\nNewBuyId: %d\nAvgPrice: %f\nDesiredSellPrice: %f\nLiquidationPrice: %f",
-		buyId,
-		avgFuturesPrice,
-		desiredSellPrice,
-		liquidationPrice,
-	))
+	// Log(fmt.Sprintf(
+	// 	"RUN_AFTER_BUY\nNewBuyId: %d\nAvgPrice: %f\nDesiredSellPrice: %f\nLiquidationPrice: %f",
+	// 	buyId,
+	// 	avgFuturesPrice,
+	// 	desiredSellPrice,
+	// 	liquidationPrice,
+	// ))
 
 	lastIdx := len(unsoldBuys) - 1
 	for idx, buy := range unsoldBuys {
 		Log(fmt.Sprintf(
-			"MOVE_DESIRED_PRICE\nBuyId: %d\nDesiredPrice: %f",
+			"MOVE ORDERSs\nBuyId: %d\nDesired sell price: %f",
 			buy.Id,
 			desiredSellPrice,
 		))
@@ -648,7 +648,7 @@ func (bot *Bot) createAndUpdateSellOrder(buyId int64, sellPrice, quantity float6
 	bot.db.UpdateRealBuyOrderId(buyId, sellOrderId)
 
 	Log(fmt.Sprintf(
-		"SELL_ORDER\nBuyId: %d\nOrderId: %d\nUpperPrice: %f",
+		"SELL ORDER HAS CREATED\nBuyId: %d\nOrderId: %d\nSell price: %f",
 		buyId,
 		sellOrderId,
 		sellPrice,
