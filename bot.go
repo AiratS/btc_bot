@@ -767,11 +767,11 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
-	lessThanPreviousBuyIndicator := NewLessThanPreviousBuyIndicator(
-		bot.Config,
-		bot.buffer,
-		bot.db,
-	)
+	//lessThanPreviousBuyIndicator := NewLessThanPreviousBuyIndicator(
+	//	bot.Config,
+	//	bot.buffer,
+	//	bot.db,
+	//)
 
 	//lessThanPreviousAverageIndicator := NewLessThanPreviousAverageIndicator(
 	//	bot.Config,
@@ -791,14 +791,22 @@ func setupBuyIndicators(bot *Bot) {
 	//	bot.db,
 	//)
 
+	stableTradeIndicator := NewStableMarketIndicator(
+		bot.Config,
+		bot.buffer,
+		bot.db,
+	)
+
 	bot.BuyIndicators = []BuyIndicator{
 		&bigFallIndicator,
 		//&linearRegressionIndicator,
 		//&lessThanPreviousAverageIndicator,
 		//&catchingFallingKnifeIndicator,
 		//&gradientDescentIndicator,
-		&lessThanPreviousBuyIndicator,
+		//&lessThanPreviousBuyIndicator,
 		//&gradientSwingIndicator,
+
+		&stableTradeIndicator,
 	}
 
 	// Boost buy indicator

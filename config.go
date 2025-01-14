@@ -20,7 +20,7 @@ const ENABLE_DYNAMIC_NEXT_BUY_PERCENTAGE = false
 
 // Candle
 const CANDLE_SYMBOL = "BTCUSDT"
-const CANDLE_INTERVAL = "1m"
+const CANDLE_INTERVAL = "3m"
 const BALANCE_MONEY = 10000.0
 const COMMISSION = 0.06
 const DATASETS_DIRECTORY = "datasets"
@@ -100,6 +100,12 @@ type Config struct {
 	WindowOffsetPercentage    float64
 	WindowBasePeriodMinutes   int
 	WindowOffsetPeriodMinutes int
+
+	StableTradeIndicatorCandles           int
+	StableTradeIndicatorSmoothPeriod      int
+	StableTradeIndicatorPercentage        float64
+	StableTradeMinStartPercentage         float64
+	StableTradeGuaranteedSignalPercentage float64
 
 	TotalRevenue     float64
 	FinalBalance     float64

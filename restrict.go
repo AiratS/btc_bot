@@ -59,6 +59,12 @@ type ConfigRestriction struct {
 	WindowOffsetPercentage    MinMaxFloat64
 	WindowBasePeriodMinutes   MinMaxInt
 	WindowOffsetPeriodMinutes MinMaxInt
+
+	StableTradeIndicatorCandles           MinMaxInt
+	StableTradeIndicatorSmoothPeriod      MinMaxInt
+	StableTradeIndicatorPercentage        MinMaxFloat64
+	StableTradeMinStartPercentage         MinMaxFloat64
+	StableTradeGuaranteedSignalPercentage MinMaxFloat64
 }
 
 type MinMaxInt struct {
@@ -270,6 +276,28 @@ func GetBotConfigRestrictions() ConfigRestriction {
 		WindowOffsetPeriodMinutes: MinMaxInt{
 			min: 10,
 			max: 60,
+		},
+
+		// ------------------------------------------------
+		StableTradeIndicatorCandles: MinMaxInt{
+			min: 30,
+			max: 60,
+		},
+		StableTradeIndicatorSmoothPeriod: MinMaxInt{
+			min: 10,
+			max: 40,
+		},
+		StableTradeIndicatorPercentage: MinMaxFloat64{
+			min: 0.8,
+			max: 2,
+		},
+		StableTradeMinStartPercentage: MinMaxFloat64{
+			min: 3,
+			max: 5,
+		},
+		StableTradeGuaranteedSignalPercentage: MinMaxFloat64{
+			min: 5,
+			max: 9,
 		},
 	}
 }

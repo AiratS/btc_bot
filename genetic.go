@@ -69,6 +69,14 @@ func InitBotsDataFrame() *dataframe.DataFrame {
 		dataframe.NewSeriesFloat64("WindowOffsetPercentage", nil),
 		dataframe.NewSeriesInt64("WindowBasePeriodMinutes", nil),
 		dataframe.NewSeriesInt64("WindowOffsetPeriodMinutes", nil),
+
+		// ------------------------
+		dataframe.NewSeriesInt64("StableTradeIndicatorCandles", nil),
+		dataframe.NewSeriesInt64("StableTradeIndicatorSmoothPeriod", nil),
+		dataframe.NewSeriesFloat64("StableTradeIndicatorPercentage", nil),
+		dataframe.NewSeriesFloat64("StableTradeMinStartPercentage", nil),
+		dataframe.NewSeriesFloat64("StableTradeGuaranteedSignalPercentage", nil),
+
 		// ------------------------
 
 		dataframe.NewSeriesFloat64("TotalRevenue", nil),
@@ -184,22 +192,28 @@ func ImportFromCsv(fileName string) []Config {
 			WindowBasePeriodMinutes:   convertStringToInt(row[42]),
 			WindowOffsetPeriodMinutes: convertStringToInt(row[43]),
 			// ------------------------
+			StableTradeIndicatorCandles:           convertStringToInt(row[44]),
+			StableTradeIndicatorSmoothPeriod:      convertStringToInt(row[45]),
+			StableTradeIndicatorPercentage:        convertStringToFloat64(row[46]),
+			StableTradeMinStartPercentage:         convertStringToFloat64(row[47]),
+			StableTradeGuaranteedSignalPercentage: convertStringToFloat64(row[48]),
+			// ------------------------
 
-			TotalRevenue:     convertStringToFloat64(row[44]),
-			FinalBalance:     convertStringToFloat64(row[45]),
-			FinalRevenue:     convertStringToFloat64(row[46]),
-			TotalBuysCount:   convertStringToInt(row[47]),
-			UnsoldBuysCount:  convertStringToInt(row[48]),
-			LiquidationCount: convertStringToInt(row[49]),
-			AvgSellTime:      convertStringToFloat64(row[50]),
+			TotalRevenue:     convertStringToFloat64(row[49]),
+			FinalBalance:     convertStringToFloat64(row[50]),
+			FinalRevenue:     convertStringToFloat64(row[51]),
+			TotalBuysCount:   convertStringToInt(row[52]),
+			UnsoldBuysCount:  convertStringToInt(row[53]),
+			LiquidationCount: convertStringToInt(row[54]),
+			AvgSellTime:      convertStringToFloat64(row[55]),
 
-			ValidationTotalRevenue:     convertStringToFloat64(row[51]),
-			ValidationTotalBuysCount:   convertStringToInt(row[52]),
-			ValidationUnsoldBuysCount:  convertStringToInt(row[53]),
-			ValidationLiquidationCount: convertStringToInt(row[54]),
-			ValidationAvgSellTime:      convertStringToFloat64(row[55]),
+			ValidationTotalRevenue:     convertStringToFloat64(row[56]),
+			ValidationTotalBuysCount:   convertStringToInt(row[57]),
+			ValidationUnsoldBuysCount:  convertStringToInt(row[58]),
+			ValidationLiquidationCount: convertStringToInt(row[59]),
+			ValidationAvgSellTime:      convertStringToFloat64(row[60]),
 
-			Selection: convertStringToFloat64(row[56]),
+			Selection: convertStringToFloat64(row[61]),
 		}
 
 		bots = append(bots, bot)
@@ -272,6 +286,13 @@ func InitBotConfig() Config {
 		WindowBasePeriodMinutes:   GetRandIntConfig(restrict.WindowBasePeriodMinutes),
 		WindowOffsetPeriodMinutes: GetRandIntConfig(restrict.WindowOffsetPeriodMinutes),
 		// ----------------------------
+
+		StableTradeIndicatorCandles:           GetRandIntConfig(restrict.StableTradeIndicatorCandles),
+		StableTradeIndicatorSmoothPeriod:      GetRandIntConfig(restrict.StableTradeIndicatorSmoothPeriod),
+		StableTradeIndicatorPercentage:        GetRandFloat64Config(restrict.StableTradeIndicatorPercentage),
+		StableTradeMinStartPercentage:         GetRandFloat64Config(restrict.StableTradeMinStartPercentage),
+		StableTradeGuaranteedSignalPercentage: GetRandFloat64Config(restrict.StableTradeGuaranteedSignalPercentage),
+		// ----------------------------
 	}
 }
 
@@ -336,6 +357,12 @@ func GetBotConfigMapInterface(botConfig Config) map[string]interface{} {
 		"WindowOffsetPercentage":    botConfig.WindowOffsetPercentage,
 		"WindowBasePeriodMinutes":   botConfig.WindowBasePeriodMinutes,
 		"WindowOffsetPeriodMinutes": botConfig.WindowOffsetPeriodMinutes,
+		// --------------------------
+		"StableTradeIndicatorCandles":           botConfig.StableTradeIndicatorCandles,
+		"StableTradeIndicatorSmoothPeriod":      botConfig.StableTradeIndicatorSmoothPeriod,
+		"StableTradeIndicatorPercentage":        botConfig.StableTradeIndicatorPercentage,
+		"StableTradeMinStartPercentage":         botConfig.StableTradeMinStartPercentage,
+		"StableTradeGuaranteedSignalPercentage": botConfig.StableTradeGuaranteedSignalPercentage,
 		// --------------------------
 
 		"TotalRevenue":     botConfig.TotalRevenue,
@@ -526,6 +553,14 @@ func createBotDataFrameRow(bot map[interface{}]interface{}) map[string]interface
 		"WindowOffsetPercentage":    bot["WindowOffsetPercentage"],
 		"WindowBasePeriodMinutes":   bot["WindowBasePeriodMinutes"],
 		"WindowOffsetPeriodMinutes": bot["WindowOffsetPeriodMinutes"],
+
+		// -------------------------------
+
+		"StableTradeIndicatorCandles":           bot["StableTradeIndicatorCandles"],
+		"StableTradeIndicatorSmoothPeriod":      bot["StableTradeIndicatorSmoothPeriod"],
+		"StableTradeIndicatorPercentage":        bot["StableTradeIndicatorPercentage"],
+		"StableTradeMinStartPercentage":         bot["StableTradeMinStartPercentage"],
+		"StableTradeGuaranteedSignalPercentage": bot["StableTradeGuaranteedSignalPercentage"],
 		// -------------------------------
 
 		"TotalRevenue":     bot["TotalRevenue"],
@@ -665,6 +700,12 @@ func ConvertDataFrameToBotConfig(dataFrame map[interface{}]interface{}) Config {
 		WindowBasePeriodMinutes:   convertToInt(dataFrame["WindowBasePeriodMinutes"]),
 		WindowOffsetPeriodMinutes: convertToInt(dataFrame["WindowOffsetPeriodMinutes"]),
 		// -----------------------------
+
+		StableTradeIndicatorCandles:           convertToInt(dataFrame["StableTradeIndicatorCandles"]),
+		StableTradeIndicatorSmoothPeriod:      convertToInt(dataFrame["StableTradeIndicatorSmoothPeriod"]),
+		StableTradeIndicatorPercentage:        convertToFloat64(dataFrame["StableTradeIndicatorPercentage"]),
+		StableTradeMinStartPercentage:         convertToFloat64(dataFrame["StableTradeMinStartPercentage"]),
+		StableTradeGuaranteedSignalPercentage: convertToFloat64(dataFrame["StableTradeGuaranteedSignalPercentage"]),
 	}
 }
 
@@ -733,10 +774,16 @@ func makeChild(
 		WindowBasePeriodMinutes:   GetIntFatherOrMomGen(maleBotConfig.WindowBasePeriodMinutes, femaleBotConfig.WindowBasePeriodMinutes),
 		WindowOffsetPeriodMinutes: GetIntFatherOrMomGen(maleBotConfig.WindowOffsetPeriodMinutes, femaleBotConfig.WindowOffsetPeriodMinutes),
 		// -------------------------------
+
+		StableTradeIndicatorCandles:           GetIntFatherOrMomGen(maleBotConfig.StableTradeIndicatorCandles, femaleBotConfig.StableTradeIndicatorCandles),
+		StableTradeIndicatorSmoothPeriod:      GetIntFatherOrMomGen(maleBotConfig.StableTradeIndicatorSmoothPeriod, femaleBotConfig.StableTradeIndicatorSmoothPeriod),
+		StableTradeIndicatorPercentage:        GetFloatFatherOrMomGen(maleBotConfig.StableTradeIndicatorPercentage, femaleBotConfig.StableTradeIndicatorPercentage),
+		StableTradeMinStartPercentage:         GetFloatFatherOrMomGen(maleBotConfig.StableTradeMinStartPercentage, femaleBotConfig.StableTradeMinStartPercentage),
+		StableTradeGuaranteedSignalPercentage: GetFloatFatherOrMomGen(maleBotConfig.StableTradeGuaranteedSignalPercentage, femaleBotConfig.StableTradeGuaranteedSignalPercentage),
 	}
 
-	for i := 0; i < 35; i++ {
-		mutateGens(&childBotConfig, GetRandInt(0, 40))
+	for i := 0; i < 40; i++ {
+		mutateGens(&childBotConfig, GetRandInt(0, 48))
 	}
 
 	return GetBotConfigMapInterface(childBotConfig)
@@ -804,7 +851,14 @@ func mutateGens(botConfig *Config, randGenNumber int) {
 	mutateGenFloat64(randGenNumber, 41, &(botConfig.WindowOffsetPercentage), restrict.WindowOffsetPercentage)
 	mutateGenInt(randGenNumber, 42, &(botConfig.WindowBasePeriodMinutes), restrict.WindowBasePeriodMinutes)
 	mutateGenInt(randGenNumber, 43, &(botConfig.WindowOffsetPeriodMinutes), restrict.WindowOffsetPeriodMinutes)
+
 	// --------------------------------------
+
+	mutateGenInt(randGenNumber, 44, &(botConfig.StableTradeIndicatorCandles), restrict.StableTradeIndicatorCandles)
+	mutateGenInt(randGenNumber, 45, &(botConfig.StableTradeIndicatorSmoothPeriod), restrict.StableTradeIndicatorSmoothPeriod)
+	mutateGenFloat64(randGenNumber, 46, &(botConfig.StableTradeIndicatorPercentage), restrict.StableTradeIndicatorPercentage)
+	mutateGenFloat64(randGenNumber, 47, &(botConfig.StableTradeMinStartPercentage), restrict.StableTradeMinStartPercentage)
+	mutateGenFloat64(randGenNumber, 48, &(botConfig.StableTradeGuaranteedSignalPercentage), restrict.StableTradeGuaranteedSignalPercentage)
 }
 
 func mutateGenFloat64(randGenNumber, genNumber int, genValue *float64, restrictMinMax MinMaxFloat64) {

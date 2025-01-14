@@ -18,6 +18,111 @@ type BuyIndicator interface {
 	Finish()
 }
 
+type StableMarketIndicator struct {
+	config *Config
+	buffer *Buffer
+	db     *Database
+}
+
+func NewStableMarketIndicator(
+	config *Config,
+	buffer *Buffer,
+	db *Database,
+) StableMarketIndicator {
+	return StableMarketIndicator{
+		config: config,
+		buffer: buffer,
+		db:     db,
+	}
+}
+
+func (indicator *StableMarketIndicator) HasSignal(candle Candle) bool {
+	count := len(indicator.buffer.GetCandles())
+	if (indicator.config.StableTradeIndicatorCandles + 1) > count {
+		return false
+	}
+
+	if indicator.db.CountUnsoldBuys() == 0 {
+		return true
+	}
+
+	// Начинаем работу только ниже определенного процента
+	if !indicator.shouldStart() {
+		return false
+	}
+
+	// Если цена слишком сильно упала, но не поймали стабилизацию
+	if indicator.hasGuaranteedSignal() {
+		return true
+	}
+
+	closePrices := GetValuesFromSlice(
+		GetClosePrices(indicator.buffer.GetCandles()),
+		indicator.config.StableTradeIndicatorCandles,
+	)
+	smoothedPrices := FilterZeroPrices(talib.Sma(closePrices, indicator.getPeriod()))
+	smoothedLen := len(smoothedPrices)
+	if 4 > smoothedLen {
+		return false
+	}
+
+	topPrice := CalcUpperPrice(smoothedPrices[0], indicator.config.StableTradeIndicatorPercentage)
+	bottomPrice := CalcBottomPrice(smoothedPrices[0], indicator.config.StableTradeIndicatorPercentage)
+
+	lastPrice := smoothedPrices[len(smoothedPrices)-1]
+
+	return bottomPrice <= lastPrice && lastPrice <= topPrice
+}
+
+func (indicator *StableMarketIndicator) shouldStart() bool {
+	unsoldBuys := indicator.db.FetchUnsoldBuys()
+	if len(unsoldBuys) == 0 {
+		return false
+	}
+
+	avgPrice := CalcFuturesAvgPrice(unsoldBuys)
+	lastRealPrice := indicator.buffer.GetLastCandleClosePrice()
+	fallPercentage := -1 * CalcGrowth(avgPrice, lastRealPrice)
+
+	return fallPercentage >= indicator.config.StableTradeMinStartPercentage
+}
+
+func (indicator *StableMarketIndicator) hasGuaranteedSignal() bool {
+	unsoldBuys := indicator.db.FetchUnsoldBuys()
+	if len(unsoldBuys) == 0 {
+		return false
+	}
+
+	avgPrice := CalcFuturesAvgPrice(unsoldBuys)
+	lastRealPrice := indicator.buffer.GetLastCandleClosePrice()
+	fallPercentage := -1 * CalcGrowth(avgPrice, lastRealPrice)
+
+	return fallPercentage >= indicator.config.StableTradeGuaranteedSignalPercentage
+}
+
+func (indicator *StableMarketIndicator) getPeriod() int {
+	period := indicator.config.StableTradeIndicatorCandles - indicator.config.StableTradeIndicatorSmoothPeriod
+	if period <= 0 {
+		period = 1
+	}
+
+	return period
+}
+
+func (indicator *StableMarketIndicator) IsStarted() bool {
+	return false
+}
+
+func (indicator *StableMarketIndicator) Start() {
+}
+
+func (indicator *StableMarketIndicator) Update() {
+}
+
+func (indicator *StableMarketIndicator) Finish() {
+}
+
+// BackTrailingBuyIndicator
 type BackTrailingBuyIndicator struct {
 	config *Config
 	buffer *Buffer
