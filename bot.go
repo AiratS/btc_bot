@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"github.com/adshao/go-binance/v2"
 	"github.com/adshao/go-binance/v2/futures"
+	"os"
 	"reflect"
 )
 
@@ -36,7 +36,7 @@ func NewBot(config *Config) Bot {
 		balance:                        &balance,
 		IsTrailingSellIndicatorEnabled: false,
 
-		hadBuy: false
+		hadBuy: false,
 	}
 
 	setupBuyIndicators(&bot)
@@ -75,7 +75,6 @@ func (bot *Bot) DoStuff(candle Candle) {
 
 	bot.runSellIndicators()
 }
-
 
 func (bot *Bot) runBuyIndicators(candle Candle) {
 	// Run BoostBuyIndicator
@@ -371,7 +370,7 @@ func (bot *Bot) HasEnoughMoneyForBuy(usedMoney, coinsCount float64) bool {
 	if _, err := os.Stat("./block"); err == nil {
 		return false
 	}
-	
+
 	isBalanceEnough := bot.balance.HasEnoughMoneyForBuy(usedMoney)
 	if !USE_REAL_MONEY {
 		return isBalanceEnough
@@ -431,10 +430,10 @@ func (bot *Bot) runAfterBuy(buyId int64) {
 		desiredSellPrice = unsoldBuys[0].DesiredPrice
 	}
 
-	liquidationPrice := bot.calcAfterBuyLiquidationPrice(
-		avgFuturesPrice,
-		GetLeverageLiquidationPercentage(bot.Config.Leverage),
-	)
+	//liquidationPrice := bot.calcAfterBuyLiquidationPrice(
+	//	avgFuturesPrice,
+	//	GetLeverageLiquidationPercentage(bot.Config.Leverage),
+	//)
 	// Log(fmt.Sprintf(
 	// 	"RUN_AFTER_BUY\nNewBuyId: %d\nAvgPrice: %f\nDesiredSellPrice: %f\nLiquidationPrice: %f",
 	// 	buyId,
