@@ -56,6 +56,10 @@ func (indicator *StableMarketIndicator) HasSignal(candle Candle) bool {
 		return true
 	}
 
+	if !indicator.isWindowAfterLastBuy() {
+		return false
+	}
+
 	closePrices := GetValuesFromSlice(
 		GetClosePrices(indicator.buffer.GetCandles()),
 		indicator.config.StableTradeIndicatorCandles,
@@ -98,6 +102,26 @@ func (indicator *StableMarketIndicator) hasGuaranteedSignal() bool {
 	fallPercentage := -1 * CalcGrowth(avgPrice, lastRealPrice)
 
 	return fallPercentage >= indicator.config.StableTradeGuaranteedSignalPercentage
+}
+
+func (indicator *StableMarketIndicator) isWindowAfterLastBuy() bool {
+	ok, lastUnsoldBuy := indicator.db.GetLastUnsoldBuy()
+	if !ok {
+		return false
+	}
+
+	stableTradeCandles := GetCandlesFromSlice(
+		indicator.buffer.GetCandles(),
+		indicator.config.StableTradeIndicatorCandles,
+	)
+	if len(stableTradeCandles) == 0 {
+		return false
+	}
+
+	lastUnsoldBuyTime := carbon.Parse(lastUnsoldBuy.CreatedAt, carbon.Greenwich).ToStdTime()
+	stableTradeStartTime := carbon.Parse(stableTradeCandles[0].CloseTime, carbon.Greenwich).ToStdTime()
+
+	return lastUnsoldBuyTime.Before(stableTradeStartTime)
 }
 
 func (indicator *StableMarketIndicator) getPeriod() int {

@@ -709,6 +709,7 @@ func resolveBufferSize(config *Config) int {
 		config.BigFallCandlesCount,
 		config.DesiredPriceCandles,
 		config.GradientDescentCandles,
+		config.StableTradeIndicatorCandles,
 	}) + 1
 }
 

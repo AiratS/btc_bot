@@ -132,6 +132,16 @@ func GetValuesFromSlice(values []float64, count int) []float64 {
 	return values[length-count : length]
 }
 
+func GetCandlesFromSlice(candles []Candle, count int) []Candle {
+	if len(candles) < count {
+		panic("GetCandlesFromSlice: Invalid candles count")
+	}
+
+	length := len(candles)
+
+	return candles[length-count : length]
+}
+
 func getKlineCandleListLastIdx(candles *[]Candle) int {
 	return len(*candles) - 1
 }
