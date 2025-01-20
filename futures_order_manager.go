@@ -154,7 +154,7 @@ func (manager *FuturesOrderManager) HasEnoughMoneyForBuy(usedMoney float64) bool
 		}
 
 		for _, balance := range res {
-			if balance.Asset == "BUSD" {
+			if balance.Asset == "USDT" {
 				freeMoney := convertBinanceToFloat64(balance.AvailableBalance)
 
 				return freeMoney >= usedMoney
@@ -182,7 +182,7 @@ func (manager *FuturesOrderManager) getBalance() float64 {
 		}
 
 		for _, balance := range res {
-			if balance.Asset == "BUSD" {
+			if balance.Asset == "USDT" {
 				return convertBinanceToFloat64(balance.AvailableBalance)
 			}
 		}

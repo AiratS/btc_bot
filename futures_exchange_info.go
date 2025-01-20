@@ -41,7 +41,7 @@ func NewFuturesExchangeInfo(res *futures.ExchangeInfo) FuturesExchangeInfo {
 		infoMap[info.Symbol] = symbolInfoContainer
 	}
 
-	r := infoMap["BTCBUSD"]
+	r := infoMap["BTCUSDT"]
 	fmt.Println(r)
 
 	return FuturesExchangeInfo{infoMap}
