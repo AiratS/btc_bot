@@ -592,13 +592,20 @@ func (bot *Bot) sell(buy Buy) float64 {
 		//}
 	}
 
+	logCommission := (rev * COMMISSION) / 100
+	logRev := rev - buy.UsedMoney*float64(bot.Config.Leverage) - logCommission
+
 	Log(fmt.Sprintf(
-		"SELL\nCreatedAt: %s\nBuyId: %d\nStartPrice: %f\nEndPrice: %f\nRevenue: %f",
+		"SELL\nCreatedAt: %s\nBuyId: %d\nStartPrice: %f\nEndPrice: %f\nLeverage: %d\nSellPercentage: %f\nUserMoney: %f\nRevenue: %f\nCommission: %f",
 		candle.CloseTime,
 		buy.Id,
 		buy.ExchangeRate,
 		candle.ClosePrice,
-		rev,
+		bot.Config.Leverage,
+		bot.Config.HighSellPercentage,
+		buy.UsedMoney,
+		logRev,
+		logCommission,
 	))
 
 	bot.db.AddSell(
