@@ -516,3 +516,45 @@ func CalcTotalCoinsCountForMaintenanceMargin(unsoldBuys []Buy, coinsCount float6
 
 	return totalCoinsCount
 }
+
+func ConvertBinanceToMexcSymbol(symbol string) string {
+	symbolMap := map[string]string{
+		"BTCUSDT": "BTC_USDT",
+	}
+
+	mexcSymbol, ok := symbolMap[symbol]
+	if !ok {
+		panic(fmt.Sprintf("Symbol %s not found in MEXC symbolMap", symbol))
+	}
+
+	return mexcSymbol
+}
+func ConvertBinanceToMexcInterval(interval string) string {
+	intervalMap := map[string]string{
+		"1m": "Min1",
+		"3m": "Min3",
+		"5m": "Min5",
+	}
+
+	mexcInterval, ok := intervalMap[interval]
+	if !ok {
+		panic(fmt.Sprintf("interval %s not found in MEXC intervalMap", interval))
+	}
+
+	return mexcInterval
+}
+
+func ConvertMexcIntervalToIntMinutes(interval string) int {
+	intervalMap := map[string]int{
+		"Min1": 1,
+		"Min3": 3,
+		"Min5": 5,
+	}
+
+	intMinutes, ok := intervalMap[interval]
+	if !ok {
+		panic(fmt.Sprintf("INT interval %s not found in MEXC intervalMap", interval))
+	}
+
+	return intMinutes
+}

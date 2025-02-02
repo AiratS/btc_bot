@@ -1,9 +1,10 @@
 package main
 
 // Main
-const IS_REAL_ENABLED = false
+const IS_REAL_ENABLED = true
 const ENABLE_FUTURES = true
 const USE_REAL_MONEY = false
+const USE_MEXC_STOCK = true
 
 const (
 	BUY_ORDER_REDUCTION_ENABLED      = false
@@ -20,7 +21,7 @@ const ENABLE_DYNAMIC_NEXT_BUY_PERCENTAGE = false
 
 // Candle
 const CANDLE_SYMBOL = "BTCUSDT"
-const CANDLE_INTERVAL = "3m"
+const CANDLE_INTERVAL = "1m"
 const BALANCE_MONEY = 10000.0
 const COMMISSION = 0.06
 const DATASETS_DIRECTORY = "datasets"

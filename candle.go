@@ -107,6 +107,27 @@ func WebSocketCandleToKlineCandleFutures(wsKline futures.WsKline) Candle {
 	}
 }
 
+func MexcCandleToKlineCandleFutures(wsKline MexcCandle, prevSecCandle *Candle) Candle {
+	intMinutes := int64(ConvertMexcIntervalToIntMinutes(wsKline.Interval))
+	openTime := FormatTimestamp(wsKline.StartTime * 1000)
+
+	return Candle{
+		Symbol:     wsKline.Symbol,
+		OpenTime:   openTime,
+		CloseTime:  FormatTimestamp((wsKline.StartTime + 60*intMinutes) * 1000),
+		OpenPrice:  wsKline.OpenPrice,
+		HighPrice:  wsKline.ClosePrice,
+		LowPrice:   wsKline.LowPrice,
+		ClosePrice: wsKline.HighPrice,
+		Volume:     wsKline.Volume,
+		//QuoteAssetVolume:         wsKline.QuoteVolume,
+		NumberOfTrades: 0,
+		//TakerBuyBaseAssetVolume:  wsKline.ActiveBuyVolume,
+		//TakerBuyQuoteAssetVolume: wsKline.ActiveBuyQuoteVolume,
+		IsClosed: prevSecCandle.Symbol != "" && prevSecCandle.CloseTime == openTime,
+	}
+}
+
 type SecToMinCandleIntervalConverter struct {
 }
 

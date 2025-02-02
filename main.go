@@ -25,7 +25,11 @@ func main() {
 
 	if IS_REAL_ENABLED {
 		if ENABLE_FUTURES {
-			RunFuturesRealTime()
+			if USE_MEXC_STOCK {
+				RunMexcFuturesRealTime()
+			} else {
+				RunFuturesRealTime()
+			}
 		} else {
 			RunRealTime()
 		}
