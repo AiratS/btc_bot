@@ -47,13 +47,13 @@ func KlineEventHandlerFutures(event *futures.WsKlineEvent) {
 		realBot.runBuyIndicators(secCandle)
 	}
 
-	if convertedCandle, ok := candleConverter.Convert(secCandle); ok {
-		Log("I am OK")
-		realBot.DoStuff(convertedCandle)
-	}
-
-	//if ticker.tick() {
-	//	fmt.Println("__TICKER__")
-	//	realBot.CheckBuyOrders()
+	//if convertedCandle, ok := candleConverter.Convert(secCandle); ok {
+	//	Log("I am OK")
+	realBot.DoStuff(secCandle)
 	//}
+
+	if ticker.tick() {
+		Log("__TICKER__")
+		//realBot.CheckBuyOrders()
+	}
 }

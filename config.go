@@ -4,7 +4,7 @@ package main
 const IS_REAL_ENABLED = true
 const ENABLE_FUTURES = true
 const USE_REAL_MONEY = false
-const USE_MEXC_STOCK = true
+const USE_MEXC_STOCK = false
 
 const (
 	BUY_ORDER_REDUCTION_ENABLED      = false
