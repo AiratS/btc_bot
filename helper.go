@@ -558,3 +558,8 @@ func ConvertMexcIntervalToIntMinutes(interval string) int {
 
 	return intMinutes
 }
+
+func Float64ToString(num float64) string {
+	// to convert a float number to a string
+	return strconv.FormatFloat(num, 'f', 6, 64)
+}
